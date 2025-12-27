@@ -1,0 +1,42 @@
+{
+  "name": "KONKRED AI Hub",
+  "version": "2.0.0",
+  "description": "The premium AI asset marketplace. Buy, sell, and create AI assets.",
+  "author": {
+    "name": "KONKRED Systems",
+    "email": "hello@konkred.xyz",
+    "url": "https://konkred.xyz"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/konkred/konkred-hub"
+  },
+  "keywords": [
+    "ai",
+    "marketplace",
+    "prompts",
+    "agents",
+    "machine-learning",
+    "gpt",
+    "llm"
+  ],
+  "features": [
+    "AI Asset Marketplace",
+    "Prompt Valuation (AUDIT)",
+    "Documentation Generator",
+    "Multi-Provider AI Support",
+    "Secure Payments via Stripe",
+    "Seller Dashboard & Analytics"
+  ],
+  "tech_stack": {
+    "frontend": "React 18",
+    "language": "TypeScript",
+    "styling": "Tailwind CSS",
+    "ai": "Google Gemini, Groq, Cerebras",
+    "payments": "Stripe",
+    "icons": "Lucide React"
+  },
+  "license": "Proprietary",
+  "copyright": "© 2025 KONKRED Systems. All rights reserved.",
+  "requestFramePermissions": []
+}

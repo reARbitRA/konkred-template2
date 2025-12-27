@@ -1,0 +1,1 @@
+// Placeholder for ListingDetails component

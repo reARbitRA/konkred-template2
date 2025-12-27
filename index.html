@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KONKRED | The AI Asset Marketplace</title>
+    <meta name="description" content="The premium marketplace for AI assets. Buy, sell, and create prompts, agents, datasets, and more." />
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>◆</text></svg>">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'Menlo', 'monospace'],
+                        display: ['Space Grotesk', 'Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'void': {
+                            DEFAULT: '#030304',
+                            50: '#0a0a0c',
+                            100: '#0d0d10',
+                            200: '#111114',
+                            300: '#16161a',
+                            400: '#1c1c21',
+                            500: '#232329',
+                        },
+                        'neon': {
+                            cyan: '#ff9500', 
+                            blue: '#3b82f6',
+                            purple: '#a855f7',
+                            pink: '#ec4899',
+                            green: '#10b981',
+                            orange: '#f97316',
+                            red: '#ef4444',
+                            gold: '#fbbf24',
+                        },
+                        'metal': {
+                            light: '#e4e4e7',
+                            DEFAULT: '#a1a1aa',
+                            dark: '#52525b',
+                            darker: '#27272a',
+                        },
+                        'ghost': {
+                            DEFAULT: '#71717a',
+                            light: '#a1a1aa',
+                            lighter: '#d4d4d8',
+                        },
+                    },
+                    boxShadow: {
+                        'neon-cyan': '0 0 15px rgba(255, 149, 0, 0.4)',
+                    },
+                    animation: {
+                        'slide-up': 'slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        'fade-in': 'fadeIn 0.5s ease-out forwards',
+                        'zoom-in': 'zoomIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                    },
+                    keyframes: {
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        zoomIn: {
+                            '0%': { transform: 'scale(0.95)', opacity: '0' },
+                            '100%': { transform: 'scale(1)', opacity: '1' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        :root {
+            --color-void: #030304;
+            --color-neon-cyan: #ff9500;
+            --transition-normal: 300ms;
+        }
+        body {
+            background: var(--color-void);
+            color: #e4e4e7;
+            font-family: 'Inter', system-ui, sans-serif;
+            overflow-x: hidden;
+        }
+        .bg-void-gradient {
+            background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(255, 149, 0, 0.05) 0%, transparent 50%), #030304;
+        }
+        .glass-strong {
+            background: rgba(10, 10, 12, 0.9);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #ff9500 0%, #cc7a00 100%);
+            color: #030304;
+            font-weight: 600;
+            padding: 10px 24px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #e4e4e7;
+            padding: 10px 24px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #ff9500 0%, #a855f7 50%, #ec4899 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .logo-3d-effect {
+            text-shadow: 1px 1px 0px #000, 2px 2px 0px rgba(255,255,255,0.05);
+        }
+
+        /* Sophisticated Animations */
+        @keyframes grid-flow {
+            0% { transform: perspective(500px) rotateX(60deg) translateY(0); }
+            100% { transform: perspective(500px) rotateX(60deg) translateY(40px); }
+        }
+        .grid-plane {
+            background-image: linear-gradient(rgba(255, 149, 0, 0.1) 1px, transparent 1px), 
+                              linear-gradient(90deg, rgba(255, 149, 0, 0.1) 1px, transparent 1px);
+            background-size: 40px 40px;
+            animation: grid-flow 2s linear infinite;
+        }
+        .grid-bg {
+             background-image: linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px), 
+                              linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+
+        @keyframes glitch {
+            0% { transform: translate(0) }
+            20% { transform: translate(-2px, 2px) }
+            40% { transform: translate(-2px, -2px) }
+            60% { transform: translate(2px, 2px) }
+            80% { transform: translate(2px, -2px) }
+            100% { transform: translate(0) }
+        }
+        .animate-glitch {
+            animation: glitch 0.3s cubic-bezier(.25,.46,.45,.94) both infinite;
+            animation-play-state: paused;
+        }
+        .animate-glitch:hover, .group:hover .animate-glitch {
+            animation-play-state: running;
+        }
+
+        @keyframes scanline {
+            0% { top: -100% }
+            100% { top: 100% }
+        }
+        .scanline {
+            width: 100%;
+            height: 100px;
+            z-index: 10;
+            background: linear-gradient(to bottom, transparent 0%, rgba(255, 149, 0, 0.05) 50%, transparent 100%);
+            position: absolute;
+            animation: scanline 4s linear infinite;
+        }
+        
+        .fill-mode-forwards {
+            animation-fill-mode: forwards;
+        }
+        .delay-100 { animation-delay: 100ms; }
+        .delay-200 { animation-delay: 200ms; }
+        .delay-300 { animation-delay: 300ms; }
+        .delay-500 { animation-delay: 500ms; }
+    </style>
+    
+    <!-- Import Map -->
+    <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@18.2.0",
+    "react/": "https://esm.sh/react@18.2.0/",
+    "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+    "react/jsx-runtime": "https://esm.sh/react@18.2.0/jsx-runtime",
+    "@google/genai": "https://esm.sh/@google/genai",
+    "lucide-react": "https://esm.sh/lucide-react@0.294.0",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/"
+  }
+}
+</script>
+</head>
+<body class="bg-void-gradient">
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+</body>
+</html>
