@@ -124,7 +124,7 @@ const ForgePage: React.FC<{ onNavigate: (page: PageView) => void }> = ({ onNavig
                      <div className="flex-1 space-y-4">
                         <h2 className="text-3xl font-display font-bold text-white uppercase tracking-tight">Logic Contribution</h2>
                         <p className="text-ghost text-lg leading-relaxed font-light">Architects are encouraged to submit high-fidelity templates and guides. Verified contributions receive structural capital credits.</p>
-                        <button className="text-xs font-mono font-black text-neon-cyan uppercase tracking-widest underline decoration-neon-cyan/30">Initialize Submission Packet -></button>
+                        <button className="text-xs font-mono font-black text-neon-cyan uppercase tracking-widest underline decoration-neon-cyan/30">Initialize Submission Packet →</button>
                      </div>
                   </div>
                </div>

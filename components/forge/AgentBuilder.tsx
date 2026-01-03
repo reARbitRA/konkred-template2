@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { 
   Cpu, Database, Globe, Zap, Play, Save, Plus, X, 
-  Settings, MoreHorizontal, Layers, Code, Search, MousePointer2, ZoomIn, ZoomOut, Move
+  Settings, MoreHorizontal, Layers, Code, Search, MousePointer2, ZoomIn, ZoomOut, Move, Command, RotateCcw
 } from 'lucide-react';
 import Badge from '../common/Badge.tsx';
 
@@ -64,21 +64,52 @@ const AgentBuilder: React.FC = () => {
   const [showSearch, setShowSearch] = useState(false);
 
   const canvasRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
-  // --- Search Library ---
+  // --- Keyboard Shortcuts ---
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Search Shortcut (Cmd+K / Ctrl+K)
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+        setShowSearch(true);
+      }
+      // Escape to close search or deselect
+      if (e.key === 'Escape') {
+        setShowSearch(false);
+        setSelectedNode(null);
+        searchInputRef.current?.blur();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  // --- Search Logic ---
   const nodeLibrary = [
-    { type: 'llm', label: 'Gemini 1.5 Flash', category: 'AI' },
-    { type: 'llm', label: 'Gemini 1.5 Pro', category: 'AI' },
-    { type: 'api', label: 'Google Search Grounding', category: 'Tools' },
-    { type: 'api', label: 'Gmail Sender', category: 'Tools' },
-    { type: 'condition', label: 'If/Else Logic Router', category: 'Logic' },
-    { type: 'trigger', label: 'Webhook Listener', category: 'Trigger' },
-    { type: 'api', label: 'Pinecone Retrieval', category: 'Database' },
-    { type: 'llm', label: 'Claude 3.5 Sonnet', category: 'AI' },
+    { type: 'llm', label: 'Gemini 1.5 Flash', category: 'AI', tags: ['fast', 'google'] },
+    { type: 'llm', label: 'Gemini 1.5 Pro', category: 'AI', tags: ['reasoning', 'google'] },
+    { type: 'api', label: 'Google Search Grounding', category: 'Tools', tags: ['web', 'search'] },
+    { type: 'api', label: 'Gmail Sender', category: 'Tools', tags: ['email', 'action'] },
+    { type: 'condition', label: 'If/Else Logic Router', category: 'Logic', tags: ['flow', 'control'] },
+    { type: 'trigger', label: 'Webhook Listener', category: 'Trigger', tags: ['http', 'api'] },
+    { type: 'api', label: 'Pinecone Retrieval', category: 'Database', tags: ['vector', 'memory'] },
+    { type: 'llm', label: 'Claude 3.5 Sonnet', category: 'AI', tags: ['anthropic'] },
   ];
 
-  const filteredLibrary = nodeLibrary.filter(n => n.label.toLowerCase().includes(searchQuery.toLowerCase()));
-  const filteredNodes = nodes.filter(n => n.data.label.toLowerCase().includes(searchQuery.toLowerCase()));
+  const filteredLibrary = nodeLibrary.filter(n => 
+    n.label.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    n.tags.some(t => t.includes(searchQuery.toLowerCase()))
+  );
+
+  const filteredNodes = nodes.filter(n => 
+    n.data.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    n.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    n.data.model?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    n.data.endpoint?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   // --- Handlers: Canvas Navigation ---
   const handleWheel = useCallback((e: React.WheelEvent) => {
@@ -180,31 +211,55 @@ const AgentBuilder: React.FC = () => {
       }
   };
 
+  const handleReset = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    setIsSimulating(false);
+    setNodes(prev => prev.map(n => ({ ...n, data: { ...n.data, status: 'idle' } })));
+  };
+
   const handleSimulate = async () => {
     if (isSimulating) return;
     setIsSimulating(true);
     
-    // Reset statuses
-    setNodes(prev => prev.map(n => ({ ...n, data: { ...n.data, status: 'idle' } })));
-
-    // Simulation sequence
-    const sequence = ['n1', ['n2', 'n3'], 'n4'];
+    // Create new abort controller
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
     
-    for (const step of sequence) {
-        if (Array.isArray(step)) {
-            // Parallel execution
-            setNodes(prev => prev.map(n => step.includes(n.id) ? { ...n, data: { ...n.data, status: 'active' } } : n));
-            await new Promise(r => setTimeout(r, 1500));
-            setNodes(prev => prev.map(n => step.includes(n.id) ? { ...n, data: { ...n.data, status: 'success' } } : n));
-        } else {
-            // Sequential execution
-            setNodes(prev => prev.map(n => n.id === step ? { ...n, data: { ...n.data, status: 'active' } } : n));
-            await new Promise(r => setTimeout(r, 1200));
-            setNodes(prev => prev.map(n => n.id === step ? { ...n, data: { ...n.data, status: 'success' } } : n));
+    try {
+        // Reset statuses
+        setNodes(prev => prev.map(n => ({ ...n, data: { ...n.data, status: 'idle' } })));
+
+        // Simulation sequence
+        const sequence = ['n1', ['n2', 'n3'], 'n4'];
+        
+        for (const step of sequence) {
+            if (controller.signal.aborted) break;
+
+            if (Array.isArray(step)) {
+                // Parallel execution
+                setNodes(prev => prev.map(n => step.includes(n.id) ? { ...n, data: { ...n.data, status: 'active' } } : n));
+                await new Promise(r => setTimeout(r, 1500));
+                if (controller.signal.aborted) break;
+                setNodes(prev => prev.map(n => step.includes(n.id) ? { ...n, data: { ...n.data, status: 'success' } } : n));
+            } else {
+                // Sequential execution
+                setNodes(prev => prev.map(n => n.id === step ? { ...n, data: { ...n.data, status: 'active' } } : n));
+                await new Promise(r => setTimeout(r, 1200));
+                if (controller.signal.aborted) break;
+                setNodes(prev => prev.map(n => n.id === step ? { ...n, data: { ...n.data, status: 'success' } } : n));
+            }
+        }
+    } catch (e) {
+        // Ignore errors
+    } finally {
+        if (abortControllerRef.current === controller) {
+            setIsSimulating(false);
+            abortControllerRef.current = null;
         }
     }
-    
-    setIsSimulating(false);
   };
 
   // --- Render Helpers ---
@@ -258,28 +313,36 @@ const AgentBuilder: React.FC = () => {
             <div className="flex items-center gap-3 bg-black/40 border border-white/10 rounded-xl px-4 py-2 focus-within:border-neon-cyan/50 focus-within:bg-black/60 transition-all w-96 shadow-inner">
                 <Search size={14} className="text-ghost group-focus-within:text-neon-cyan" />
                 <input 
+                    ref={searchInputRef}
                     value={searchQuery}
                     onChange={(e) => { setSearchQuery(e.target.value); setShowSearch(true); }}
-                    placeholder="Search nodes, models, or logic gates..."
+                    placeholder="Find nodes, models, or functions..."
                     className="bg-transparent border-none outline-none text-xs text-white placeholder-ghost/50 w-full font-mono"
                     onFocus={() => setShowSearch(true)}
                     onBlur={() => setTimeout(() => setShowSearch(false), 200)}
                 />
+                <div className="hidden group-focus-within:hidden md:flex gap-1 items-center">
+                    <span className="bg-white/10 px-1.5 py-0.5 rounded text-[9px] font-mono text-ghost flex items-center justify-center h-5 w-5">⌘</span>
+                    <span className="bg-white/10 px-1.5 py-0.5 rounded text-[9px] font-mono text-ghost flex items-center justify-center h-5 w-5">K</span>
+                </div>
             </div>
             
             {showSearch && searchQuery && (
-                <div className="absolute top-full left-0 w-96 mt-2 bg-[#0a0a0c] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50 animate-in fade-in zoom-in-95">
+                <div className="absolute top-full left-0 w-96 mt-2 bg-[#0a0a0c] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50 animate-in fade-in zoom-in-95 backdrop-blur-xl">
                     {filteredNodes.length > 0 && (
                         <div className="p-2">
-                            <div className="text-[9px] font-mono text-ghost uppercase tracking-widest px-3 py-1 mb-1">Active Canvas</div>
+                            <div className="text-[9px] font-mono text-ghost uppercase tracking-widest px-3 py-1 mb-1 border-b border-white/5 pb-2">Active Canvas</div>
                             {filteredNodes.map(node => (
                                 <button key={node.id} onClick={() => focusNode(node.id)} className="w-full text-left px-3 py-2 hover:bg-white/5 rounded-lg flex items-center justify-between group transition-colors">
-                                    <div className="flex items-center gap-2">
+                                    <div className="flex items-center gap-3">
                                         <div className={`w-2 h-2 rounded-full ${node.type === 'llm' ? 'bg-neon-purple' : 'bg-white'}`} />
-                                        <span className="text-xs text-white group-hover:text-neon-cyan">{node.data.label}</span>
+                                        <div className="flex flex-col">
+                                            <span className="text-xs text-white group-hover:text-neon-cyan font-bold">{node.data.label}</span>
+                                            {node.data.model && <span className="text-[9px] text-ghost">{node.data.model}</span>}
+                                        </div>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <span className="text-[9px] text-ghost font-mono">ID: {node.id}</span>
+                                        <span className="text-[9px] text-ghost font-mono opacity-50">JUMP_TO</span>
                                         <Move size={10} className="text-ghost" />
                                     </div>
                                 </button>
@@ -288,13 +351,23 @@ const AgentBuilder: React.FC = () => {
                     )}
                     <div className={`p-2 ${filteredNodes.length > 0 ? 'border-t border-white/5' : ''}`}>
                         <div className="text-[9px] font-mono text-ghost uppercase tracking-widest px-3 py-1 mb-1">Component Library</div>
+                        {filteredLibrary.length === 0 && <div className="px-3 py-2 text-[10px] text-ghost italic">No matching components found.</div>}
                         {filteredLibrary.map((item, i) => (
                             <button key={i} onClick={() => handleAddNode(item)} className="w-full text-left px-3 py-2 hover:bg-white/5 rounded-lg flex items-center justify-between group transition-colors">
-                                <div className="flex items-center gap-2">
-                                    <Plus size={10} className="text-ghost group-hover:text-white" />
-                                    <span className="text-xs text-white font-bold group-hover:text-neon-purple">{item.label}</span>
+                                <div className="flex items-center gap-3">
+                                    <div className="p-1.5 bg-white/5 rounded-md text-ghost group-hover:text-white group-hover:bg-neon-purple/20 transition-colors">
+                                        <Plus size={10} />
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className="text-xs text-white font-bold group-hover:text-neon-purple">{item.label}</span>
+                                        <span className="text-[9px] text-ghost">{item.category}</span>
+                                    </div>
                                 </div>
-                                <Badge variant="gray" size="sm">{item.category}</Badge>
+                                <div className="flex gap-1">
+                                    {item.tags?.slice(0, 1).map(tag => (
+                                        <Badge key={tag} variant="gray" size="sm" className="opacity-50">{tag}</Badge>
+                                    ))}
+                                </div>
                             </button>
                         ))}
                     </div>
@@ -308,14 +381,26 @@ const AgentBuilder: React.FC = () => {
               <button onClick={() => setViewport(v => ({ ...v, zoom: 1 }))} className="px-2 text-[10px] font-mono text-ghost min-w-[3rem] text-center">{Math.round(viewport.zoom * 100)}%</button>
               <button onClick={() => setViewport(v => ({ ...v, zoom: Math.min(2, v.zoom + 0.1) }))} className="p-1.5 text-ghost hover:text-white rounded"><ZoomIn size={14} /></button>
            </div>
-           <button 
-             onClick={handleSimulate}
-             disabled={isSimulating}
-             className="bg-white text-black px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:bg-neon-green hover:shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-all disabled:opacity-50"
-           >
-             {isSimulating ? <Zap size={14} className="animate-spin" /> : <Play size={14} />}
-             {isSimulating ? 'Processing...' : 'Run Simulation'}
-           </button>
+           
+           {/* Simulation Controls */}
+           <div className="flex items-center gap-2 bg-white/5 p-1 rounded-lg border border-white/5">
+                <button 
+                    onClick={handleReset}
+                    className="p-2 text-ghost hover:text-white hover:bg-white/10 rounded-md transition-colors"
+                    title="Reset Simulation"
+                >
+                    <RotateCcw size={14} />
+                </button>
+                <div className="w-px h-4 bg-white/10" />
+                <button 
+                    onClick={handleSimulate}
+                    disabled={isSimulating}
+                    className="bg-white text-black px-4 py-1.5 rounded-md text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:bg-neon-green hover:shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    {isSimulating ? <Zap size={14} className="animate-spin" /> : <Play size={14} fill="currentColor" />}
+                    {isSimulating ? 'Running...' : 'Run Flow'}
+                </button>
+           </div>
         </div>
       </div>
 
