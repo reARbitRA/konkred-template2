@@ -5,7 +5,8 @@ export type PageView =
     | 'landing' | 'marketplace' | 'listing_detail' | 'wizard' | 'forge_audit' 
     | 'wallet' | 'usage' | 'seller_dashboard' | 'academy' | 'intel' 
     | 'network' | 'advisory' | 'documentation' | 'career' | 'resources' 
-    | 'pricing' | 'enter' | 'join_network' | 'account' | 'checkout';
+    | 'pricing' | 'enter' | 'join_network' | 'account' | 'checkout'
+    | 'usage_metrics' | 'affiliate' | 'admin' | 'dispute' | 'style_guide';
 
 export type AssetType = 'prompt' | 'agent' | 'workflow' | 'dataset' | 'api' | 'prompt_system';
 

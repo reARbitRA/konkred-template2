@@ -2,9 +2,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Search, Command, ArrowRight, LayoutDashboard, ShoppingBag, Shield, LogOut, Settings, CreditCard, Home, FileText } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext.tsx';
-import { useNavigate } from '../../hooks/useNavigate'; // Assuming this hook exists or we use prop drilling. Let's assume prop drilling via App context/props isn't easy here, so I'll pass a navigator prop if possible, or dispatch custom events. 
-// Actually, standard pattern in this codebase seems to be `onNavigate` props. But CommandPalette is global. 
-// I will dispatch a custom event that App.tsx can listen to, or assume it's rendered inside App and receives the prop.
 
 interface CommandPaletteProps {
   isOpen: boolean;
