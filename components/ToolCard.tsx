@@ -23,7 +23,7 @@ const ToolCard: React.FC<ToolCardProps> = ({ tool, onClick }) => {
   return (
     <div 
       onClick={isInteractable ? onClick : undefined}
-      className={`group bg-zinc-900/20 border border-zinc-800 p-5 transition-all duration-300 flex items-center justify-between gap-4 ${isInteractable ? 'cursor-pointer hover:border-zinc-500 hover:bg-zinc-900/60 hover:shadow-lg' : 'hover:bg-zinc-900/40 hover:border-zinc-700'}`}
+      className={`group concrete-card p-5 transition-all duration-300 flex items-center justify-between gap-4 ${isInteractable ? 'cursor-pointer hover:border-zinc-500 hover:bg-zinc-900/60 hover:shadow-lg' : 'hover:bg-zinc-900/40 hover:border-zinc-700'}`}
     >
       <div className="flex items-start gap-4">
         <div className={`p-2 bg-zinc-900 border border-zinc-800 text-zinc-400 transition-colors ${isInteractable ? 'group-hover:text-white group-hover:border-zinc-600' : 'group-hover:text-white'}`}>

@@ -60,7 +60,7 @@ const StyleGuide: React.FC = () => {
                 <h2 className="text-xl font-bold text-white flex items-center gap-3">
                     <span className="w-8 h-px bg-neon-cyan" /> Empty States
                 </h2>
-                <div className="p-20 border border-dashed border-white/10 rounded-xl bg-white/5 text-center">
+                <div className="p-20 border border-dashed border-white/10 rounded-xl concrete-card text-center">
                     <div className="w-16 h-16 bg-void-300 rounded-full flex items-center justify-center mx-auto mb-4 text-ghost">
                         <ShoppingBag size={24} />
                     </div>

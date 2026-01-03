@@ -1,124 +1,69 @@
-import React from 'react';
-import { PageView, Listing } from '../types';
-import { ArrowLeft, DollarSign, Package, TrendingUp, Users, Plus, MoreHorizontal } from 'lucide-react';
 
-interface SellerDashboardProps {
-  // Added listings prop to match usage in App.tsx
-  listings: Listing[];
-  onNavigate: (page: PageView) => void;
-}
+import React, { useState } from 'react';
+import { PageView, Listing } from '../types.ts';
+import { ArrowLeft, DollarSign, Package, TrendingUp, Users, Plus, LayoutDashboard, BarChart3, Settings } from 'lucide-react';
+import Badge from '../components/common/Badge.tsx';
+import Analytics from '../components/seller/Analytics.tsx';
+import MyListings from '../components/seller/MyListings.tsx';
+import Payouts from '../components/seller/Payouts.tsx';
 
-const SellerDashboard: React.FC<SellerDashboardProps> = ({ listings, onNavigate }) => {
+const SellerDashboard: React.FC<{ listings: Listing[]; onNavigate: (page: PageView) => void; onNewListing: () => void }> = ({ listings, onNavigate, onNewListing }) => {
+  const [activeTab, setActiveTab] = useState<'inventory' | 'analytics' | 'payouts'>('inventory');
+
   return (
-    <div className="min-h-screen bg-void pt-20 pb-12">
-       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-void pt-28 pb-12 px-12 animate-in fade-in duration-1000">
+       <div className="max-w-[1600px] mx-auto">
+          <button 
+            onClick={() => onNavigate('landing')}
+            className="flex items-center gap-2 text-ghost hover:text-white transition-colors mb-8 text-[10px] uppercase tracking-widest font-mono group"
+          >
+            <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" /> 
+            RETURN_TO_BASE
+          </button>
           
           {/* Header */}
-          <div className="flex items-center justify-between mb-8">
-             <div className="flex items-center gap-4">
-                <button onClick={() => onNavigate('landing')} className="text-ghost hover:text-white transition-colors">
-                   <ArrowLeft size={20} />
-                </button>
-                <h1 className="text-2xl font-display font-bold text-white">Seller Dashboard</h1>
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-10 mb-16 pb-8 border-b border-white/5">
+             <div className="space-y-2">
+                <h1 className="text-6xl font-display font-black text-white tracking-tighter uppercase leading-none">Forge Dashboard</h1>
+                <div className="flex items-center gap-6 text-ghost font-mono text-[9px] uppercase tracking-[0.4em] mt-4">
+                    <span className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-neon-green" /> Node Status: Validator</span>
+                    <span className="text-white/10">|</span>
+                    <span className="flex items-center gap-2">Network Yield: 8.24%</span>
+                    <span className="text-white/10">|</span>
+                    <span>Uplink: Secure</span>
+                </div>
              </div>
-             <button className="btn-primary flex items-center gap-2 text-sm px-4 py-2">
-                <Plus size={16} />
-                New Listing
-             </button>
+             <div className="flex gap-4">
+                <button onClick={onNewListing} className="bg-neon-cyan text-black font-black py-4 px-10 rounded-2xl flex items-center gap-3 text-xs uppercase tracking-widest hover:shadow-[0_0_40px_rgba(255,149,0,0.3)] transition-all">
+                    <Plus size={18} /> DEPLOY_NEW_PROTOCOL
+                </button>
+             </div>
           </div>
 
-          {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          {/* Dashboard Navigation */}
+          <div className="flex gap-8 mb-12 border-b border-white/5">
              {[
-               { label: 'Total Revenue', value: '$12,450', change: '+12%', icon: DollarSign, color: 'green' },
-               { label: 'Active Listings', value: '8', change: '0', icon: Package, color: 'blue' },
-               { label: 'Total Sales', value: '432', change: '+5%', icon: TrendingUp, color: 'purple' },
-               { label: 'Views (30d)', value: '15.2k', change: '+22%', icon: Users, color: 'orange' },
-             ].map((stat, i) => (
-               <div key={i} className="bg-void-200 border border-white/5 rounded-xl p-6">
-                  <div className="flex justify-between items-start mb-4">
-                     <div className={`p-2 rounded-lg bg-${stat.color}-500/10 text-${stat.color}-500`}>
-                        <stat.icon size={20} />
-                     </div>
-                     <span className={`text-xs font-medium ${stat.change.startsWith('+') ? 'text-neon-green' : 'text-ghost'}`}>
-                        {stat.change}
-                     </span>
-                  </div>
-                  <div className="text-2xl font-bold text-white mb-1">{stat.value}</div>
-                  <div className="text-xs text-ghost">{stat.label}</div>
-               </div>
+               { id: 'inventory', label: 'My_Inventory', icon: Package },
+               { id: 'analytics', label: 'Telemetry_Data', icon: BarChart3 },
+               { id: 'payouts', label: 'Capital_Liquidity', icon: DollarSign },
+             ].map(tab => (
+               <button 
+                 key={tab.id}
+                 onClick={() => setActiveTab(tab.id as any)}
+                 className={`pb-6 text-[10px] font-mono font-bold uppercase tracking-[0.3em] flex items-center gap-3 transition-all relative group ${activeTab === tab.id ? 'text-white' : 'text-ghost hover:text-white'}`}
+               >
+                  <tab.icon size={14} className={activeTab === tab.id ? 'text-neon-cyan' : ''} />
+                  {tab.label}
+                  {activeTab === tab.id && <div className="absolute bottom-[-1px] left-0 w-full h-1 bg-neon-cyan shadow-[0_0_15px_rgba(255,149,0,0.5)]" />}
+               </button>
              ))}
           </div>
 
-          {/* Main Content Area */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-             
-             {/* Recent Listings Table */}
-             <div className="lg:col-span-2 bg-void-200 border border-white/5 rounded-xl overflow-hidden">
-                <div className="p-6 border-b border-white/5 flex justify-between items-center">
-                   <h3 className="font-bold text-white">Your Listings</h3>
-                   <button className="text-sm text-neon-cyan hover:underline">View All</button>
-                </div>
-                <div className="overflow-x-auto">
-                   <table className="w-full text-left">
-                      <thead className="bg-void-300 text-xs uppercase text-ghost font-mono">
-                         <tr>
-                            <th className="px-6 py-3">Product</th>
-                            <th className="px-6 py-3">Price</th>
-                            <th className="px-6 py-3">Sales</th>
-                            <th className="px-6 py-3">Status</th>
-                            <th className="px-6 py-3"></th>
-                         </tr>
-                      </thead>
-                      <tbody className="divide-y divide-white/5">
-                         {/* Fallback to static list if listings prop is not used yet, or we can use the prop */}
-                         {[1, 2, 3, 4].map((item) => (
-                           <tr key={item} className="hover:bg-white/5 transition-colors">
-                              <td className="px-6 py-4">
-                                 <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded bg-void-400 flex-shrink-0"></div>
-                                    <span className="text-sm text-white font-medium">Enterprise Legal Agent v2</span>
-                                 </div>
-                              </td>
-                              <td className="px-6 py-4 text-sm text-ghost-light">$149.00</td>
-                              <td className="px-6 py-4 text-sm text-ghost-light">24</td>
-                              <td className="px-6 py-4">
-                                 <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-500/10 text-green-500 border border-green-500/20">
-                                    Active
-                                 </span>
-                              </td>
-                              <td className="px-6 py-4 text-right">
-                                 <button className="text-ghost hover:text-white">
-                                    <MoreHorizontal size={16} />
-                                 </button>
-                              </td>
-                           </tr>
-                         ))}
-                      </tbody>
-                   </table>
-                </div>
-             </div>
-
-             {/* Activity Feed */}
-             <div className="bg-void-200 border border-white/5 rounded-xl p-6">
-                <h3 className="font-bold text-white mb-4">Recent Activity</h3>
-                <div className="space-y-6">
-                   {[
-                     { text: 'New sale: SEO Content System', time: '2 mins ago', type: 'sale' },
-                     { text: 'Payout processed: $1,240.00', time: '1 day ago', type: 'payout' },
-                     { text: 'New review (5★) on Legal Agent', time: '2 days ago', type: 'review' },
-                   ].map((activity, i) => (
-                     <div key={i} className="flex gap-3">
-                        <div className="w-2 h-2 mt-2 rounded-full bg-neon-cyan flex-shrink-0"></div>
-                        <div>
-                           <p className="text-sm text-white">{activity.text}</p>
-                           <p className="text-xs text-ghost mt-1">{activity.time}</p>
-                        </div>
-                     </div>
-                   ))}
-                </div>
-             </div>
-
+          {/* View Controller */}
+          <div className="space-y-12">
+             {activeTab === 'inventory' && <MyListings listings={listings} />}
+             {activeTab === 'analytics' && <Analytics />}
+             {activeTab === 'payouts' && <Payouts />}
           </div>
        </div>
     </div>

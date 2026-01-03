@@ -2,28 +2,30 @@
 // Unified types for the KONKRED platform
 
 export type PageView = 
-    | 'landing'
-    | 'marketplace'
-    | 'listing_detail'
-    | 'wizard'
-    | 'forge_audit'
-    | 'wallet'
-    | 'usage'
-    | 'seller_dashboard'
-    | 'affiliate_center'
-    | 'dispute_center'
-    | 'admin_moderation'
-    | 'checkout'
-    | 'payment_success'
-    | 'vertical_landing'
-    | 'style_guide'
-    | 'pricing'
-    | 'academy'    // Courses
-    | 'intel'      // Blog
-    | 'network'    // Forum
-    | 'advisory';  // Consulting
+    | 'landing' | 'marketplace' | 'listing_detail' | 'wizard' | 'forge_audit' 
+    | 'wallet' | 'usage' | 'seller_dashboard' | 'academy' | 'intel' 
+    | 'network' | 'advisory' | 'documentation' | 'career' | 'resources' 
+    | 'pricing' | 'enter' | 'join_network' | 'account' | 'checkout';
 
 export type AssetType = 'prompt' | 'agent' | 'workflow' | 'dataset' | 'api' | 'prompt_system';
+
+// Added missing LicenseType
+export type LicenseType = 'personal' | 'commercial' | 'enterprise';
+
+// Added missing ToastMessage interface
+export interface ToastMessage {
+  id: string;
+  message: string;
+  type: 'success' | 'error' | 'info' | 'warning';
+  duration?: number;
+}
+
+// Added missing AuthResult interface
+export interface AuthResult {
+  success: boolean;
+  user?: User;
+  error?: string;
+}
 
 export interface User {
   id: string;
@@ -69,6 +71,7 @@ export interface Listing {
   rating: number;
   reviewCount: number;
   featured: boolean;
+  // Added optional trending property
   trending?: boolean;
   tags: string[];
   createdAt: Date;
@@ -83,6 +86,7 @@ export interface Protocol {
   price: string;
   isVerified: boolean;
   tags: string[];
+  acquisitionCount: number;
 }
 
 export interface Tool {
@@ -114,11 +118,16 @@ export interface AuthState {
   isAuthenticated: boolean;
 }
 
-export type ModalType = 'login' | 'signup' | 'waitlist' | 'enter' | 'demo';
+export type ModalType = 
+  | 'ProtocolDetails' 
+  | 'AuditReport' 
+  | 'AddCredits' 
+  | 'Withdrawal' 
+  | 'DemoView' 
+  | 'UpgradePrompt'
+  | 'ConfirmPurchase';
 
-export interface Toast {
-  type: 'success' | 'error' | 'info' | 'warning';
-  message: string;
+export interface ModalState {
+  type: ModalType | null;
+  props: any;
 }
-
-export type LicenseType = 'personal' | 'commercial' | 'enterprise';

@@ -1,7 +1,166 @@
-/* Placeholder for global styles & animations */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --void-bg: #030304;
+  --neon-cyan: #ff9500; /* Orange/Gold primary as per theme */
+  --neon-blue: #3b82f6;
+  --neon-purple: #a855f7;
+  --neon-green: #10b981;
+  --glass-border: rgba(255, 255, 255, 0.05);
+}
+
+/* --- CORE RESET & TYPOGRAPHY --- */
 body {
-  margin: 0;
-  font-family: sans-serif;
-  background-color: #050505;
-  color: #ededed;
+  background-color: var(--void-bg);
+  color: #e4e4e7;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  selection-background-color: var(--neon-cyan);
+  selection-color: #000;
+}
+
+::selection {
+  background: var(--neon-cyan);
+  color: black;
+}
+
+/* --- CUSTOM SCROLLBAR --- */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0a0a0c;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #27272a;
+  border-radius: 3px;
+  transition: background 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--neon-cyan);
+}
+
+/* --- UTILITY CLASSES --- */
+
+/* Glassmorphism */
+.glass-panel {
+  background: rgba(13, 13, 16, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+}
+
+/* Concrete Texture Overlay */
+.concrete-texture {
+  background-image: url('https://www.transparenttextures.com/patterns/concrete-wall.png');
+  background-blend-mode: overlay;
+}
+
+/* Scanline Effect */
+.scanline-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0),
+    rgba(255, 255, 255, 0) 50%,
+    rgba(0, 0, 0, 0.1) 50%,
+    rgba(0, 0, 0, 0.1)
+  );
+  background-size: 100% 4px;
+  z-index: 10;
+  opacity: 0.15;
+}
+
+/* --- ANIMATIONS --- */
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 12s linear infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 10px rgba(255, 149, 0, 0.1); }
+  50% { box-shadow: 0 0 25px rgba(255, 149, 0, 0.3); }
+}
+
+.animate-glow-pulse {
+  animation: pulse-glow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes dust-float {
+  0% { transform: translateY(0) translateX(0); opacity: 0; }
+  50% { opacity: 1; }
+  100% { transform: translateY(-20px) translateX(10px); opacity: 0; }
+}
+
+.dust-particle {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: white;
+  border-radius: 50%;
+  opacity: 0.3;
+  animation: dust-float 10s infinite linear;
+}
+
+/* --- COMPONENT SPECIFIC --- */
+
+/* Brutalist Inputs */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px #111114 inset !important;
+    -webkit-text-fill-color: white !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+/* 3D Transform Utilities */
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+
+.perspective-1000 {
+  perspective: 1000px;
 }

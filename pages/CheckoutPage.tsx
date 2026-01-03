@@ -1,17 +1,24 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState } from 'react';
 import { Listing, LicenseType, PageView } from '../types.ts';
 import { LICENSE_TYPES } from '../constants.ts';
-import { Shield, CreditCard, Lock, ChevronRight, Check, Zap, Coins, Copy, Loader2, RefreshCw } from 'lucide-react';
+import { Shield, CreditCard, Lock, ChevronRight, Check, Zap, Coins, Copy, Loader2, RefreshCw, ArrowLeft } from 'lucide-react';
 import Badge from '../components/common/Badge.tsx';
 
-const CheckoutPage: React.FC<{ listing: Listing; onNavigate: (page: any) => void }> = ({ listing, onNavigate }) => {
+interface CheckoutPageProps {
+    listing: Listing;
+    onNavigate: (page: PageView) => void;
+    onConfirmed: () => void;
+}
+
+const CheckoutPage: React.FC<CheckoutPageProps> = ({ listing, onNavigate, onConfirmed }) => {
     const [license, setLicense] = useState<LicenseType>('personal');
     const [paymentStep, setPaymentStep] = useState<'selection' | 'processing' | 'confirmed'>('selection');
     const [selectedCrypto, setSelectedCrypto] = useState('USDT');
     
     const selectedLicense = LICENSE_TYPES.find(l => l.id === license)!;
     const subtotal = listing.pricing.amount * selectedLicense.multiplier;
-    const tax = 0; // Crypto often has zero tax/platform handles it
+    const tax = 0;
     const total = subtotal + tax;
 
     const cryptoAssets = [
@@ -27,20 +34,26 @@ const CheckoutPage: React.FC<{ listing: Listing; onNavigate: (page: any) => void
         // Simulate block confirmation
         setTimeout(() => {
             setPaymentStep('confirmed');
-        }, 5000);
+        }, 4000);
+    };
+
+    const handleFinalize = () => {
+        onConfirmed();
     };
 
     if (paymentStep === 'confirmed') {
         return (
             <div className="min-h-screen flex items-center justify-center bg-void p-6 animate-in fade-in zoom-in-95">
-                <div className="max-w-md w-full bg-void-100 border border-neon-green/30 p-12 text-center rounded-2xl shadow-[0_0_50px_rgba(16,185,129,0.1)]">
+                <div className="max-w-md w-full concrete-card border-neon-green/30 p-12 text-center rounded-2xl shadow-[0_0_50px_rgba(16,185,129,0.1)]">
                     <div className="w-20 h-20 bg-neon-green/20 rounded-full flex items-center justify-center mx-auto mb-6">
                         <Check className="text-neon-green" size={40} />
                     </div>
-                    <h1 className="text-2xl font-bold text-white mb-2">Acquisition Confirmed</h1>
-                    <p className="text-ghost text-sm mb-8">Transaction successfully validated on-chain. Asset has been added to your Library.</p>
-                    <button onClick={() => onNavigate('usage')} className="btn-primary w-full py-4 uppercase font-bold tracking-widest">
-                        Access Asset
+                    <h1 className="text-2xl font-bold text-white mb-2 uppercase tracking-tight">Acquisition Verified</h1>
+                    <p className="text-ghost text-sm mb-8 leading-relaxed">
+                        Transaction successfully validated on-chain. License map for <span className="text-white font-bold">{listing.title}</span> has been appended to your local enclave.
+                    </p>
+                    <button onClick={handleFinalize} className="btn-primary w-full py-5 uppercase font-black tracking-[0.2em] text-xs">
+                        ACCESS ENCLAVE
                     </button>
                 </div>
             </div>
@@ -49,111 +62,135 @@ const CheckoutPage: React.FC<{ listing: Listing; onNavigate: (page: any) => void
 
     return (
         <div className="min-h-screen bg-void pt-28 pb-32">
-            <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16">
-                
-                {/* Left: NowPayments Integration */}
-                <div className="space-y-10">
-                    <header>
-                        <div className="flex items-center gap-2 text-neon-cyan mb-2">
-                            <Coins size={20} />
-                            <span className="text-[10px] font-mono font-black uppercase tracking-[0.4em]">NowPayments Protocol v4.0</span>
-                        </div>
-                        <h1 className="text-4xl font-display font-bold text-white">Secure Crypto Checkout</h1>
-                        <p className="text-ghost text-sm mt-2 font-light">Global decentralized settlement for intellectual capital.</p>
-                    </header>
+            <div className="max-w-6xl mx-auto px-6">
+                <button 
+                  onClick={() => onNavigate('marketplace')}
+                  className="flex items-center gap-3 text-ghost hover:text-white transition-all font-mono text-[10px] uppercase tracking-[0.4em] mb-12 group"
+                >
+                    <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" /> Exit_Checkout
+                </button>
 
-                    {paymentStep === 'selection' ? (
-                        <div className="space-y-8 animate-in slide-in-from-bottom-4">
-                            <div className="space-y-4">
-                                <label className="block text-[10px] font-mono font-bold text-ghost uppercase tracking-widest">License Scope</label>
-                                <div className="grid grid-cols-1 gap-3">
-                                    {LICENSE_TYPES.map(l => (
-                                        <div 
-                                            key={l.id} 
-                                            onClick={() => setLicense(l.id as LicenseType)}
-                                            className={`p-5 border-2 rounded-xl cursor-pointer transition-all flex justify-between items-center ${license === l.id ? 'border-neon-cyan bg-neon-cyan/5' : 'border-white/5 bg-void-200 hover:border-white/10'}`}
-                                        >
-                                            <div>
-                                                <p className="text-sm font-bold text-white">{l.name}</p>
-                                                <p className="text-[10px] text-ghost font-mono uppercase mt-1">Multiplier: {l.multiplier}x</p>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+                    
+                    {/* Left: Settlement Logic */}
+                    <div className="space-y-10">
+                        <header>
+                            <div className="flex items-center gap-2 text-neon-cyan mb-3">
+                                <Coins size={20} />
+                                <span className="text-[10px] font-mono font-black uppercase tracking-[0.4em]">NowPayments Protocol v4.0</span>
+                            </div>
+                            <h1 className="text-5xl font-display font-black text-white leading-none uppercase tracking-tighter">Crypto Settlement</h1>
+                            <p className="text-ghost text-lg mt-4 font-light leading-relaxed">Verified decentralized clearing for structural AI capital.</p>
+                        </header>
+
+                        {paymentStep === 'selection' ? (
+                            <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
+                                <div className="space-y-4">
+                                    <label className="block text-[10px] font-mono font-bold text-ghost uppercase tracking-widest ml-1">1. Define License Scope</label>
+                                    <div className="grid grid-cols-1 gap-3">
+                                        {LICENSE_TYPES.map(l => (
+                                            <div 
+                                                key={l.id} 
+                                                onClick={() => setLicense(l.id as LicenseType)}
+                                                className={`p-5 border-2 rounded-2xl cursor-pointer transition-all flex justify-between items-center ${license === l.id ? 'border-neon-cyan bg-neon-cyan/5' : 'concrete-card border-white/5 hover:border-white/10'}`}
+                                            >
+                                                <div>
+                                                    <p className={`text-sm font-bold ${license === l.id ? 'text-white' : 'text-ghost-light'}`}>{l.name}</p>
+                                                    <p className="text-[9px] text-ghost font-mono uppercase mt-1 tracking-widest">Scaling Factor: {l.multiplier}x</p>
+                                                </div>
+                                                <div className="text-right">
+                                                    <p className={`text-xl font-black ${license === l.id ? 'text-neon-cyan' : 'text-white'}`}>${(listing.pricing.amount * l.multiplier).toFixed(2)}</p>
+                                                </div>
                                             </div>
-                                            <div className="text-right">
-                                                <p className="text-lg font-bold text-white">${(listing.pricing.amount * l.multiplier).toFixed(2)}</p>
-                                            </div>
-                                        </div>
-                                    ))}
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <label className="block text-[10px] font-mono font-bold text-ghost uppercase tracking-widest ml-1">2. Select Settlement Asset</label>
+                                    <div className="grid grid-cols-3 gap-3">
+                                        {cryptoAssets.map(c => (
+                                            <button 
+                                                key={c.id} 
+                                                onClick={() => setSelectedCrypto(c.id)}
+                                                className={`py-4 rounded-xl border-2 font-bold text-xs transition-all ${selectedCrypto === c.id ? 'border-neon-cyan bg-neon-cyan/10 text-white shadow-[0_0_20px_rgba(255,149,0,0.1)]' : 'concrete-card border-white/5 text-ghost hover:text-white'}`}
+                                            >
+                                                {c.id}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <button onClick={handlePayment} className="w-full bg-neon-cyan text-black py-6 rounded-2xl font-black tracking-[0.2em] hover:shadow-[0_0_30px_rgba(255,149,0,0.3)] transition-all flex items-center justify-center gap-3 text-sm uppercase">
+                                    INITIALIZE TRANSACTION <ChevronRight size={18} />
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="concrete-card rounded-[2rem] p-12 text-center space-y-8 animate-in zoom-in-95 duration-500">
+                                <div className="relative inline-block">
+                                    <Loader2 size={48} className="text-neon-cyan animate-spin mx-auto" />
+                                    <div className="absolute inset-0 bg-neon-cyan/20 blur-2xl rounded-full animate-pulse" />
+                                </div>
+                                <div>
+                                    <h3 className="text-2xl font-display font-bold text-white uppercase tracking-tight">Monitoring Mempool</h3>
+                                    <p className="text-ghost text-sm mt-2">Awaiting multi-sig confirmation on {selectedCrypto} network.</p>
+                                </div>
+                                
+                                <div className="bg-black/40 border border-white/5 p-8 rounded-2xl text-left">
+                                    <p className="text-[9px] text-ghost font-mono uppercase mb-4 tracking-widest">Deposit Address ({selectedCrypto})</p>
+                                    <div className="flex items-center gap-4 bg-void-400 p-4 rounded-xl border border-white/10 group">
+                                        <code className="text-[11px] text-white flex-1 truncate font-mono">{currentCrypto.address}</code>
+                                        <Copy size={16} className="text-ghost hover:text-neon-cyan cursor-pointer transition-colors" />
+                                    </div>
+                                    <div className="mt-6 p-4 bg-neon-cyan/5 border border-neon-cyan/20 rounded-xl flex items-center gap-4">
+                                        <RefreshCw size={16} className="text-neon-cyan animate-spin" />
+                                        <p className="text-[10px] text-neon-cyan font-mono uppercase tracking-widest">Status: Validating Node Presence...</p>
+                                    </div>
                                 </div>
                             </div>
+                        )}
+                    </div>
 
-                            <div className="space-y-4">
-                                <label className="block text-[10px] font-mono font-bold text-ghost uppercase tracking-widest">Select Asset</label>
-                                <div className="grid grid-cols-3 gap-3">
-                                    {cryptoAssets.map(c => (
-                                        <button 
-                                            key={c.id} 
-                                            onClick={() => setSelectedCrypto(c.id)}
-                                            className={`py-4 rounded-xl border-2 font-bold text-xs transition-all ${selectedCrypto === c.id ? 'border-neon-cyan bg-neon-cyan/10 text-white' : 'border-white/5 bg-void-300 text-ghost hover:text-white'}`}
-                                        >
-                                            {c.id}
-                                        </button>
-                                    ))}
+                    {/* Right: Summary Hud */}
+                    <div className="lg:sticky lg:top-32 h-fit concrete-card rounded-[2.5rem] overflow-hidden shadow-2xl bg-black/40 border-white/10">
+                        <div className="p-10 border-b border-white/5">
+                            <h3 className="text-[10px] font-mono font-black text-ghost mb-8 uppercase tracking-[0.4em]">Cart_Snapshot // {listing.id}</h3>
+                            <div className="flex gap-8">
+                                <div className="w-24 h-24 bg-void-300 rounded-3xl border border-white/10 flex items-center justify-center shadow-inner group-hover:border-neon-cyan/30 transition-all">
+                                    <Zap size={40} className="text-neon-cyan animate-pulse" />
+                                </div>
+                                <div className="flex-1 py-1">
+                                    <h4 className="text-2xl font-bold text-white mb-2 leading-tight uppercase">{listing.title}</h4>
+                                    <div className="flex gap-3">
+                                        <Badge variant="cyan">{listing.type.replace('_', ' ')}</Badge>
+                                        <span className="text-[9px] text-ghost font-mono mt-1 uppercase">Score: {listing.auditScore}%</span>
+                                    </div>
                                 </div>
                             </div>
-
-                            <button onClick={handlePayment} className="w-full bg-white text-black py-5 rounded-xl font-black tracking-widest hover:bg-neon-cyan transition-all flex items-center justify-center gap-3">
-                                INITIATE CRYPTO SETTLEMENT <ChevronRight size={18} />
-                            </button>
                         </div>
-                    ) : (
-                        <div className="bg-void-100 border border-white/10 rounded-2xl p-10 text-center space-y-6 animate-pulse-slow">
-                            <Loader2 size={40} className="text-neon-cyan animate-spin mx-auto" />
-                            <h3 className="text-xl font-bold text-white">Awaiting Blockchain Confirmation</h3>
-                            <div className="bg-black/40 p-6 rounded-xl border border-white/5 text-left">
-                                <p className="text-[10px] text-ghost font-mono uppercase mb-2">Deposit Address ({selectedCrypto})</p>
-                                <div className="flex items-center gap-3 bg-void p-3 rounded border border-white/10">
-                                    <code className="text-[11px] text-white flex-1 truncate">{currentCrypto.address}</code>
-                                    <Copy size={14} className="text-ghost hover:text-neon-cyan cursor-pointer" />
+                        <div className="p-10 space-y-6">
+                            <div className="flex justify-between text-sm">
+                                <span className="text-ghost uppercase font-mono text-xs">Asset Valuation</span>
+                                <span className="text-white font-bold">${subtotal.toLocaleString()}</span>
+                            </div>
+                            <div className="flex justify-between text-sm font-mono text-neon-green">
+                                <span className="text-xs uppercase">Decentralized P2P Fee</span>
+                                <span className="font-bold">-$0.00</span>
+                            </div>
+                            <div className="pt-8 border-t border-white/10 flex justify-between items-end">
+                                <div className="flex flex-col">
+                                    <span className="text-[9px] font-mono text-ghost uppercase tracking-widest">Total Settlement</span>
+                                    <span className="text-4xl font-black text-neon-cyan font-display leading-none mt-1">${total.toLocaleString()}</span>
                                 </div>
-                                <div className="mt-4 p-4 bg-neon-cyan/5 border border-neon-cyan/20 rounded-lg flex items-center gap-3">
-                                    <RefreshCw size={16} className="text-neon-cyan animate-spin" />
-                                    <p className="text-[11px] text-neon-cyan font-mono">Status: Monitoring mempool...</p>
-                                </div>
+                                <Shield className="text-neon-green opacity-20" size={32} />
                             </div>
                         </div>
-                    )}
-                </div>
-
-                {/* Right: Summary */}
-                <div className="lg:sticky lg:top-32 h-fit bg-void-100 border border-white/10 rounded-3xl overflow-hidden shadow-2xl">
-                    <div className="p-8 border-b border-white/5">
-                        <h3 className="font-bold text-white mb-6 uppercase tracking-widest text-xs">Acquisition Summary</h3>
-                        <div className="flex gap-6">
-                            <div className="w-20 h-20 bg-void-300 rounded-2xl border border-white/10 flex items-center justify-center">
-                                <Zap size={32} className="text-neon-cyan" />
-                            </div>
-                            <div className="flex-1">
-                                <h4 className="text-lg font-bold text-white mb-1">{listing.title}</h4>
-                                <Badge variant="cyan">{listing.type}</Badge>
-                                <div className="mt-2 text-xs text-ghost font-mono">FORGE AUDIT SCORE: {listing.auditScore}%</div>
-                            </div>
+                        <div className="p-4 bg-white/[0.02] text-[9px] font-mono text-ghost text-center uppercase tracking-[0.3em]">
+                            End-to-End Encrypted Node-to-Node Transfer
                         </div>
                     </div>
-                    <div className="p-8 space-y-4">
-                        <div className="flex justify-between text-sm">
-                            <span className="text-ghost">Asset Value</span>
-                            <span className="text-white">${subtotal.toFixed(2)}</span>
-                        </div>
-                        <div className="flex justify-between text-sm font-mono text-neon-green">
-                            <span>NowPayments Fee</span>
-                            <span>$0.00</span>
-                        </div>
-                        <div className="pt-6 border-t border-white/5 flex justify-between font-bold text-2xl">
-                            <span className="text-white">TOTAL</span>
-                            <span className="text-neon-cyan">${total.toFixed(2)}</span>
-                        </div>
-                    </div>
-                </div>
 
+                </div>
             </div>
         </div>
     );

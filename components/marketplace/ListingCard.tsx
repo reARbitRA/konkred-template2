@@ -33,7 +33,7 @@ const ListingCard: React.FC<ListingCardProps> = ({ listing, onClick }) => {
   return (
     <div 
       onClick={onClick}
-      className="group bg-void-50 border border-white/5 rounded-lg overflow-hidden hover:border-neon-cyan/50 hover:shadow-elevation-2 transition-all cursor-pointer flex flex-col"
+      className="group concrete-card rounded-lg overflow-hidden hover:border-neon-cyan/50 hover:shadow-elevation-2 transition-all cursor-pointer flex flex-col"
     >
       <div className="p-4 flex-1">
         <div className="flex justify-between items-start mb-3">

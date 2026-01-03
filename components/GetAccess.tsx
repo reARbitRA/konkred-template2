@@ -40,7 +40,7 @@ const GetAccess: React.FC<GetAccessProps> = ({ onOpen, onDemo }) => {
                value={email}
                onChange={(e) => setEmail(e.target.value)}
                placeholder="Enter your email frequency..."
-               className="w-full bg-zinc-900 border border-zinc-800 focus:border-white pl-5 pr-14 py-4 text-sm text-white placeholder-zinc-600 outline-none transition-colors font-mono"
+               className="w-full bg-zinc-900 border border-zinc-800 focus:border-white pl-5 pr-14 py-4 text-sm text-white placeholder-zinc-600 outline-none transition-colors font-mono concrete-card"
              />
              <button 
                type="submit"

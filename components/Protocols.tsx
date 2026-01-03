@@ -1,15 +1,20 @@
-import React from 'react';
+
+import React, { useState } from 'react';
 import { Protocol } from '../types';
 import ProtocolCard from './ProtocolCard';
-import { Layers, Info } from 'lucide-react';
+import ProtocolDetails from './ProtocolDetails';
+import AcquirersList from './AcquirersList';
+import { Layers } from 'lucide-react';
 
 interface ProtocolsProps {
   protocols: Protocol[];
-  onViewDetails: (protocol: Protocol) => void;
   onAcquire: (protocol: Protocol) => void;
 }
 
-const Protocols: React.FC<ProtocolsProps> = ({ protocols, onViewDetails, onAcquire }) => {
+const Protocols: React.FC<ProtocolsProps> = ({ protocols, onAcquire }) => {
+  const [selectedProtocol, setSelectedProtocol] = useState<Protocol | null>(null);
+  const [showingAcquirersFor, setShowingAcquirersFor] = useState<Protocol | null>(null);
+
   return (
     <section id="protocols" className="py-24 border-t border-zinc-900 animate-in fade-in slide-in-from-bottom-8 duration-700">
       <div className="max-w-7xl mx-auto px-6">
@@ -30,25 +35,31 @@ const Protocols: React.FC<ProtocolsProps> = ({ protocols, onViewDetails, onAcqui
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {protocols.map(protocol => (
-            <div key={protocol.id} className="relative group h-full">
-              <ProtocolCard 
-                protocol={protocol} 
-                onAcquire={() => onAcquire(protocol)}
-              />
-              {/* Overlay Trigger for Details - positioned to not block acquire button completely or added as a secondary action */}
-              <div className="absolute top-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button 
-                  onClick={() => onViewDetails(protocol)}
-                  className="bg-black/80 backdrop-blur border border-zinc-700 p-2 rounded-full hover:bg-zinc-800 hover:text-white text-zinc-400 transition-all"
-                  title="View Details"
-                >
-                  <Info size={14} />
-                </button>
-              </div>
-            </div>
+            <ProtocolCard 
+              key={protocol.id}
+              protocol={protocol} 
+              onAcquire={() => onAcquire(protocol)}
+              onViewDetails={setSelectedProtocol}
+              onShowAcquirers={setShowingAcquirersFor}
+            />
           ))}
         </div>
       </div>
+
+      <ProtocolDetails 
+        protocol={selectedProtocol}
+        onClose={() => setSelectedProtocol(null)}
+        onAcquire={() => {
+            if (selectedProtocol) onAcquire(selectedProtocol);
+        }}
+      />
+
+      {showingAcquirersFor && (
+        <AcquirersList 
+          protocol={showingAcquirersFor}
+          onClose={() => setShowingAcquirersFor(null)}
+        />
+      )}
     </section>
   );
 };

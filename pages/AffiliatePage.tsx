@@ -40,7 +40,7 @@ const AffiliatePage: React.FC = () => {
                         { label: 'Earnings (Pending)', value: '$1,240.00', icon: DollarSign, color: 'gold' },
                         { label: 'Total Payouts', value: '$8,420.50', icon: DollarSign, color: 'green' },
                     ].map((stat, i) => (
-                        <div key={i} className="bg-void-100 border border-white/10 p-6 rounded-2xl group hover:border-white/20 transition-all">
+                        <div key={i} className="concrete-card p-6 rounded-2xl group hover:border-white/20 transition-all">
                             <div className="flex justify-between items-start mb-4">
                                 <stat.icon size={20} className={`text-neon-${stat.color} group-hover:scale-110 transition-transform`} />
                             </div>
@@ -51,7 +51,7 @@ const AffiliatePage: React.FC = () => {
                 </div>
 
                 {generatedCode && (
-                  <div className="bg-neon-cyan/5 border border-neon-cyan/20 p-8 rounded-2xl animate-in zoom-in-95">
+                  <div className="concrete-card bg-neon-cyan/5 border-neon-cyan/20 p-8 rounded-2xl animate-in zoom-in-95">
                     <h3 className="text-white font-bold mb-4 flex items-center gap-2">
                         <Link size={18} className="text-neon-cyan" />
                         Active Referral Link
@@ -71,7 +71,7 @@ const AffiliatePage: React.FC = () => {
                   </div>
                 )}
 
-                <div className="bg-void-100 border border-white/10 rounded-2xl overflow-hidden">
+                <div className="concrete-card rounded-2xl overflow-hidden">
                     <div className="p-6 border-b border-white/5 bg-white/[0.02]">
                         <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-white">Conversion Ledger</h3>
                     </div>

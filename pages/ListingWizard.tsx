@@ -59,7 +59,7 @@ const ListingWizard: React.FC<{ onComplete: (listing: Listing) => void; onCancel
                         value={formData.title}
                         onChange={e => setFormData({...formData, title: e.target.value})}
                         type="text" placeholder="e.g. Strategic Risk Synthesizer v4" 
-                        className="w-full bg-void-200 border-2 border-white/5 rounded-2xl px-6 py-4 text-white outline-none focus:border-neon-cyan transition-all text-lg" 
+                        className="w-full bg-void-200 concrete-card px-6 py-4 text-white outline-none focus:border-neon-cyan transition-all text-lg" 
                     />
                 </label>
                 <div className="grid grid-cols-2 gap-6">
@@ -68,7 +68,7 @@ const ListingWizard: React.FC<{ onComplete: (listing: Listing) => void; onCancel
                         <select 
                             value={formData.type}
                             onChange={e => setFormData({...formData, type: e.target.value})}
-                            className="w-full bg-void-200 border-2 border-white/5 rounded-2xl px-6 py-4 text-white outline-none focus:border-neon-cyan transition-all"
+                            className="w-full bg-void-200 concrete-card px-6 py-4 text-white outline-none focus:border-neon-cyan transition-all"
                         >
                             <option value="prompt">Prompt System</option>
                             <option value="agent">Autonomous Agent</option>
@@ -81,7 +81,7 @@ const ListingWizard: React.FC<{ onComplete: (listing: Listing) => void; onCancel
                         <select 
                             value={formData.category}
                             onChange={e => setFormData({...formData, category: e.target.value})}
-                            className="w-full bg-void-200 border-2 border-white/5 rounded-2xl px-6 py-4 text-white outline-none focus:border-neon-cyan transition-all"
+                            className="w-full bg-void-200 concrete-card px-6 py-4 text-white outline-none focus:border-neon-cyan transition-all"
                         >
                             <option value="legal">Legal & Compliance</option>
                             <option value="finance">Finance & VC</option>
@@ -104,10 +104,10 @@ const ListingWizard: React.FC<{ onComplete: (listing: Listing) => void; onCancel
                         value={formData.description}
                         onChange={e => setFormData({...formData, description: e.target.value})}
                         rows={6} placeholder="Detailed breakdown of the asset's utility, methodology, and logic structure..." 
-                        className="w-full bg-void-200 border-2 border-white/5 rounded-2xl px-6 py-4 text-white outline-none focus:border-neon-cyan transition-all resize-none leading-relaxed" 
+                        className="w-full bg-void-200 concrete-card px-6 py-4 text-white outline-none focus:border-neon-cyan transition-all resize-none leading-relaxed" 
                     />
                 </label>
-                <div className="p-8 border-2 border-dashed border-white/10 rounded-3xl flex flex-col items-center justify-center text-center group hover:border-neon-cyan/50 transition-all">
+                <div className="p-8 concrete-card border-dashed border-white/10 rounded-3xl flex flex-col items-center justify-center text-center group hover:border-neon-cyan/50 transition-all">
                     <Upload className="text-ghost group-hover:text-neon-cyan mb-4 transition-colors" size={40} />
                     <p className="text-sm text-white font-bold">Upload Source Payloads</p>
                     <p className="text-xs text-ghost mt-1">JSON, MD, or PDF schema files (Max 50MB)</p>
@@ -119,7 +119,7 @@ const ListingWizard: React.FC<{ onComplete: (listing: Listing) => void; onCancel
         return (
             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
                 <h2 className="text-4xl font-display font-bold text-white">Monetization</h2>
-                <div className="bg-void-200 border border-white/10 p-10 rounded-3xl space-y-8">
+                <div className="concrete-card p-10 rounded-3xl space-y-8">
                     <div className="flex items-center justify-between">
                         <div>
                             <h3 className="text-xl font-bold text-white">Acquisition Value</h3>
@@ -174,7 +174,7 @@ const ListingWizard: React.FC<{ onComplete: (listing: Listing) => void; onCancel
                   {isAuditing ? 'ANALYZING NEURAL PATHS...' : 'RUN VERIFICATION SEQUENCE'}
                 </button>
               ) : (
-                <div className="bg-neon-green/5 border border-neon-green/20 p-8 rounded-3xl text-left animate-in zoom-in-95">
+                <div className="bg-neon-green/5 concrete-card p-8 rounded-3xl text-left animate-in zoom-in-95">
                   <div className="flex items-center gap-3 text-neon-green text-sm font-bold uppercase mb-4">
                     <CheckCircle size={20} /> PROTOCOL VERIFIED BY FORGE AI
                   </div>
@@ -197,7 +197,7 @@ const ListingWizard: React.FC<{ onComplete: (listing: Listing) => void; onCancel
                 <h2 className="text-4xl font-display font-bold text-white">Global Deployment</h2>
                 <p className="text-ghost text-lg font-light max-w-lg mx-auto">Your protocol is ready to be published to the KONKRED Network. All licensing and NowPayments settlement modules are active.</p>
                 
-                <div className="bg-void-200 border border-white/5 p-8 rounded-3xl max-w-md mx-auto text-left space-y-4">
+                <div className="concrete-card p-8 rounded-3xl max-w-md mx-auto text-left space-y-4">
                     <div className="flex justify-between items-center">
                         <span className="text-ghost text-[10px] font-mono uppercase">Listing Class</span>
                         <span className="text-white font-bold uppercase">{formData.type}</span>
@@ -225,7 +225,7 @@ const ListingWizard: React.FC<{ onComplete: (listing: Listing) => void; onCancel
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           {STEPS.map((step, i) => (
             <div key={step} className="flex flex-col items-center gap-3 group">
-              <div className={`w-8 h-8 rounded-xl text-[10px] flex items-center justify-center font-bold font-mono transition-all duration-500 border-2 ${i === currentStep ? 'bg-neon-cyan border-neon-cyan text-black shadow-[0_0_20px_rgba(0,240,255,0.4)]' : i < currentStep ? 'bg-neon-green border-neon-green text-black' : 'bg-void border-white/10 text-ghost'}`}>
+              <div className={`w-8 h-8 rounded-xl text-[10px] flex items-center justify-center font-bold font-mono transition-all duration-500 border-2 ${i === currentStep ? 'bg-neon-cyan border-neon-cyan text-black shadow-[0_0_20px_rgba(0,240,255,0.4)]' : i < currentStep ? 'bg-neon-green border-neon-green text-black' : 'concrete-card text-ghost'}`}>
                 {i + 1}
               </div>
               <span className={`text-[8px] font-mono uppercase tracking-[0.2em] hidden md:block transition-colors ${i === currentStep ? 'text-white' : 'text-ghost'}`}>{step}</span>

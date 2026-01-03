@@ -1,6 +1,7 @@
+
 import React, { useState } from 'react';
 import { PageView } from '../types.ts';
-import { Check, Zap, Shield, Globe, Cpu, ArrowRight } from 'lucide-react';
+import { Check, Zap, Shield, Globe, Cpu, ArrowRight, ArrowLeft } from 'lucide-react';
 import { SUBSCRIPTION_PLANS } from '../constants.ts';
 import Badge from '../components/common/Badge.tsx';
 
@@ -16,6 +17,14 @@ const PricingPage: React.FC<{ onNavigate: (page: PageView) => void }> = ({ onNav
   return (
     <div className="min-h-screen bg-void pt-32 pb-20 px-6">
       <div className="max-w-7xl mx-auto">
+        <button 
+          onClick={() => onNavigate('landing')}
+          className="flex items-center gap-2 text-ghost hover:text-white transition-colors mb-8 text-[10px] uppercase tracking-widest font-mono group"
+        >
+          <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" /> 
+          RETURN_TO_BASE
+        </button>
+
         <header className="text-center mb-16 space-y-4">
           <Badge variant="purple">Membership Protocols</Badge>
           <h1 className="text-5xl md:text-6xl font-display font-bold text-white">Scale Your AI <span className="text-neon-cyan">Operations</span></h1>
@@ -37,7 +46,7 @@ const PricingPage: React.FC<{ onNavigate: (page: PageView) => void }> = ({ onNav
           {SUBSCRIPTION_PLANS.map((plan) => (
             <div 
               key={plan.id}
-              className={`relative bg-void-100 border p-8 rounded-3xl flex flex-col transition-all duration-500 hover:scale-[1.02] ${plan.id === 'pro' ? 'border-neon-cyan shadow-[0_0_50px_rgba(255,149,0,0.1)]' : 'border-white/5 hover:border-white/20'}`}
+              className={`relative concrete-card p-8 rounded-3xl flex flex-col transition-all duration-500 hover:scale-[1.02] ${plan.id === 'pro' ? 'border-neon-cyan shadow-[0_0_50px_rgba(255,149,0,0.1)]' : 'border-white/5 hover:border-white/20'}`}
             >
               {plan.id === 'pro' && (
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-neon-cyan text-black text-[10px] font-black px-4 py-1 rounded-full uppercase tracking-widest shadow-[0_0_20px_rgba(255,149,0,0.5)]">

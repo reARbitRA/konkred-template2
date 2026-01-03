@@ -12,30 +12,30 @@ const AdminPage: React.FC = () => {
                 </header>
 
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                    <div className="bg-void-100 border border-white/10 p-6 rounded-lg">
+                    <div className="concrete-card p-6 rounded-lg">
                         <div className="text-xs text-ghost uppercase font-mono mb-4">Pending Audits</div>
                         <div className="text-3xl font-bold text-white">14</div>
                     </div>
-                    <div className="bg-void-100 border border-white/10 p-6 rounded-lg">
+                    <div className="concrete-card p-6 rounded-lg">
                         <div className="text-xs text-ghost uppercase font-mono mb-4">Flagged Assets</div>
                         <div className="text-3xl font-bold text-neon-red">2</div>
                     </div>
-                    <div className="bg-void-100 border border-white/10 p-6 rounded-lg">
+                    <div className="concrete-card p-6 rounded-lg">
                         <div className="text-xs text-ghost uppercase font-mono mb-4">Escrow Volume</div>
                         <div className="text-3xl font-bold text-white">$42.8k</div>
                     </div>
-                    <div className="bg-void-100 border border-white/10 p-6 rounded-lg">
+                    <div className="concrete-card p-6 rounded-lg">
                         <div className="text-xs text-ghost uppercase font-mono mb-4">Uptime</div>
                         <div className="text-3xl font-bold text-neon-green">99.9%</div>
                     </div>
                 </div>
 
-                <div className="bg-void-100 border border-white/10 rounded-lg overflow-hidden">
-                    <div className="p-4 border-b border-white/5 bg-white/5 flex justify-between items-center">
+                <div className="concrete-card rounded-lg overflow-hidden">
+                    <div className="p-4 border-b border-white/5 concrete-card flex justify-between items-center">
                         <h3 className="text-sm font-bold text-white">Audit Queue</h3>
                         <div className="relative">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-ghost" size={14} />
-                            <input placeholder="Search assets..." className="bg-void-200 border border-white/10 rounded px-8 py-1.5 text-xs text-white outline-none" />
+                            <input placeholder="Search assets..." className="bg-void-200 concrete-card rounded px-8 py-1.5 text-xs text-white outline-none" />
                         </div>
                     </div>
                     <div className="p-12 text-center">

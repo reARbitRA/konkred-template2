@@ -7,7 +7,7 @@ const Footer: React.FC = () => {
       {/* Background Texture Overlay (Simulated Concrete) */}
       <div className="absolute inset-0 opacity-10 pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/concrete-wall.png')]"></div>
       
-      <div className="group relative flex flex-col md:flex-row items-center gap-8 md:gap-12 z-10 px-12 py-8 glass-strong rounded-2xl border border-white/5">
+      <div className="group relative flex flex-col md:flex-row items-center gap-8 md:gap-12 z-10 px-12 py-8 concrete-card rounded-2xl border border-white/5">
         {/* Left Side: ARBITRA STUDIO */}
         <div className="flex items-center gap-6">
           <a 

@@ -1,4 +1,5 @@
 
+
 import { Listing, User } from './types.ts';
 
 export const MOCK_USER: User = {
@@ -47,7 +48,7 @@ export const FEATURED_LISTINGS_DEMO: Listing[] = [
         rating: 4.9,
         reviewCount: 127,
         featured: true,
-        tags: ['legal', 'contracts', 'enterprise'],
+        tags: ['legal', 'contracts', 'enterprise', 'pdf gen'],
         createdAt: new Date(),
     },
     {
@@ -64,7 +65,7 @@ export const FEATURED_LISTINGS_DEMO: Listing[] = [
         rating: 4.9,
         reviewCount: 342,
         featured: true,
-        tags: ['health', 'hipaa', 'api'],
+        tags: ['health', 'hipaa', 'api', 'compliance'],
         createdAt: new Date(),
     },
     {
@@ -82,7 +83,7 @@ export const FEATURED_LISTINGS_DEMO: Listing[] = [
         reviewCount: 89,
         featured: false,
         trending: true,
-        tags: ['support', 'agent', 'automation'],
+        tags: ['support', 'agent', 'automation', 'saas'],
         createdAt: new Date(),
     }
 ];
@@ -117,6 +118,10 @@ export const NAV_LINKS = [
     { label: 'Forge', href: '/forge' },
     { label: 'Network', href: '/network' },
     { label: 'Pricing', href: '/pricing' },
+    { label: 'Documentation', href: '/documentation' }, // New link
+    { label: 'Careers', href: '/career' }, // New link
+    { label: 'Courses', href: '/academy' }, // New link (re-pointing existing)
+    { label: 'Resources', href: '/resources' }, // New link
 ];
 
 export const FOOTER_SECTIONS = [

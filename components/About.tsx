@@ -22,7 +22,7 @@ const About: React.FC = () => {
           </p>
         </div>
 
-        <div className="relative border border-zinc-800 bg-zinc-900/30 p-8 aspect-square flex flex-col justify-between">
+        <div className="relative concrete-card p-8 aspect-square flex flex-col justify-between">
           <div className="absolute top-4 right-4 text-zinc-700 font-mono text-xs">EST. 2024</div>
           <div className="text-6xl font-black text-zinc-800 select-none">KON<br/>KRED</div>
           <div className="grid grid-cols-3 gap-4 border-t border-zinc-800 pt-8">

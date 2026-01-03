@@ -65,6 +65,11 @@
                         'slide-up': 'slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards',
                         'fade-in': 'fadeIn 0.5s ease-out forwards',
                         'zoom-in': 'zoomIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        'float': 'float 3s ease-in-out infinite',
+                        'glow-pulse': 'glowPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'shimmer': 'shimmer 1.5s linear infinite',
+                        'spin-slow': 'spin 8s linear infinite',
+                        'dust-shimmer': 'dust-shimmer 8s ease-in-out infinite',
                     },
                     keyframes: {
                         slideUp: {
@@ -78,7 +83,26 @@
                         zoomIn: {
                             '0%': { transform: 'scale(0.95)', opacity: '0' },
                             '100%': { transform: 'scale(1)', opacity: '1' },
-                        }
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                        glowPulse: {
+                            '0%, 100%': { opacity: '0.2', transform: 'scale(1)' },
+                            '50%': { opacity: '0.6', transform: 'scale(1.05)' },
+                        },
+                        shimmer: {
+                            '0%': { backgroundPosition: '-200% 0' },
+                            '100%': { backgroundPosition: '200% 0' },
+                        },
+                        'dust-shimmer': {
+                            '0%': { backgroundPosition: '0% 0%', opacity: '0.03' },
+                            '25%': { backgroundPosition: '50% 50%', opacity: '0.06' },
+                            '50%': { backgroundPosition: '100% 100%', opacity: '0.03' },
+                            '75%': { backgroundPosition: '50% 0%', opacity: '0.06' },
+                            '100%': { backgroundPosition: '0% 0%', opacity: '0.03' },
+                        },
                     }
                 }
             }
@@ -100,24 +124,13 @@
         .bg-void-gradient {
             background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(255, 149, 0, 0.05) 0%, transparent 50%), #030304;
         }
-        .glass-strong {
-            background: rgba(10, 10, 12, 0.9);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
+        .preserve-3d { transform-style: preserve-3d; }
+        .perspective-1000 { perspective: 1000px; }
+        
         .btn-primary {
             background: linear-gradient(135deg, #ff9500 0%, #cc7a00 100%);
             color: #030304;
             font-weight: 600;
-            padding: 10px 24px;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
-        .btn-secondary {
-            background: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #e4e4e7;
             padding: 10px 24px;
             border-radius: 8px;
             transition: all 0.3s ease;
@@ -132,7 +145,6 @@
             text-shadow: 1px 1px 0px #000, 2px 2px 0px rgba(255,255,255,0.05);
         }
 
-        /* Sophisticated Animations */
         @keyframes grid-flow {
             0% { transform: perspective(500px) rotateX(60deg) translateY(0); }
             100% { transform: perspective(500px) rotateX(60deg) translateY(40px); }
@@ -147,22 +159,6 @@
              background-image: linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px), 
                               linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
             background-size: 30px 30px;
-        }
-
-        @keyframes glitch {
-            0% { transform: translate(0) }
-            20% { transform: translate(-2px, 2px) }
-            40% { transform: translate(-2px, -2px) }
-            60% { transform: translate(2px, 2px) }
-            80% { transform: translate(2px, -2px) }
-            100% { transform: translate(0) }
-        }
-        .animate-glitch {
-            animation: glitch 0.3s cubic-bezier(.25,.46,.45,.94) both infinite;
-            animation-play-state: paused;
-        }
-        .animate-glitch:hover, .group:hover .animate-glitch {
-            animation-play-state: running;
         }
 
         @keyframes scanline {
@@ -185,6 +181,41 @@
         .delay-200 { animation-delay: 200ms; }
         .delay-300 { animation-delay: 300ms; }
         .delay-500 { animation-delay: 500ms; }
+
+        .concrete-card {
+            background-color: #0d0d10;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            background-image: url('https://www.transparenttextures.com/patterns/concrete-wall.png');
+            position: relative;
+            overflow: hidden;
+        }
+        .concrete-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at center, rgba(255, 255, 255, 0.03) 0%, transparent 70%);
+            background-size: 200% 200%;
+            animation: dust-shimmer 8s ease-in-out infinite;
+            pointer-events: none;
+            opacity: 0.8;
+        }
+        
+        .brutalist-bg {
+            background-color: #0d0d10;
+            background-image: url('https://www.transparenttextures.com/patterns/concrete-wall.png');
+            position: relative;
+            overflow: hidden;
+        }
+        .brutalist-bg::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at center, rgba(255, 255, 255, 0.03) 0%, transparent 70%);
+            background-size: 200% 200%;
+            animation: dust-shimmer 8s ease-in-out infinite;
+            pointer-events: none;
+            opacity: 0.8;
+        }
     </style>
     
     <!-- Import Map -->

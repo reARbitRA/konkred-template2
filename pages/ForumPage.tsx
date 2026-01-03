@@ -1,6 +1,8 @@
+
 import React from 'react';
-import { MessageSquare, Users, TrendingUp, Search, MessageCircle, ArrowRight } from 'lucide-react';
+import { MessageSquare, Users, TrendingUp, Search, MessageCircle, ArrowRight, ArrowLeft } from 'lucide-react';
 import Badge from '../components/common/Badge.tsx';
+import { PageView } from '../types.ts';
 
 const threads = [
   { id: 1, title: 'Optimizing Token Efficiency for Finance Agents', author: 'LogicMaster', replies: 42, views: '1.2k', lastActive: '2m ago', tags: ['Engineering'] },
@@ -8,10 +10,18 @@ const threads = [
   { id: 3, title: 'Discussion: Standardizing Logic Map Schemas', author: 'AriMiyanji', replies: 89, views: '3.1k', lastActive: '1h ago', tags: ['Governance'] },
 ];
 
-const ForumPage: React.FC = () => {
+const ForumPage: React.FC<{ onNavigate: (page: PageView) => void }> = ({ onNavigate }) => {
   return (
     <div className="p-8 min-h-screen bg-void animate-in fade-in duration-700">
       <div className="max-w-6xl mx-auto space-y-12">
+        <button 
+          onClick={() => onNavigate('landing')}
+          className="flex items-center gap-2 text-ghost hover:text-white transition-colors mb-8 text-[10px] uppercase tracking-widest font-mono group"
+        >
+          <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" /> 
+          RETURN_TO_BASE
+        </button>
+
         <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
           <div>
             <h1 className="text-4xl font-display font-bold text-white mb-2">Architect Network</h1>

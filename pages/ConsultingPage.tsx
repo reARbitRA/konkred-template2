@@ -1,8 +1,8 @@
 
 import React from 'react';
-/* Added missing Clock import */
-import { Headphones, Globe, Calendar, Zap, MessageSquare, ShieldCheck, ChevronRight, Clock } from 'lucide-react';
+import { Headphones, Globe, Calendar, Zap, MessageSquare, ShieldCheck, ChevronRight, Clock, ArrowLeft } from 'lucide-react';
 import Badge from '../components/common/Badge.tsx';
+import { PageView } from '../types.ts';
 
 const services = [
   { id: 'S1', title: 'Architecture Audit Session', price: 850, duration: '90 Min', desc: 'Direct logic mapping and safety review of your AI ecosystem with a Senior Architect.' },
@@ -10,10 +10,18 @@ const services = [
   { id: 'S3', title: 'Enterprise White-Glove Setup', price: 5000, duration: 'Project-Based', desc: 'End-to-end implementation of the KONKRED executive stack into your existing node.' },
 ];
 
-const ConsultingPage: React.FC = () => {
+const ConsultingPage: React.FC<{ onNavigate: (page: PageView) => void }> = ({ onNavigate }) => {
   return (
     <div className="p-8 min-h-screen bg-void animate-in fade-in duration-700">
       <div className="max-w-6xl mx-auto space-y-12">
+        <button 
+          onClick={() => onNavigate('landing')}
+          className="flex items-center gap-2 text-ghost hover:text-white transition-colors mb-8 text-[10px] uppercase tracking-widest font-mono group"
+        >
+          <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" /> 
+          RETURN_TO_BASE
+        </button>
+
         <header className="text-center max-w-2xl mx-auto space-y-4">
           <Badge variant="gold">Executive Advisory</Badge>
           <h1 className="text-5xl font-display font-bold text-white">Direct <span className="text-neon-gold">Uplink</span></h1>

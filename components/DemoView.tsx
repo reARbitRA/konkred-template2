@@ -10,7 +10,7 @@ const DemoView: React.FC<DemoViewProps> = ({ onClose }) => {
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
        <div className="absolute inset-0 bg-black/90 backdrop-blur-md" onClick={onClose} />
        
-       <div className="relative w-full max-w-4xl bg-black border border-zinc-800 shadow-2xl animate-in zoom-in-95 duration-300">
+       <div className="relative w-full max-w-4xl concrete-card border border-zinc-800 shadow-2xl animate-in zoom-in-95 duration-300">
          <div className="flex justify-between items-center p-4 border-b border-zinc-800">
             <span className="text-xs font-mono text-zinc-500 uppercase tracking-widest">System Demo // v2.04</span>
             <button onClick={onClose} className="text-zinc-500 hover:text-white">

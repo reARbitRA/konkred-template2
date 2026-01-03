@@ -15,7 +15,8 @@ export const APP_DATA: AppData = {
       description: "Standardized DCF and comparable analysis framework for B2B SaaS acquisition targets.",
       price: "$249",
       isVerified: true,
-      tags: ["Structured Output", "XLSX Source"]
+      tags: ["Structured Output", "XLSX Source"],
+      acquisitionCount: 142,
     },
     {
       id: "p2",
@@ -25,7 +26,8 @@ export const APP_DATA: AppData = {
       description: "Complete checklist and document generator for EU data privacy compliance audits.",
       price: "$199",
       isVerified: true,
-      tags: ["PDF Gen", "Legal"]
+      tags: ["PDF Gen", "Legal"],
+      acquisitionCount: 210,
     },
     {
       id: "p3",
@@ -35,7 +37,8 @@ export const APP_DATA: AppData = {
       description: "Communication templates and decision trees for immediate PR crisis management.",
       price: "$89",
       isVerified: false,
-      tags: ["Playbook"]
+      tags: ["Playbook"],
+      acquisitionCount: 88,
     },
     {
       id: "p4",
@@ -45,7 +48,8 @@ export const APP_DATA: AppData = {
       description: "Narrative structures and slide layouts for Series B+ fundraising and board meetings.",
       price: "$349",
       isVerified: true,
-      tags: ["Presentation", "Strategy"]
+      tags: ["Presentation", "Strategy"],
+      acquisitionCount: 95,
     }
   ],
   tools: [

@@ -10,7 +10,7 @@ interface ToolsProps {
 
 const Tools: React.FC<ToolsProps> = ({ tools, onLaunchTool }) => {
   return (
-    <section id="tools" className="py-24 bg-zinc-900/10 border-t border-zinc-900">
+    <section id="tools" className="py-24 concrete-card border-t border-zinc-900">
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex items-center justify-between mb-10">
           <div className="flex items-center gap-3">

@@ -11,7 +11,7 @@ const UsageDashboard: React.FC = () => {
                 </header>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="bg-void-100 border border-white/10 p-6 rounded-lg">
+                    <div className="concrete-card p-6 rounded-lg">
                         <div className="text-xs text-ghost uppercase font-mono mb-4 flex items-center gap-2">
                             <Zap size={14} className="text-neon-cyan" /> Current Run Rate
                         </div>
@@ -25,7 +25,7 @@ const UsageDashboard: React.FC = () => {
                         </div>
                     </div>
 
-                    <div className="bg-void-100 border border-white/10 p-6 rounded-lg">
+                    <div className="concrete-card p-6 rounded-lg">
                         <div className="text-xs text-ghost uppercase font-mono mb-4 flex items-center gap-2">
                             <BarChart3 size={14} className="text-neon-purple" /> API Requests
                         </div>
@@ -33,7 +33,7 @@ const UsageDashboard: React.FC = () => {
                         <div className="text-xs text-neon-green mt-2">+12% from last cycle</div>
                     </div>
 
-                    <div className="bg-void-100 border border-white/10 p-6 rounded-lg">
+                    <div className="concrete-card p-6 rounded-lg">
                         <div className="text-xs text-ghost uppercase font-mono mb-4 flex items-center gap-2">
                             <AlertCircle size={14} className="text-neon-gold" /> Active Throttles
                         </div>
@@ -42,8 +42,8 @@ const UsageDashboard: React.FC = () => {
                     </div>
                 </div>
 
-                <div className="bg-void-100 border border-white/10 rounded-lg overflow-hidden">
-                    <div className="p-4 border-b border-white/5 bg-white/5 flex justify-between items-center">
+                <div className="concrete-card rounded-lg overflow-hidden">
+                    <div className="p-4 border-b border-white/5 concrete-card flex justify-between items-center">
                         <span className="text-xs font-mono font-bold uppercase tracking-widest">Endpoint Telemetry</span>
                         <button className="text-[10px] text-neon-cyan uppercase font-bold flex items-center gap-1">
                             Export Logs <ArrowUpRight size={12} />
