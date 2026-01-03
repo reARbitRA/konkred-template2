@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Command, ArrowRight, LayoutDashboard, ShoppingBag, Shield, LogOut, Settings, CreditCard, Home, FileText } from 'lucide-react';
+import { Search, ArrowRight, LayoutDashboard, ShoppingBag, Shield, LogOut, Settings, CreditCard, Home, FileText } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext.tsx';
 
 interface CommandPaletteProps {

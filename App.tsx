@@ -18,7 +18,7 @@ import EnterGate from './components/EnterGate.tsx';
 import JoinNetwork from './components/JoinNetwork.tsx';
 import UserMenu from './components/auth/UserMenu.tsx';
 import CommandPalette from './components/common/CommandPalette.tsx'; 
-import SystemHUD from './components/layout/SystemHUD.tsx'; // New Import
+import SystemHUD from './components/layout/SystemHUD.tsx'; 
 
 // Pages
 import LandingPage from './pages/LandingPage.tsx';
@@ -46,7 +46,7 @@ import DisputePage from './pages/DisputePage.tsx';
 import StyleGuide from './pages/StyleGuide.tsx';
 
 import { 
-    ShoppingBag, Hammer, Wallet, Database, BookOpen, MessageSquare, LogOut, ChevronRight 
+    ShoppingBag, Hammer, Wallet, Database, BookOpen, MessageSquare, ChevronRight 
 } from 'lucide-react';
 
 const App: React.FC = () => {
@@ -87,17 +87,49 @@ const App: React.FC = () => {
         navigate('listing_detail');
     };
 
-    const handleBuyRequest = (listing: Listing) => {
+    const handleBuyRequest = (item: Listing | Protocol) => {
         if (!user) {
             navigate('enter');
             return;
         }
-        if (userLibrary.includes(listing.id)) {
+        
+        let listingToBuy: Listing;
+
+        // Check if it's a Protocol (has 'level' or price as string) by duck typing or explicit check
+        if ('price' in item && typeof item.price === 'string') {
+             const p = item as Protocol;
+             listingToBuy = {
+                id: p.id,
+                sellerId: 'system',
+                seller: { name: 'KONKRED Archive', verified: true, totalSales: p.acquisitionCount },
+                title: p.title,
+                shortDescription: p.description,
+                description: p.description,
+                type: 'protocol',
+                category: p.category.toLowerCase(),
+                pricing: { 
+                    mode: 'one_time', 
+                    amount: parseInt(p.price.replace(/[^0-9]/g, '')) || 99, 
+                    currency: 'USD' 
+                },
+                delivery: 'download',
+                auditScore: 98,
+                rating: 5.0,
+                reviewCount: 42,
+                featured: false,
+                tags: p.tags,
+                createdAt: new Date()
+             };
+        } else {
+            listingToBuy = item as Listing;
+        }
+
+        if (userLibrary.includes(listingToBuy.id)) {
             showToast("Asset already in Library", "info");
             navigate('usage');
             return;
         }
-        setSelectedListing(listing);
+        setSelectedListing(listingToBuy);
         navigate('checkout');
     };
 
@@ -175,7 +207,7 @@ const App: React.FC = () => {
                 )}
 
                 <div className="animate-in fade-in duration-500">
-                    {currentPage === 'landing' && <LandingPage onNavigate={navigate} user={user} isAuthenticated={!!user} onLogin={() => navigate('enter')} onAcquireRequest={(p) => handleBuyRequest(p as any)} />}
+                    {currentPage === 'landing' && <LandingPage onNavigate={navigate} user={user} isAuthenticated={!!user} onLogin={() => navigate('enter')} onAcquireRequest={(p) => handleBuyRequest(p)} />}
                     {currentPage === 'marketplace' && <MarketplacePage onNavigate={navigate} onOpenListing={handleOpenListing} />}
                     {currentPage === 'listing_detail' && selectedListing && <ListingPage listing={selectedListing} onNavigate={navigate} onBuy={handleBuyRequest} />}
                     {currentPage === 'forge_audit' && <ForgePage onNavigate={navigate} />}
