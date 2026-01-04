@@ -1,6 +1,6 @@
 
-import { User, AuthResult } from '../types';
-import { MOCK_USER } from '../constants';
+import { User, AuthResult } from '../types.ts';
+import { MOCK_USER } from '../constants.ts';
 
 // Simulated delay helper
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));

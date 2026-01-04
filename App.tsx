@@ -96,7 +96,8 @@ const App: React.FC = () => {
         let listingToBuy: Listing;
 
         // Check if it's a Protocol (has 'level' or price as string) by duck typing or explicit check
-        if ('price' in item && typeof item.price === 'string') {
+        // Listing has 'pricing' object, Protocol has 'price' string
+        if ('price' in item && typeof (item as Protocol).price === 'string') {
              const p = item as Protocol;
              listingToBuy = {
                 id: p.id,
@@ -242,7 +243,15 @@ const App: React.FC = () => {
     );
 };
 
-const SideLink = ({ id, label, icon: Icon, current, onNav }: any) => (
+interface SideLinkProps {
+    id: PageView;
+    label: string;
+    icon: React.ElementType;
+    current: PageView;
+    onNav: (page: PageView) => void;
+}
+
+const SideLink: React.FC<SideLinkProps> = ({ id, label, icon: Icon, current, onNav }) => (
     <button 
         onClick={() => onNav(id)}
         className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-mono uppercase tracking-widest transition-all ${current === id ? 'bg-neon-cyan/10 text-neon-cyan border border-neon-cyan/20' : 'text-ghost hover:text-white hover:bg-white/5'}`}

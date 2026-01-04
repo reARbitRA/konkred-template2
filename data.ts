@@ -1,4 +1,5 @@
-import { AppData } from './types';
+
+import { AppData } from './types.ts';
 
 export const APP_DATA: AppData = {
   hero: {

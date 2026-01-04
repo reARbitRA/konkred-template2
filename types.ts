@@ -10,10 +10,8 @@ export type PageView =
 
 export type AssetType = 'prompt' | 'agent' | 'workflow' | 'dataset' | 'api' | 'prompt_system';
 
-// Added missing LicenseType
 export type LicenseType = 'personal' | 'commercial' | 'enterprise';
 
-// Added missing ToastMessage interface
 export interface ToastMessage {
   id: string;
   message: string;
@@ -21,7 +19,6 @@ export interface ToastMessage {
   duration?: number;
 }
 
-// Added missing AuthResult interface
 export interface AuthResult {
   success: boolean;
   user?: User;
@@ -72,7 +69,6 @@ export interface Listing {
   rating: number;
   reviewCount: number;
   featured: boolean;
-  // Added optional trending property
   trending?: boolean;
   tags: string[];
   createdAt: Date;

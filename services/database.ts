@@ -1,6 +1,6 @@
 
-import { Listing, Protocol } from '../types';
-import { FEATURED_LISTINGS_DEMO } from '../constants';
+import { Listing, Protocol } from '../types.ts';
+import { FEATURED_LISTINGS_DEMO } from '../constants.ts';
 
 class DatabaseService {
     // Simulated latency
