@@ -2,16 +2,27 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { 
   Cpu, Database, Globe, Zap, Play, Save, Plus, X, 
-  Settings, MoreHorizontal, Layers, Code, Search, MousePointer2, ZoomIn, ZoomOut, Move, Command, RotateCcw
+  Settings, MoreHorizontal, Layers, Code, Search, MousePointer2, ZoomIn, ZoomOut, Move, Command, RotateCcw,
+  Sliders, MessageSquare, Link as LinkIcon, GitBranch
 } from 'lucide-react';
 import Badge from '../common/Badge.tsx';
 
 // --- Types ---
 interface NodeData {
   label: string;
-  model?: string;
-  endpoint?: string;
+  // Common
   status?: 'idle' | 'active' | 'success' | 'error';
+  // LLM Properties
+  model?: string;
+  temperature?: number;
+  systemPrompt?: string;
+  // API Properties
+  endpoint?: string;
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
+  // Condition Properties
+  condition?: string;
+  // Trigger Properties
+  triggerType?: 'webhook' | 'schedule' | 'manual';
 }
 
 interface Node {
@@ -40,10 +51,46 @@ const NODE_WIDTH = 280;
 const AgentBuilder: React.FC = () => {
   // --- State ---
   const [nodes, setNodes] = useState<Node[]>([
-    { id: 'n1', type: 'trigger', x: 100, y: 300, data: { label: 'User_Input_Stream', status: 'idle' } },
-    { id: 'n2', type: 'llm', x: 500, y: 200, data: { label: 'Reasoning_Core_v4', model: 'Gemini-Pro-1.5', status: 'idle' } },
-    { id: 'n3', type: 'api', x: 500, y: 450, data: { label: 'Knowledge_Retrieval', endpoint: '/v1/vector-db', status: 'idle' } },
-    { id: 'n4', type: 'llm', x: 900, y: 325, data: { label: 'Response_Synthesizer', model: 'Gemini-Ultra', status: 'idle' } },
+    { 
+        id: 'n1', 
+        type: 'trigger', 
+        x: 100, y: 300, 
+        data: { label: 'User_Input_Stream', status: 'idle', triggerType: 'manual' } 
+    },
+    { 
+        id: 'n2', 
+        type: 'llm', 
+        x: 500, y: 200, 
+        data: { 
+            label: 'Reasoning_Core_v4', 
+            model: 'Gemini-1.5-Pro', 
+            temperature: 0.7,
+            systemPrompt: 'You are a logical reasoning engine. Output valid JSON.',
+            status: 'idle' 
+        } 
+    },
+    { 
+        id: 'n3', 
+        type: 'api', 
+        x: 500, y: 450, 
+        data: { 
+            label: 'Knowledge_Retrieval', 
+            endpoint: 'https://api.konkred.xyz/v1/vector-db', 
+            method: 'POST',
+            status: 'idle' 
+        } 
+    },
+    { 
+        id: 'n4', 
+        type: 'llm', 
+        x: 900, y: 325, 
+        data: { 
+            label: 'Response_Synthesizer', 
+            model: 'Gemini-1.5-Flash', 
+            temperature: 0.4,
+            status: 'idle' 
+        } 
+    },
   ]);
   
   const [edges, setEdges] = useState<Edge[]>([
@@ -86,6 +133,13 @@ const AgentBuilder: React.FC = () => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
+
+  // --- Helper: Update Node Data ---
+  const updateNodeData = (id: string, updates: Partial<NodeData>) => {
+    setNodes(prev => prev.map(n => 
+      n.id === id ? { ...n, data: { ...n.data, ...updates } } : n
+    ));
+  };
 
   // --- Search Logic ---
   const nodeLibrary = [
@@ -187,7 +241,14 @@ const AgentBuilder: React.FC = () => {
           type: item.type as any,
           x: centerX - (NODE_WIDTH / 2) + (Math.random() * 40 - 20),
           y: centerY + (Math.random() * 40 - 20),
-          data: { label: item.label, status: 'idle' }
+          data: { 
+              label: item.label, 
+              status: 'idle',
+              // Defaults
+              model: item.type === 'llm' ? 'Gemini-1.5-Flash' : undefined,
+              temperature: 0.7,
+              method: 'GET'
+          }
       };
       setNodes(prev => [...prev, newNode]);
       setSelectedNode(newNode.id);
@@ -290,6 +351,8 @@ const AgentBuilder: React.FC = () => {
         default: return 'border-white/10';
     }
   };
+
+  const activeNode = nodes.find(n => n.id === selectedNode);
 
   return (
     <div className="h-[700px] flex flex-col concrete-card bg-[#050505] rounded-[2.5rem] border-white/5 overflow-hidden animate-in zoom-in-95 duration-700 shadow-2xl relative group">
@@ -545,50 +608,155 @@ const AgentBuilder: React.FC = () => {
         </div>
       </div>
 
-      {/* Side Property Panel */}
-      {selectedNode && (
-        <div className="absolute top-20 right-6 w-72 bg-[#0a0a0c]/95 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl animate-in slide-in-from-right-10 duration-300 z-30">
-           <div className="flex justify-between items-center mb-6 pb-4 border-b border-white/5">
-              <span className="text-[10px] font-mono font-bold text-white uppercase tracking-widest">Node_Config</span>
+      {/* Side Property Panel - Enhanced Dynamic Form */}
+      {selectedNode && activeNode && (
+        <div className="absolute top-20 right-6 w-80 bg-[#0a0a0c]/95 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl animate-in slide-in-from-right-10 duration-300 z-30 flex flex-col max-h-[600px] overflow-hidden">
+           <div className="flex justify-between items-center mb-6 pb-4 border-b border-white/5 flex-shrink-0">
+              <span className="text-[10px] font-mono font-bold text-white uppercase tracking-widest flex items-center gap-2">
+                  <Settings size={12} className="text-neon-cyan" />
+                  Node_Config [{activeNode.type}]
+              </span>
               <button onClick={() => setSelectedNode(null)} className="text-ghost hover:text-white"><X size={14} /></button>
            </div>
            
-           <div className="space-y-4">
+           <div className="space-y-5 flex-1 overflow-y-auto pr-1 custom-scrollbar">
+              {/* Common Fields */}
               <div className="space-y-2">
                  <label className="text-[9px] font-mono text-ghost uppercase">Label</label>
                  <input 
                     className="w-full bg-void-200 border border-white/10 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-neon-purple transition-all font-mono" 
-                    value={nodes.find(n => n.id === selectedNode)?.data.label}
-                    onChange={(e) => setNodes(nodes.map(n => n.id === selectedNode ? { ...n, data: { ...n.data, label: e.target.value } } : n))}
+                    value={activeNode.data.label}
+                    onChange={(e) => updateNodeData(activeNode.id, { label: e.target.value })}
                  />
               </div>
-              
-              <div className="space-y-2">
-                 <label className="text-[9px] font-mono text-ghost uppercase">Context_Window</label>
-                 <div className="p-3 bg-white/[0.03] rounded-lg border border-white/5 font-mono text-[10px] text-neon-cyan">
-                    {`{
-  "temp": 0.7,
-  "top_p": 0.9,
-  "stream": true
-}`}
-                 </div>
-              </div>
 
-              <div className="pt-4 border-t border-white/5 flex gap-2">
-                  <button className="flex-1 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-[10px] font-mono text-ghost hover:text-white uppercase transition-colors">
-                      Duplicate
-                  </button>
-                  <button 
-                    onClick={() => {
-                        setNodes(nodes.filter(n => n.id !== selectedNode));
-                        setEdges(edges.filter(e => e.source !== selectedNode && e.target !== selectedNode));
-                        setSelectedNode(null);
-                    }}
-                    className="flex-1 py-2 bg-neon-red/10 hover:bg-neon-red/20 text-neon-red rounded-lg text-[10px] font-mono uppercase transition-colors"
-                  >
-                      Delete
-                  </button>
-              </div>
+              {/* LLM Specific Fields */}
+              {activeNode.type === 'llm' && (
+                <>
+                    <div className="space-y-2">
+                        <label className="text-[9px] font-mono text-ghost uppercase">Model Engine</label>
+                        <select 
+                            className="w-full bg-void-200 border border-white/10 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-neon-purple transition-all font-mono"
+                            value={activeNode.data.model}
+                            onChange={(e) => updateNodeData(activeNode.id, { model: e.target.value })}
+                        >
+                            <option value="Gemini-1.5-Pro">Gemini 1.5 Pro</option>
+                            <option value="Gemini-1.5-Flash">Gemini 1.5 Flash</option>
+                            <option value="Gemini-Ultra">Gemini Ultra</option>
+                            <option value="Claude-3.5-Sonnet">Claude 3.5 Sonnet</option>
+                            <option value="GPT-4o">GPT-4o</option>
+                        </select>
+                    </div>
+                    
+                    <div className="space-y-2">
+                        <div className="flex justify-between text-[9px] font-mono text-ghost uppercase">
+                            <span>Temperature</span>
+                            <span className="text-white">{activeNode.data.temperature}</span>
+                        </div>
+                        <input 
+                            type="range" min="0" max="1" step="0.1"
+                            className="w-full h-1 bg-void-300 rounded-lg appearance-none cursor-pointer accent-neon-purple"
+                            value={activeNode.data.temperature}
+                            onChange={(e) => updateNodeData(activeNode.id, { temperature: parseFloat(e.target.value) })}
+                        />
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="text-[9px] font-mono text-ghost uppercase flex items-center gap-2">
+                            <MessageSquare size={10} /> System Prompt
+                        </label>
+                        <textarea 
+                            className="w-full bg-void-200 border border-white/10 rounded-lg px-3 py-2 text-xs text-ghost-light outline-none focus:border-neon-purple transition-all font-mono resize-none h-24 leading-relaxed"
+                            placeholder="Define the agent's persona and constraints..."
+                            value={activeNode.data.systemPrompt || ''}
+                            onChange={(e) => updateNodeData(activeNode.id, { systemPrompt: e.target.value })}
+                        />
+                    </div>
+                </>
+              )}
+
+              {/* API Specific Fields */}
+              {activeNode.type === 'api' && (
+                <>
+                    <div className="space-y-2">
+                        <label className="text-[9px] font-mono text-ghost uppercase">HTTP Method</label>
+                        <div className="flex gap-2">
+                            {['GET', 'POST', 'PUT', 'DELETE'].map(method => (
+                                <button
+                                    key={method}
+                                    onClick={() => updateNodeData(activeNode.id, { method: method as any })}
+                                    className={`flex-1 py-1.5 rounded-md text-[9px] font-mono border transition-all ${
+                                        activeNode.data.method === method 
+                                            ? 'bg-neon-blue/20 border-neon-blue text-neon-blue' 
+                                            : 'bg-void-200 border-transparent text-ghost hover:text-white'
+                                    }`}
+                                >
+                                    {method}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="text-[9px] font-mono text-ghost uppercase flex items-center gap-2">
+                            <LinkIcon size={10} /> Endpoint URL
+                        </label>
+                        <input 
+                            className="w-full bg-void-200 border border-white/10 rounded-lg px-3 py-2 text-xs text-neon-blue outline-none focus:border-neon-blue transition-all font-mono" 
+                            placeholder="https://api..."
+                            value={activeNode.data.endpoint || ''}
+                            onChange={(e) => updateNodeData(activeNode.id, { endpoint: e.target.value })}
+                        />
+                    </div>
+                </>
+              )}
+
+              {/* Trigger Specific Fields */}
+              {activeNode.type === 'trigger' && (
+                  <div className="space-y-2">
+                    <label className="text-[9px] font-mono text-ghost uppercase">Trigger Source</label>
+                    <select 
+                        className="w-full bg-void-200 border border-white/10 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-neon-cyan transition-all font-mono"
+                        value={activeNode.data.triggerType}
+                        onChange={(e) => updateNodeData(activeNode.id, { triggerType: e.target.value as any })}
+                    >
+                        <option value="manual">Manual Input</option>
+                        <option value="webhook">Webhook Event</option>
+                        <option value="schedule">Cron Schedule</option>
+                    </select>
+                  </div>
+              )}
+
+              {/* Condition Specific Fields */}
+              {activeNode.type === 'condition' && (
+                  <div className="space-y-2">
+                    <label className="text-[9px] font-mono text-ghost uppercase flex items-center gap-2">
+                        <GitBranch size={10} /> Logic Expression
+                    </label>
+                    <input 
+                        className="w-full bg-void-200 border border-white/10 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-white transition-all font-mono"
+                        placeholder="e.g. input contains 'error'"
+                        value={activeNode.data.condition || ''}
+                        onChange={(e) => updateNodeData(activeNode.id, { condition: e.target.value })}
+                    />
+                  </div>
+              )}
+           </div>
+
+           <div className="pt-4 mt-2 border-t border-white/5 flex gap-2 flex-shrink-0">
+              <button className="flex-1 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-[10px] font-mono text-ghost hover:text-white uppercase transition-colors">
+                  Duplicate
+              </button>
+              <button 
+                onClick={() => {
+                    setNodes(nodes.filter(n => n.id !== selectedNode));
+                    setEdges(edges.filter(e => e.source !== selectedNode && e.target !== selectedNode));
+                    setSelectedNode(null);
+                }}
+                className="flex-1 py-2 bg-neon-red/10 hover:bg-neon-red/20 text-neon-red rounded-lg text-[10px] font-mono uppercase transition-colors"
+              >
+                  Delete
+              </button>
            </div>
         </div>
       )}
