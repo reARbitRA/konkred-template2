@@ -6,7 +6,8 @@ export type PageView =
     | 'wallet' | 'usage' | 'seller_dashboard' | 'academy' | 'intel' 
     | 'network' | 'advisory' | 'documentation' | 'career' | 'resources' 
     | 'pricing' | 'enter' | 'join_network' | 'account' | 'checkout'
-    | 'usage_metrics' | 'affiliate' | 'admin' | 'dispute' | 'style_guide';
+    | 'usage_metrics' | 'affiliate' | 'admin' | 'dispute' | 'style_guide'
+    | 'verify_email';
 
 export type AssetType = 'prompt' | 'agent' | 'workflow' | 'dataset' | 'api' | 'prompt_system';
 
@@ -122,9 +123,42 @@ export type ModalType =
   | 'Withdrawal' 
   | 'DemoView' 
   | 'UpgradePrompt'
-  | 'ConfirmPurchase';
+  | 'ConfirmPurchase'
+  | 'NewFolder'
+  | 'AddFile'
+  | 'NewNote'
+  | 'AddMember';
 
 export interface ModalState {
   type: ModalType | null;
   props: any;
+}
+
+// New types for Firestore
+export interface FirestoreDocument {
+  id: string;
+  createdAt: {
+    seconds: number;
+    nanoseconds: number;
+  };
+}
+
+export interface Folder extends FirestoreDocument {
+  name: string;
+}
+
+export interface FileItem extends FirestoreDocument {
+  name: string;
+  folderId?: string;
+  size: number; // in KB
+}
+
+export interface Note extends FirestoreDocument {
+  title: string;
+  content: string;
+}
+
+export interface TeamMember extends FirestoreDocument {
+  name: string;
+  role: string;
 }

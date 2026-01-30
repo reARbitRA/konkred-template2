@@ -1,10 +1,13 @@
 
+
 import React from 'react';
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement | HTMLTextAreaElement> {
   label?: string;
   error?: string;
   multiline?: boolean;
+  // FIX: Added `rows` prop to allow it to be passed to the textarea element.
+  rows?: number;
 }
 
 const Input: React.FC<InputProps> = ({ label, error, multiline, className = '', ...props }) => {

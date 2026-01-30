@@ -39,6 +39,11 @@ const ToastItem: React.FC<{ toast: ToastMessage; onDismiss: () => void }> = ({ t
 export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
+  // dismissToast must be declared BEFORE showToast to avoid TDZ if showToast is called immediately
+  const dismissToast = useCallback((id: string) => {
+    setToasts(prev => prev.filter(t => t.id !== id));
+  }, []);
+
   const showToast = useCallback((message: string, type: ToastMessage['type'] = 'success', duration = 4000) => {
     const id = Math.random().toString(36).substr(2, 9);
     const newToast: ToastMessage = { id, message, type, duration };
@@ -50,11 +55,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         dismissToast(id);
       }, duration);
     }
-  }, []);
-
-  const dismissToast = useCallback((id: string) => {
-    setToasts(prev => prev.filter(t => t.id !== id));
-  }, []);
+  }, [dismissToast]);
 
   return (
     <ToastContext.Provider value={{ showToast, dismissToast }}>
@@ -70,6 +71,12 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
 export const useToast = () => {
   const context = useContext(ToastContext);
-  if (!context) throw new Error('useToast must be used within a ToastProvider');
+  if (!context) {
+    // Return a dummy object if used outside provider to prevent immediate crash during module evaluation
+    return {
+      showToast: () => console.warn("showToast called outside provider"),
+      dismissToast: () => {}
+    };
+  }
   return context;
 };

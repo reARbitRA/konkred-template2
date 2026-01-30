@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { User, PageView, Protocol } from '../types.ts';
 import { APP_DATA } from '../data.ts';
 import Protocols from '../components/Protocols.tsx';
@@ -14,6 +14,7 @@ import Trust from '../components/landing/Trust.tsx';
 import Pricing from '../components/landing/Pricing.tsx';
 import FeaturedListings from '../components/landing/FeaturedListings.tsx'; // New
 import CTA from '../components/landing/CTA.tsx'; // New
+import ValuationTerminal from '../components/ValuationTerminal.tsx'; // New Import
 import { BRAND, PLATFORM_STATS, TRUST_POINTS } from '../constants.ts';
 import { ArrowRight, Play, Sparkles, Shield, ChevronDown } from 'lucide-react';
 
@@ -26,8 +27,19 @@ interface LandingPageProps {
 }
 
 const LandingPage: React.FC<LandingPageProps> = ({ user, isAuthenticated, onNavigate, onLogin, onAcquireRequest }) => {
+    const [isTerminalOpen, setIsTerminalOpen] = useState(false);
+
+    const handleLaunchTool = (id: string) => {
+        if (id === 't1') { // Valuation Terminal
+            setIsTerminalOpen(true);
+        } else {
+            onNavigate('forge_audit');
+        }
+    };
+
     return (
         <div className="min-h-screen brutalist-bg">
+            {isTerminalOpen && <ValuationTerminal onExit={() => setIsTerminalOpen(false)} />}
             {/* High-Fidelity Hero Section */}
             <section className="relative pt-32 lg:pt-56 pb-32 overflow-hidden flex flex-col items-center">
                 <div className="absolute inset-0 z-0 opacity-[0.08] grid-bg pointer-events-none" />
@@ -96,7 +108,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ user, isAuthenticated, onNavi
 
             <About />
             
-            <Tools tools={APP_DATA.tools} onLaunchTool={(id) => onNavigate('forge_audit')} />
+            <Tools tools={APP_DATA.tools} onLaunchTool={handleLaunchTool} />
             
             <Pricing />
 

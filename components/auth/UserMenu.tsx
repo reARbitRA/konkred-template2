@@ -9,7 +9,7 @@ interface UserMenuProps {
   isOpen: boolean;
   onClose: () => void;
   onNavigate: (page: any) => void;
-  onLogout: () => void;
+  onLogout: () => Promise<void>;
 }
 
 const UserMenu: React.FC<UserMenuProps> = ({ user, isOpen, onClose, onNavigate, onLogout }) => {
@@ -63,7 +63,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ user, isOpen, onClose, onNavigate, 
         {/* Footer */}
         <div className="p-2 border-t border-white/5 mt-1">
             <button 
-                onClick={() => { onLogout(); onClose(); }}
+                onClick={async () => { await onLogout(); onClose(); }}
                 className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-mono text-neon-red hover:bg-neon-red/10 transition-all uppercase tracking-widest group"
             >
                 <LogOut size={14} className="group-hover:-translate-x-1 transition-transform" />

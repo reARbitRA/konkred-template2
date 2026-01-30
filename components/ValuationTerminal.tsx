@@ -49,7 +49,7 @@ const ValuationTerminal: React.FC<ValuationTerminalProps> = ({ onExit }) => {
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
       const response: GenerateContentResponse = await ai.models.generateContent({
         model: "gemini-3-pro-preview",
-        contents: [{ parts: [{ text: searchQuery }] }],
+        contents: `Analyze the current market demand, valuation multiples, recent funding rounds, and key competitors for: "${searchQuery}". Provide a concise executive summary formatted in markdown.`,
         config: {
           tools: [{ googleSearch: {} }],
         },
@@ -62,17 +62,22 @@ const ValuationTerminal: React.FC<ValuationTerminalProps> = ({ onExit }) => {
 
       if (groundingChunks && Array.isArray(groundingChunks)) {
         const urls = groundingChunks
-          .filter(chunk => chunk.web?.uri)
-          .map(chunk => ({
-            uri: chunk.web!.uri!,
-            title: chunk.web!.title,
-          }));
+          .map(chunk => chunk.web)
+          .filter((web): web is { uri: string, title?: string } => !!web?.uri)
+          .reduce((acc, current) => { // Deduplicate URLs
+              if (!acc.find(item => item.uri === current.uri)) {
+                  acc.push(current);
+              }
+              return acc;
+          }, [] as { uri: string, title?: string }[]);
         setGroundingUrls(urls);
       }
 
     } catch (err: any) {
       console.error("Gemini API error:", err);
-      if (err.message?.includes("Rpc failed") || err.message?.includes("xhr error")) {
+      if (err.message?.includes("API key not valid")) {
+        setError("Invalid API Key. Please verify your credentials in the system configuration.");
+      } else if (err.message?.includes("Rpc failed") || err.message?.includes("xhr error")) {
         setError("Network latency or API gateway error detected. Please retry the uplink.");
       } else {
         setError(err.message || "An unexpected neural disruption occurred.");
@@ -81,17 +86,12 @@ const ValuationTerminal: React.FC<ValuationTerminalProps> = ({ onExit }) => {
       setIsLoadingAI(false);
     }
   };
-
-  const toggleVoice = () => {
-      setIsListening(!isListening);
-      if (!isListening) {
-          setTimeout(() => {
-              setSearchQuery("Analyze the trend of autonomous agent valuations in Q4...");
-              setIsListening(false);
-              setTimeout(() => handleSearch(), 500);
-          }, 3000);
-      }
+  
+  const handleVoiceSearch = (query: string) => {
+    setSearchQuery(query);
+    setTimeout(() => handleSearch(), 100);
   };
+
 
   // --- DCF Logic ---
   const dcfProjections = useMemo(() => {
@@ -173,14 +173,8 @@ const ValuationTerminal: React.FC<ValuationTerminalProps> = ({ onExit }) => {
                 </form>
             </div>
             
-            <VoiceOrb isListening={isListening} onToggle={toggleVoice} />
+            <VoiceOrb onVoiceResult={handleVoiceSearch} />
         </div>
-
-        {isListening && (
-            <div className="mb-6 p-4 bg-neon-red/5 border border-neon-red/10 rounded-xl text-center animate-in fade-in">
-                <p className="text-neon-red font-mono text-xs uppercase tracking-widest animate-pulse">Listening on secure channel...</p>
-            </div>
-        )}
 
         {error && (
           <div className="bg-neon-red/10 border border-neon-red/30 text-neon-red p-4 rounded-xl text-[10px] font-mono mb-6 animate-in fade-in">
@@ -194,7 +188,7 @@ const ValuationTerminal: React.FC<ValuationTerminalProps> = ({ onExit }) => {
                 <span className="text-[10px] font-mono text-neon-cyan uppercase tracking-widest">Synthesis Report</span>
                 <span className="text-[10px] font-mono text-ghost uppercase">Source: Deep_Graph_v4</span>
             </div>
-            <p className="whitespace-pre-wrap">{aiResponse}</p>
+            <div className="prose prose-sm prose-invert" dangerouslySetInnerHTML={{ __html: aiResponse.replace(/\n/g, '<br />') }} />
 
             {groundingUrls.length > 0 && (
               <div className="mt-8 pt-6 border-t border-white/5">
@@ -210,7 +204,7 @@ const ValuationTerminal: React.FC<ValuationTerminalProps> = ({ onExit }) => {
                         className="text-ghost-light hover:text-white transition-colors text-xs truncate underline decoration-white/10"
                         title={url.title || url.uri}
                       >
-                        {url.title || url.uri}
+                        {url.title || new URL(url.uri).hostname}
                       </a>
                     </li>
                   ))}
@@ -316,7 +310,8 @@ const ValuationTerminal: React.FC<ValuationTerminalProps> = ({ onExit }) => {
 
             <div className="flex-1 flex items-end justify-between gap-4 relative z-10 pl-4 border-l border-white/10 pb-4 border-b">
                 {dcfProjections.projections.map((p, i) => {
-                    const heightPercent = (p.pv / (dcfProjections.projections[dcfProjections.projections.length - 1].pv * 1.5)) * 100;
+                    const maxHeight = dcfProjections.terminalValue * 1.2;
+                    const heightPercent = (p.pv / maxHeight) * 100;
                     return (
                         <div key={i} className="flex-1 flex flex-col justify-end group relative">
                             <div className="text-[10px] text-white font-bold mb-2 opacity-0 group-hover:opacity-100 transition-opacity absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap">
@@ -337,7 +332,7 @@ const ValuationTerminal: React.FC<ValuationTerminalProps> = ({ onExit }) => {
                     </div>
                     <div 
                         className="w-full bg-neon-purple/20 border-t-2 border-neon-purple rounded-t-sm transition-all duration-500 hover:bg-neon-purple/40"
-                        style={{ height: '80%' }}
+                        style={{ height: `${(dcfProjections.terminalValue / (dcfProjections.terminalValue * 1.2)) * 100}%` }}
                     />
                     <div className="mt-2 text-center text-[9px] font-mono text-neon-purple font-bold">TERM</div>
                 </div>

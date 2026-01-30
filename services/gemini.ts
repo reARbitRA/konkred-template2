@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, Type, GenerateContentResponse } from "@google/genai";
 
 // Initialize the Gemini API client
@@ -65,4 +66,36 @@ export const runMarketScan = async (query: string) => {
     text: response.text,
     sources: response.candidates?.[0]?.groundingMetadata?.groundingChunks || []
   };
+};
+
+/**
+ * Suggests improvements or next steps for an agent workflow graph.
+ */
+export const suggestNodeConnections = async (nodes: any[], edges: any[]) => {
+    const ai = getAiClient();
+    const response = await ai.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents: [{
+            parts: [{
+                text: `You are an Agent Workflow Architect. Analyze this graph:
+                Nodes: ${JSON.stringify(nodes.map(n => ({ id: n.id, type: n.type, label: n.data.label })))}
+                Edges: ${JSON.stringify(edges)}
+                
+                Suggest ONE technical improvement or one missing critical component to make this agent more robust.
+                Return a valid JSON object: { "suggestion": string, "rationale": string }`
+            }]
+        }],
+        config: {
+            responseMimeType: "application/json",
+            responseSchema: {
+                type: Type.OBJECT,
+                properties: {
+                    suggestion: { type: Type.STRING },
+                    rationale: { type: Type.STRING }
+                },
+                required: ["suggestion", "rationale"]
+            }
+        }
+    });
+    return JSON.parse(response.text.trim());
 };

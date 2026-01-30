@@ -5,6 +5,10 @@ import { ModalType, ModalState } from '../types';
 // Components
 import ProtocolDetails from '../components/ProtocolDetails.tsx';
 import DemoView from '../components/DemoView.tsx';
+import NewFolderModal from '../components/modals/NewFolderModal.tsx';
+import AddFileModal from '../components/modals/AddFileModal.tsx';
+import NewNoteModal from '../components/modals/NewNoteModal.tsx';
+import AddMemberModal from '../components/modals/AddMemberModal.tsx';
 
 interface ModalContextValue {
   openModal: (type: ModalType, props?: any) => void;
@@ -34,6 +38,14 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         return <ProtocolDetails {...modal.props} onClose={closeModal} />;
       case 'DemoView':
         return <DemoView onClose={closeModal} />;
+      case 'NewFolder':
+        return <NewFolderModal onClose={closeModal} />;
+      case 'AddFile':
+        return <AddFileModal onClose={closeModal} />;
+      case 'NewNote':
+        return <NewNoteModal onClose={closeModal} />;
+      case 'AddMember':
+        return <AddMemberModal onClose={closeModal} />;
       default:
         return null;
     }
