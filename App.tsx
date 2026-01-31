@@ -1,5 +1,6 @@
 
 
+
 import React, { useState, useEffect } from 'react';
 import { PageView, Protocol, Listing, LicenseType } from './types.ts';
 import { FEATURED_LISTINGS_DEMO } from './constants.ts';
@@ -192,7 +193,6 @@ const App: React.FC = () => {
                     {currentPage === 'listing_detail' && selectedListing && <ListingPage listing={selectedListing} onNavigate={navigate} onBuy={handleBuyRequest} />}
                     {currentPage === 'forge_audit' && <ForgePage onNavigate={navigate} />}
                     {currentPage === 'wallet' && <WalletPage onNavigate={navigate} />}
-                    {/* FIX: Removed the `library` prop as it's no longer used by the refactored BuyerDashboard component. */}
                     {currentPage === 'usage' && <BuyerDashboard onNavigate={navigate} />}
                     {currentPage === 'account' && <AccountPage user={auth.user} onNavigate={navigate} />}
                     {currentPage === 'checkout' && selectedListing && <CheckoutPage listing={selectedListing} onNavigate={navigate} onConfirmed={() => { if(selectedListing) setUserLibrary(prev => [...prev, selectedListing.id]); toast.showToast("License Uplink Successful.", "success"); navigate('usage'); }} />}

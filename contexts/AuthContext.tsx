@@ -46,7 +46,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Listen for auth state changes
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      if (firebaseUser) { // Google sign-in users are auto-verified
+      if (firebaseUser && firebaseUser.emailVerified) {
         setUser(mapFirebaseUserToAppUser(firebaseUser));
       } else {
         setUser(null);
