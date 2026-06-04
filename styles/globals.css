@@ -4,11 +4,11 @@
 @tailwind utilities;
 
 :root {
-  --void-bg: #030304;
-  --neon-cyan: #ff9500; /* Orange/Gold primary as per theme */
-  --neon-blue: #3b82f6;
-  --neon-purple: #a855f7;
-  --neon-green: #10b981;
+  --void-bg: #050505;
+  --neon-cyan: #ccff00; /* Acid Green primary */
+  --neon-blue: #ccff00;
+  --neon-purple: #ffea00; /* Cyber Yellow accent */
+  --neon-green: #ccff00;
   --glass-border: rgba(255, 255, 255, 0.05);
 }
 

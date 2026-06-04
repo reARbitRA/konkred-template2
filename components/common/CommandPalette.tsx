@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, ArrowRight, LayoutDashboard, ShoppingBag, Shield, LogOut, Settings, CreditCard, Home, FileText } from 'lucide-react';
+import { Search, ArrowRight, LayoutDashboard, ShoppingBag, Shield, LogOut, Settings, CreditCard, Home, FileText, PlusCircle } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext.tsx';
 
 interface CommandPaletteProps {
@@ -13,18 +13,22 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, onNavi
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
 
-  const commands = [
-    { id: 'marketplace', label: 'Go to Marketplace', icon: ShoppingBag, group: 'Navigation', action: () => onNavigate('marketplace') },
-    { id: 'forge', label: 'Open The Forge', icon: Shield, group: 'Navigation', action: () => onNavigate('forge_audit') },
-    { id: 'dashboard', label: 'Seller Dashboard', icon: LayoutDashboard, group: 'Navigation', action: () => onNavigate('seller_dashboard') },
-    { id: 'wallet', label: 'Wallet & Liquidity', icon: CreditCard, group: 'Navigation', action: () => onNavigate('wallet') },
-    { id: 'settings', label: 'System Settings', icon: Settings, group: 'General', action: () => onNavigate('account') },
-    { id: 'docs', label: 'Documentation', icon: FileText, group: 'Resources', action: () => onNavigate('documentation') },
-    { id: 'home', label: 'Return to Base', icon: Home, group: 'Navigation', action: () => onNavigate('landing') },
-    { id: 'logout', label: 'Terminate Session', icon: LogOut, group: 'System', action: () => { logout(); onNavigate('landing'); } },
+  const allCommands = [
+    { id: 'marketplace', label: 'Go to Marketplace', icon: ShoppingBag, group: 'Navigation', action: () => onNavigate('marketplace'), requiresAuth: false },
+    { id: 'forge', label: 'Open The Forge', icon: Shield, group: 'Navigation', action: () => onNavigate('forge_audit'), requiresAuth: false },
+    { id: 'docs', label: 'Documentation', icon: FileText, group: 'Resources', action: () => onNavigate('documentation'), requiresAuth: false },
+    { id: 'home', label: 'Return to Base', icon: Home, group: 'Navigation', action: () => onNavigate('landing'), requiresAuth: false },
+    
+    { id: 'dashboard', label: 'Seller Dashboard', icon: LayoutDashboard, group: 'Navigation', action: () => onNavigate('seller_dashboard'), requiresAuth: true },
+    { id: 'wallet', label: 'Wallet & Liquidity', icon: CreditCard, group: 'Navigation', action: () => onNavigate('wallet'), requiresAuth: true },
+    { id: 'settings', label: 'System Settings', icon: Settings, group: 'General', action: () => onNavigate('account'), requiresAuth: true },
+    { id: 'new_listing', label: 'Deploy New Protocol', icon: PlusCircle, group: 'Actions', action: () => onNavigate('wizard'), requiresAuth: true },
+    { id: 'logout', label: 'Terminate Session', icon: LogOut, group: 'System', action: async () => { await logout(); onNavigate('landing'); }, requiresAuth: true },
   ];
+
+  const commands = allCommands.filter(cmd => !cmd.requiresAuth || (cmd.requiresAuth && !!user));
 
   const filteredCommands = commands.filter(cmd => 
     cmd.label.toLowerCase().includes(query.toLowerCase()) || 
@@ -35,24 +39,25 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, onNavi
     if (isOpen) {
       setTimeout(() => inputRef.current?.focus(), 50);
       setSelectedIndex(0);
+      setQuery('');
     }
   }, [isOpen]);
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
+    const handleKeyDown = async (e: KeyboardEvent) => {
       if (!isOpen) return;
 
       if (e.key === 'ArrowDown') {
         e.preventDefault();
-        setSelectedIndex(prev => (prev + 1) % filteredCommands.length);
+        setSelectedIndex(prev => (prev + 1) % (filteredCommands.length || 1));
       } else if (e.key === 'ArrowUp') {
         e.preventDefault();
-        setSelectedIndex(prev => (prev - 1 + filteredCommands.length) % filteredCommands.length);
+        setSelectedIndex(prev => (prev - 1 + (filteredCommands.length || 1)) % (filteredCommands.length || 1));
       } else if (e.key === 'Enter') {
         e.preventDefault();
         const cmd = filteredCommands[selectedIndex];
         if (cmd) {
-          cmd.action();
+          await cmd.action();
           onClose();
         }
       } else if (e.key === 'Escape') {
@@ -90,7 +95,7 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, onNavi
             filteredCommands.map((cmd, i) => (
               <div 
                 key={cmd.id}
-                onClick={() => { cmd.action(); onClose(); }}
+                onClick={async () => { await cmd.action(); onClose(); }}
                 onMouseEnter={() => setSelectedIndex(i)}
                 className={`px-4 py-3 mx-2 rounded-xl flex items-center justify-between cursor-pointer transition-colors ${
                   i === selectedIndex ? 'bg-neon-cyan/10 text-white' : 'text-ghost-light hover:bg-white/5'

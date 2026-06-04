@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { ArrowLeft, ArrowRight, Shield, Upload, DollarSign, CheckCircle, Info, Zap, Box, Layers, Globe } from 'lucide-react';
 import Badge from '../components/common/Badge.tsx';
@@ -10,7 +11,7 @@ const ListingWizard: React.FC<{ onComplete: (listing: Listing) => void; onCancel
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    type: 'prompt',
+    type: 'prompt' as const,
     price: 49,
     category: 'legal'
   });
@@ -26,13 +27,15 @@ const ListingWizard: React.FC<{ onComplete: (listing: Listing) => void; onCancel
   };
 
   const handleFinish = () => {
+    // FIX: Updated newListing object to match Listing interface including sellerId and seller object
     const newListing: Listing = {
       id: `L-${Date.now()}`,
       sellerId: 'U1',
       seller: { name: 'Ari Miyanji', verified: true, totalSales: 0 },
       title: formData.title || 'Untitled Protocol',
       shortDescription: formData.description || 'No description provided.',
-      type: formData.type,
+      description: formData.description || 'No description provided.',
+      type: formData.type as any,
       category: formData.category,
       pricing: { mode: 'one_time', amount: formData.price, currency: 'USD' },
       delivery: 'api_key',
@@ -41,7 +44,10 @@ const ListingWizard: React.FC<{ onComplete: (listing: Listing) => void; onCancel
       reviewCount: 0,
       featured: false,
       tags: [formData.category, formData.type],
+      salesCount: 0,
+      viewCount: 0,
       createdAt: new Date(),
+      updatedAt: new Date()
     };
     onComplete(newListing);
   };
@@ -67,7 +73,7 @@ const ListingWizard: React.FC<{ onComplete: (listing: Listing) => void; onCancel
                         <span className="text-[10px] font-mono text-ghost uppercase tracking-widest mb-2 block">Asset Class</span>
                         <select 
                             value={formData.type}
-                            onChange={e => setFormData({...formData, type: e.target.value})}
+                            onChange={e => setFormData({...formData, type: e.target.value as any})}
                             className="w-full bg-void-200 concrete-card px-6 py-4 text-white outline-none focus:border-neon-cyan transition-all"
                         >
                             <option value="prompt">Prompt System</option>

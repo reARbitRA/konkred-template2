@@ -1,10 +1,12 @@
 
 import React, { useState } from 'react';
-import { Shield, Zap, Loader2, AlertTriangle, CheckCircle, Info, Terminal, Copy, Download, History, Brain, Search, Hash } from 'lucide-react';
-import { runAudit } from '../../services/gemini.ts';
+import { Shield, Zap, Loader2, AlertTriangle, CheckCircle, Info, Terminal, Copy, Brain } from 'lucide-react';
+import { aiService } from '../../services/ai.ts';
 import Badge from '../common/Badge.tsx';
 import Button from '../common/Button.tsx';
 import { useToast } from '../../contexts/ToastContext.tsx';
+import { useAuth } from '../../contexts/AuthContext.tsx';
+import { AuditResult } from '../../types.ts';
 
 const SAMPLE_PROMPT = `Act as a senior legal analyst assistant. 
 Task: Evaluate the provided NDA for high-risk clauses.
@@ -17,10 +19,16 @@ Safety: Refuse to provide binding legal advice.`;
 const AuditTool: React.FC = () => {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [auditResult, setAuditResult] = useState<any>(null);
+  const [auditResult, setAuditResult] = useState<AuditResult | null>(null);
   const { showToast } = useToast();
+  const { user } = useAuth();
 
   const handleAudit = async () => {
+    if (!user) {
+      showToast("Authentication required to access logic forge.", "error");
+      return;
+    }
+    
     if (input.trim().length < 50) {
       showToast("Input length insufficient for meaningful logical analysis (min 50 chars).", "warning");
       return;
@@ -29,7 +37,7 @@ const AuditTool: React.FC = () => {
     setIsLoading(true);
     setAuditResult(null);
     try {
-      const result = await runAudit(input);
+      const result = await aiService.runAudit(input, user.id);
       setAuditResult(result);
       showToast("Audit sequence finalized. HUD score generated.", "success");
     } catch (err: any) {
@@ -41,6 +49,7 @@ const AuditTool: React.FC = () => {
   };
 
   const handleCopy = () => {
+    if (!auditResult) return;
     navigator.clipboard.writeText(JSON.stringify(auditResult, null, 2));
     showToast("Report packet copied to clipboard.", "info");
   };
@@ -156,24 +165,9 @@ const AuditTool: React.FC = () => {
                       <AlertTriangle size={14} /> Critical Technical Risks
                   </h4>
                   <ul className="space-y-3">
-                      {auditResult.vulnerabilities.map((v: string, i: number) => (
+                      {auditResult.vulnerabilities.map((v, i) => (
                           <li key={i} className="text-xs text-ghost-light flex items-start gap-3 bg-neon-red/5 p-3 rounded-xl border border-neon-red/10">
                               <span className="text-neon-red font-bold">!</span> {v}
-                          </li>
-                      ))}
-                  </ul>
-                </div>
-              )}
-              
-              {auditResult.recommendations?.length > 0 && (
-                <div className="animate-in slide-in-from-bottom-4">
-                  <h4 className="text-[10px] font-mono text-neon-green font-bold uppercase mb-4 flex items-center gap-2 tracking-[0.2em]">
-                      <CheckCircle size={14} /> Optimization Map
-                  </h4>
-                  <ul className="space-y-2">
-                      {auditResult.recommendations.map((r: string, i: number) => (
-                          <li key={i} className="text-xs text-ghost flex items-center gap-3">
-                              <span className="w-1.5 h-1.5 rounded-full bg-neon-green/30" /> {r}
                           </li>
                       ))}
                   </ul>

@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { db } from '../services/firebase.ts';
 import { useAuth } from '../contexts/AuthContext.tsx';
-import { collection, onSnapshot, addDoc, serverTimestamp, query, orderBy } from 'firebase/firestore';
+import { collection, onSnapshot, addDoc, serverTimestamp, query, orderBy, doc, deleteDoc } from 'firebase/firestore';
 
 export const useCollection = <T extends { id: string }>(collectionName: string) => {
   const { user } = useAuth();
@@ -46,5 +46,11 @@ export const useCollection = <T extends { id: string }>(collectionName: string) 
     });
   };
 
-  return { data, loading, error, add };
+  const remove = async (id: string) => {
+    if (!user) throw new Error('User not authenticated');
+    const docPath = `users/${user.id}/${collectionName}/${id}`;
+    await deleteDoc(doc(db, docPath));
+  };
+
+  return { data, loading, error, add, remove };
 };

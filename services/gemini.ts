@@ -1,59 +1,20 @@
-
-import { GoogleGenAI, Type, GenerateContentResponse } from "@google/genai";
-
-// Initialize the Gemini API client
-const getAiClient = () => new GoogleGenAI({ apiKey: process.env.API_KEY });
+import { GoogleGenAI, Type } from "@google/genai";
+import { aiService } from './ai.ts';
 
 /**
  * Runs a technical audit on a provided protocol or prompt.
- * Uses Gemini-3-pro-preview for deep logical reasoning.
+ * DEPRECATED: Use aiService.runAudit directly.
  */
-export const runAudit = async (content: string) => {
-  const ai = getAiClient();
-  const response = await ai.models.generateContent({
-    model: "gemini-3-pro-preview",
-    contents: [{
-      parts: [{
-        text: `Act as a senior AI Security & Logic Auditor for KONKRED Systems. 
-        Perform a rigorous audit on the following protocol/prompt architecture.
-        Return a valid JSON object containing:
-        - overallScore: number (0-100)
-        - logic: number (0-100)
-        - safety: number (0-100)
-        - efficiency: number (0-100)
-        - summary: string (concise executive summary)
-        - vulnerabilities: string[] (list of technical risks)
-        - recommendations: string[] (how to improve the score)
-        
-        Input Content: "${content}"`
-      }]
-    }],
-    config: {
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: Type.OBJECT,
-        properties: {
-          overallScore: { type: Type.NUMBER },
-          logic: { type: Type.NUMBER },
-          safety: { type: Type.NUMBER },
-          efficiency: { type: Type.NUMBER },
-          summary: { type: Type.STRING },
-          vulnerabilities: { type: Type.ARRAY, items: { type: Type.STRING } },
-          recommendations: { type: Type.ARRAY, items: { type: Type.STRING } }
-        },
-        required: ["overallScore", "logic", "safety", "efficiency", "summary"]
-      }
-    }
-  });
-
-  return JSON.parse(response.text.trim());
+export const runAudit = async (content: string, userId: string = 'system') => {
+  return aiService.runAudit(content, userId);
 };
 
 /**
  * Performs a market sentiment analysis using Google Search Grounding.
  */
 export const runMarketScan = async (query: string) => {
-  const ai = getAiClient();
+  /* FIX: Using standard static initialization for Gemini client with environment API key */
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   const response = await ai.models.generateContent({
     model: "gemini-3-pro-preview",
     contents: [{ parts: [{ text: `Analyze the current market demand, pricing trends, and technical sentiment for: "${query}"` }] }],
@@ -63,7 +24,8 @@ export const runMarketScan = async (query: string) => {
   });
 
   return {
-    text: response.text,
+    /* FIX: Correctly accessed model output via .text property */
+    text: response.text || '',
     sources: response.candidates?.[0]?.groundingMetadata?.groundingChunks || []
   };
 };
@@ -72,30 +34,29 @@ export const runMarketScan = async (query: string) => {
  * Suggests improvements or next steps for an agent workflow graph.
  */
 export const suggestNodeConnections = async (nodes: any[], edges: any[]) => {
-    const ai = getAiClient();
+    /* FIX: Consistent Gemini client setup using recommended platform patterns */
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
         contents: [{
             parts: [{
-                text: `You are an Agent Workflow Architect. Analyze this graph:
+                text: `Analyze this agent graph and suggest one critical optimization:
                 Nodes: ${JSON.stringify(nodes.map(n => ({ id: n.id, type: n.type, label: n.data.label })))}
-                Edges: ${JSON.stringify(edges)}
-                
-                Suggest ONE technical improvement or one missing critical component to make this agent more robust.
-                Return a valid JSON object: { "suggestion": string, "rationale": string }`
+                Edges: ${JSON.stringify(edges)}`
             }]
         }],
         config: {
             responseMimeType: "application/json",
             responseSchema: {
+                /* FIX: Utilized the imported Type enum for strict response schema definition */
                 type: Type.OBJECT,
                 properties: {
                     suggestion: { type: Type.STRING },
                     rationale: { type: Type.STRING }
-                },
-                required: ["suggestion", "rationale"]
+                }
             }
         }
     });
-    return JSON.parse(response.text.trim());
+    /* FIX: Accessed output string from the model response via .text property */
+    return JSON.parse(response.text?.trim() || '{}');
 };

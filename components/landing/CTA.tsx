@@ -1,12 +1,14 @@
-
 import React from 'react';
 import { ArrowRight, Sparkles } from 'lucide-react';
+import { useGlobalStats } from '../../hooks/useGlobalStats.ts';
 
 interface CTAProps {
   onJoin: () => void;
 }
 
 const CTA: React.FC<CTAProps> = ({ onJoin }) => {
+  const { stats, loading } = useGlobalStats();
+
   return (
     <section className="relative py-40 overflow-hidden bg-black flex items-center justify-center border-t border-white/5">
       {/* Background Animation */}
@@ -18,7 +20,9 @@ const CTA: React.FC<CTAProps> = ({ onJoin }) => {
       <div className="relative z-10 max-w-4xl mx-auto px-6 text-center">
          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-8 animate-fade-in">
             <Sparkles size={14} className="text-neon-cyan" />
-            <span className="text-[10px] font-mono text-ghost uppercase tracking-widest">Join 8,420+ Architects</span>
+            <span className="text-[10px] font-mono text-ghost uppercase tracking-widest">
+              {loading ? 'CALCULATING ARCHITECTS...' : `Join ${stats?.totalUsers.toLocaleString() || '0'} Architects`}
+            </span>
          </div>
          
          <h2 className="text-6xl md:text-8xl font-display font-black text-white mb-8 tracking-tighter leading-none">

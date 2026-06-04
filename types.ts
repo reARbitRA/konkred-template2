@@ -1,5 +1,5 @@
 
-// Unified types for the KONKRED platform
+// Unified types for the KONKRED platform - PRODUCTION GRADE
 
 export type PageView = 
     | 'landing' | 'marketplace' | 'listing_detail' | 'wizard' | 'forge_audit' 
@@ -7,23 +7,25 @@ export type PageView =
     | 'network' | 'advisory' | 'documentation' | 'career' | 'resources' 
     | 'pricing' | 'enter' | 'join_network' | 'account' | 'checkout'
     | 'usage_metrics' | 'affiliate' | 'admin' | 'dispute' | 'style_guide'
-    | 'verify_email';
+    | 'verify_email' | 'playgrounds' | 'intel_report' | 'forge';
 
-export type AssetType = 'prompt' | 'agent' | 'workflow' | 'dataset' | 'api' | 'prompt_system';
+export type AIProviderID = 
+  | 'openai' | 'anthropic' | 'google' | 'openrouter' | 'groq' 
+  | 'xai' | 'deepseek' | 'mistral' | 'qwen' | 'cerebras' 
+  | 'sambanova' | 'together' | 'fireworks' | 'perplexity' | 'cohere';
 
-export type LicenseType = 'personal' | 'commercial' | 'enterprise';
-
-export interface ToastMessage {
-  id: string;
-  message: string;
-  type: 'success' | 'error' | 'info' | 'warning';
-  duration?: number;
+export interface AIProviderConfig {
+  primaryProvider: AIProviderID;
+  fallbackProvider?: AIProviderID;
+  defaultModel: string;
+  temperature: number;
+  maxTokens: number;
+  stream: boolean;
 }
 
-export interface AuthResult {
-  success: boolean;
-  user?: User;
-  error?: string;
+export interface ChatMessage {
+  role: 'user' | 'assistant' | 'system';
+  content: string;
 }
 
 export interface User {
@@ -32,6 +34,7 @@ export interface User {
   name: string;
   role: 'buyer' | 'seller' | 'pro_seller';
   verified: boolean;
+  tier: 'free' | 'pro' | 'enterprise';
   balance: { fiat: number; crypto: number };
   stats: {
     totalPurchases: number;
@@ -40,8 +43,10 @@ export interface User {
     rating: number;
     reviewCount: number;
   };
+  aiConfig?: AIProviderConfig;
   payoutThreshold: number;
   kycStatus: 'unverified' | 'verified' | 'pending';
+  createdAt: any; // Firestore Timestamp
 }
 
 export interface Listing {
@@ -50,13 +55,12 @@ export interface Listing {
   seller: {
     name: string;
     verified: boolean;
-    badge?: 'top_seller' | 'editor_choice';
     totalSales: number;
   };
   title: string;
   shortDescription: string;
-  description?: string;
-  type: string;
+  description: string;
+  type: 'prompt' | 'agent' | 'workflow' | 'dataset' | 'api' | 'prompt_system' | 'protocol';
   category: string;
   pricing: {
     mode: 'one_time' | 'subscription' | 'usage';
@@ -67,12 +71,16 @@ export interface Listing {
   };
   delivery: 'download' | 'api_key' | 'hosted_demo' | 'repo_access' | 'booking';
   auditScore: number;
+  auditReportId?: string;
   rating: number;
   reviewCount: number;
   featured: boolean;
   trending?: boolean;
   tags: string[];
-  createdAt: Date;
+  salesCount: number;
+  viewCount: number;
+  createdAt: any;
+  updatedAt: any;
 }
 
 export interface Protocol {
@@ -87,33 +95,42 @@ export interface Protocol {
   acquisitionCount: number;
 }
 
-export interface Tool {
-  id: string;
-  name: string;
-  status: string;
-  description: string;
-  type: string;
-  access: string;
-}
-
-export interface AppData {
-  hero: {
-    status: string;
-    headline: string;
-    subheadline: string;
-  };
-  protocols: Protocol[];
-  tools: Tool[];
-  footer: {
-    systemStatus: string;
-    version: string;
-  };
-}
-
 export interface AuthState {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+}
+
+export interface GlobalStats {
+  totalUsers: number;
+  totalProtocols: number;
+  totalAgents: number;
+  totalAudits: number;
+  totalVolume: number;
+  activeNodes: number;
+}
+
+export interface AuditResult {
+  id: string;
+  assetId?: string;
+  userId: string;
+  overallScore: number;
+  logic: number;
+  safety: number;
+  efficiency: number;
+  summary: string;
+  vulnerabilities: string[];
+  recommendations: string[];
+  provider: AIProviderID;
+  model: string;
+  timestamp: any;
+}
+
+export interface ToastMessage {
+  id: string;
+  message: string;
+  type: 'success' | 'error' | 'info' | 'warning';
+  duration?: number;
 }
 
 export type ModalType = 
@@ -134,31 +151,75 @@ export interface ModalState {
   props: any;
 }
 
-// New types for Firestore
-export interface FirestoreDocument {
+export interface FileItem {
   id: string;
-  createdAt: {
-    seconds: number;
-    nanoseconds: number;
+  name: string;
+  size: number;
+  type: string;
+  downloadURL: string;
+  storagePath: string;
+  createdAt: any;
+}
+
+export interface Folder {
+  id: string;
+  name: string;
+  createdAt: any;
+}
+
+export interface Note {
+  id: string;
+  title: string;
+  content: string;
+  createdAt: any;
+}
+
+export interface TeamMember {
+  id: string;
+  name: string;
+  role: string;
+  createdAt: any;
+}
+
+/**
+ * FIX: Added missing AppData interface for global app configuration data.
+ */
+export interface AppData {
+  hero: {
+    status: string;
+    headline: string;
+    subheadline: string;
+  };
+  protocols: Protocol[];
+  tools: Tool[];
+  footer: {
+    systemStatus: string;
+    version: string;
   };
 }
 
-export interface Folder extends FirestoreDocument {
+/**
+ * FIX: Added missing Tool interface for platform utility cards.
+ */
+export interface Tool {
+  id: string;
   name: string;
+  status: string;
+  description: string;
+  type: string;
+  access: string;
 }
 
-export interface FileItem extends FirestoreDocument {
-  name: string;
-  folderId?: string;
-  size: number; // in KB
-}
+/**
+ * FIX: Added missing LicenseType used in marketplace and checkout flows.
+ */
+export type LicenseType = 'personal' | 'commercial' | 'enterprise';
 
-export interface Note extends FirestoreDocument {
-  title: string;
-  content: string;
-}
-
-export interface TeamMember extends FirestoreDocument {
-  name: string;
-  role: string;
+/**
+ * FIX: Added missing AuthResult for explicit typing of auth service responses.
+ */
+export interface AuthResult {
+  success: boolean;
+  user?: User;
+  error?: string;
 }

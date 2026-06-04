@@ -9,6 +9,7 @@ import NewFolderModal from '../components/modals/NewFolderModal.tsx';
 import AddFileModal from '../components/modals/AddFileModal.tsx';
 import NewNoteModal from '../components/modals/NewNoteModal.tsx';
 import AddMemberModal from '../components/modals/AddMemberModal.tsx';
+import UpgradePromptModal from '../components/modals/UpgradePromptModal.tsx';
 
 interface ModalContextValue {
   openModal: (type: ModalType, props?: any) => void;
@@ -46,6 +47,8 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         return <NewNoteModal onClose={closeModal} />;
       case 'AddMember':
         return <AddMemberModal onClose={closeModal} />;
+      case 'UpgradePrompt':
+        return <UpgradePromptModal onClose={closeModal} />;
       default:
         return null;
     }

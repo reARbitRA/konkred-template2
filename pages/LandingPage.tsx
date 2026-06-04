@@ -2,21 +2,20 @@
 import React, { useState } from 'react';
 import { User, PageView, Protocol } from '../types.ts';
 import { APP_DATA } from '../data.ts';
-import Protocols from '../components/Protocols.tsx';
 import Logo3D from '../components/Logo3D.tsx';
 import Footer from '../components/Footer.tsx';
 import About from '../components/About.tsx';
-import Tools from '../components/landing/Tools.tsx'; // Updated to use the correct Tools component for landing
-import GetAccess from '../components/GetAccess.tsx';
-import Badge from '../components/common/Badge.tsx';
+import Tools from '../components/landing/Tools.tsx'; 
+import Stats from '../components/landing/Stats.tsx';
 import Pillars from '../components/landing/Pillars.tsx';
 import Trust from '../components/landing/Trust.tsx';
 import Pricing from '../components/landing/Pricing.tsx';
-import FeaturedListings from '../components/landing/FeaturedListings.tsx'; // New
-import CTA from '../components/landing/CTA.tsx'; // New
-import ValuationTerminal from '../components/ValuationTerminal.tsx'; // New Import
-import { BRAND, PLATFORM_STATS, TRUST_POINTS } from '../constants.ts';
+import FeaturedListings from '../components/landing/FeaturedListings.tsx'; 
+import CTA from '../components/landing/CTA.tsx'; 
+import ValuationTerminal from '../components/ValuationTerminal.tsx'; 
+import { BRAND, TRUST_POINTS } from '../constants.ts';
 import { ArrowRight, Play, Sparkles, Shield, ChevronDown } from 'lucide-react';
+import Badge from '../components/common/Badge.tsx';
 
 interface LandingPageProps {
     user: User | null;
@@ -40,6 +39,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ user, isAuthenticated, onNavi
     return (
         <div className="min-h-screen brutalist-bg">
             {isTerminalOpen && <ValuationTerminal onExit={() => setIsTerminalOpen(false)} />}
+            
             {/* High-Fidelity Hero Section */}
             <section className="relative pt-32 lg:pt-56 pb-32 overflow-hidden flex flex-col items-center">
                 <div className="absolute inset-0 z-0 opacity-[0.08] grid-bg pointer-events-none" />
@@ -85,26 +85,12 @@ const LandingPage: React.FC<LandingPageProps> = ({ user, isAuthenticated, onNavi
                 </div>
             </section>
             
-            <section className="py-16 border-y border-white/5 bg-black/60 relative">
-                <div className="absolute inset-0 opacity-10 pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
-                <div className="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-12 relative z-10">
-                    {PLATFORM_STATS.map((stat, i) => (
-                        <div key={i} className="text-center group cursor-default">
-                            <div className="text-4xl font-black text-white font-display mb-1 group-hover:text-neon-cyan transition-colors">{stat.value}</div>
-                            <div className="text-[10px] font-mono text-ghost uppercase tracking-[0.4em]">{stat.label}</div>
-                        </div>
-                    ))}
-                </div>
-            </section>
+            {/* Dynamic Production Stats */}
+            <Stats />
 
             <FeaturedListings onNavigate={onNavigate} onOpenListing={() => onNavigate('marketplace')} />
 
             <Pillars />
-
-            {/* <Protocols 
-                protocols={APP_DATA.protocols} 
-                onAcquire={onAcquireRequest} 
-            /> */}
 
             <About />
             

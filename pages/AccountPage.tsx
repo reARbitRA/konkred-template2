@@ -1,11 +1,12 @@
 
 import React, { useState } from 'react';
 import { User, PageView } from '../types.ts';
-import { User as UserIcon, Shield, Bell, CreditCard, ArrowLeft, Settings as SettingsIcon } from 'lucide-react';
+import { User as UserIcon, Shield, Bell, CreditCard, ArrowLeft, Settings as SettingsIcon, Brain } from 'lucide-react';
 import Profile from '../components/account/Profile.tsx';
 import Settings from '../components/account/Settings.tsx';
 import Billing from '../components/account/Billing.tsx';
 import Notifications from '../components/account/Notifications.tsx';
+import AIConfig from '../components/account/AIConfig.tsx';
 
 interface AccountPageProps {
   user: User | null;
@@ -13,7 +14,7 @@ interface AccountPageProps {
 }
 
 const AccountPage: React.FC<AccountPageProps> = ({ user, onNavigate }) => {
-  const [activeTab, setActiveTab] = useState<'profile' | 'settings' | 'billing' | 'notifications'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'settings' | 'billing' | 'notifications' | 'ai'>('profile');
 
   if (!user) return null;
 
@@ -33,6 +34,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ user, onNavigate }) => {
            <aside className="space-y-2">
               {[
                 { id: 'profile', label: 'Identity', icon: UserIcon },
+                { id: 'ai', label: 'AI Uplink', icon: Brain },
                 { id: 'settings', label: 'Configuration', icon: SettingsIcon },
                 { id: 'billing', label: 'Liquidity', icon: CreditCard },
                 { id: 'notifications', label: 'System Logs', icon: Bell },
@@ -55,6 +57,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ user, onNavigate }) => {
            {/* Main Content Area */}
            <main className="lg:col-span-3">
               {activeTab === 'profile' && <Profile />}
+              {activeTab === 'ai' && <AIConfig />}
               {activeTab === 'settings' && <Settings />}
               {activeTab === 'billing' && <Billing />}
               {activeTab === 'notifications' && <Notifications />}

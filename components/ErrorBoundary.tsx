@@ -1,4 +1,5 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+
+import React, { ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
 
 interface ErrorBoundaryProps {
@@ -12,15 +13,13 @@ interface ErrorBoundaryState {
 
 /**
  * ErrorBoundary component to catch runtime errors in the component tree.
- * Explicitly extending React.Component with props and state types.
  */
-// FIX: Ensured ErrorBoundary is a class component extending React.Component. This is required for error boundaries and gives access to `state` and `props`.
-export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  constructor(props: ErrorBoundaryProps) {
-    super(props);
-    // FIX: Initialized state in the constructor to fix "Property 'state' does not exist" error.
-    this.state = { hasError: false, error: null };
-  }
+// FIX: Explicitly extending React.Component with proper generics to ensure 'this.props' and 'this.state' are correctly typed and recognized
+export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  public state: ErrorBoundaryState = {
+    hasError: false,
+    error: null,
+  };
 
   static getDerivedStateFromError(error: Error): ErrorBoundaryState {
     return { hasError: true, error };
@@ -31,8 +30,11 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   }
 
   render() {
-    // FIX: Correctly access `this.state` to check for errors and render a fallback UI.
-    if (this.state.hasError) {
+    // FIX: Destructuring props and state from 'this' within the render method
+    const { children } = this.props;
+    const { hasError } = this.state;
+
+    if (hasError) {
       return (
         <div className="min-h-screen bg-void flex items-center justify-center p-8 font-mono">
           <div className="max-w-md w-full concrete-card border-neon-red/30 p-12 text-center rounded-2xl shadow-[0_0_50px_rgba(239,68,68,0.1)]">
@@ -62,7 +64,6 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       );
     }
 
-    // FIX: Correctly access `this.props` to render children when there is no error.
-    return this.props.children;
+    return children;
   }
 }

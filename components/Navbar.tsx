@@ -1,5 +1,3 @@
-
-
 import React, { useState } from 'react';
 import { Menu, X, ChevronRight } from 'lucide-react';
 import Logo3D from './Logo3D.tsx';
@@ -8,7 +6,7 @@ interface NavbarProps {
   onNavigate: (page: any) => void;
   currentPage: string;
   onOpenEnter: () => void;
-  onJoinNetwork: () => void; // New prop for triggering the Join Network flow
+  onJoinNetwork: () => void;
 }
 
 const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentPage, onOpenEnter, onJoinNetwork }) => {
@@ -20,20 +18,15 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentPage, onOpenEnter, o
   };
 
   const navLinks = [
-    { id: 'marketplace', label: 'MARKETPLACE' },
-    { id: 'academy', label: 'ACADEMY' },
-    { id: 'intel', label: 'INTEL' },
-    { id: 'network', label: 'NETWORK' },
-    { id: 'documentation', label: 'DOCS' },
-    { id: 'resources', label: 'RESOURCES' },
-    { id: 'career', label: 'CAREERS' },
-    { id: 'advisory', label: 'ADVISORY' },
+    { id: 'landing', label: 'HOME' },
+    { id: 'playgrounds', label: 'PLAYGROUNDS' },
+    { id: 'intel_report', label: 'INTEL' },
+    { id: 'forge', label: 'THE FORGE' },
   ];
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 concrete-card border-b border-white/5 bg-black/60 backdrop-blur-xl">
       <div className="max-w-7xl mx-auto px-6 h-16 lg:h-20 flex items-center justify-between">
-        {/* Logo Section - Hover Expand Logic */}
         <div 
           className="flex items-center cursor-pointer group"
           onClick={() => handleNav('landing')}
@@ -43,14 +36,12 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentPage, onOpenEnter, o
           </div>
           <div className="overflow-hidden max-w-0 group-hover:max-w-xs transition-all duration-700 ease-in-out opacity-0 group-hover:opacity-100 flex items-center">
             <span className="font-bold tracking-tight text-xl font-display logo-3d-effect ml-2 whitespace-nowrap">
-              <span className="text-metal">KONK</span>
-              <span className="text-neon-red">RED</span>
+              <span className="text-metal">KONKRED</span>
               <span className="text-white">.xyz</span>
             </span>
           </div>
         </div>
 
-        {/* Desktop Links */}
         <div className="hidden lg:flex items-center gap-8 text-[10px] font-bold tracking-[0.2em] text-ghost font-mono">
           {navLinks.map((link) => (
             <button 
@@ -64,7 +55,6 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentPage, onOpenEnter, o
           ))}
         </div>
 
-        {/* Desktop CTA */}
         <div className="hidden md:flex items-center gap-6">
           <button 
             onClick={onOpenEnter}
@@ -81,7 +71,6 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentPage, onOpenEnter, o
           </button>
         </div>
 
-        {/* Mobile Menu Toggle */}
         <button 
           className="lg:hidden text-ghost hover:text-white p-2 focus:outline-none"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -91,7 +80,6 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentPage, onOpenEnter, o
         </button>
       </div>
 
-      {/* Mobile Menu - Enhanced with fade and slide transition */}
       <div 
         className={`lg:hidden absolute top-16 left-0 w-full bg-void/95 backdrop-blur-2xl border-b border-white/10 p-8 flex flex-col gap-4 z-40 transition-all duration-300 ease-out transform origin-top ${
           isMobileMenuOpen 

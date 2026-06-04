@@ -1,63 +1,41 @@
 
+// Production Payment Service Specification
+
 interface PaymentIntent {
   id: string;
   amount: number;
   currency: string;
   status: 'pending' | 'completed' | 'failed';
   timestamp: number;
-}
-
-interface VerificationResult {
-  verified: boolean;
-  txHash?: string;
-  confirmations?: number;
+  redirectUrl?: string;
 }
 
 class PaymentService {
-  private latency = 2500; // Simulated network latency
-
   /**
-   * Initializes a transaction intent.
+   * Initializes a transaction intent with the NowPayments gateway.
+   * In production, this calls a cloud function to generate a real payment link.
    */
-  async createPaymentIntent(amount: number, currency: 'USD' | 'USDT' | 'ETH'): Promise<PaymentIntent> {
-    await new Promise(resolve => setTimeout(resolve, 800)); // Quick init
+  async createPaymentIntent(amount: number, currency: 'USD' | 'USDT' | 'ETH', listingId: string): Promise<PaymentIntent> {
+    // API Route: POST /api/payments/create
+    const response = await fetch('/api/payments/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount, currency, listingId })
+    });
     
-    return {
-      id: `pi_${Math.random().toString(36).substr(2, 9)}`,
-      amount,
-      currency,
-      status: 'pending',
-      timestamp: Date.now()
-    };
-  }
-
-  /**
-   * Simulates the blockchain verification process.
-   */
-  async verifyTransaction(txHash: string): Promise<VerificationResult> {
-    // Simulate polling latency
-    await new Promise(resolve => setTimeout(resolve, this.latency));
-
-    // Random success/fail simulation (mostly success for demo)
-    const isSuccess = Math.random() > 0.05; 
-
-    if (isSuccess) {
-      return {
-        verified: true,
-        txHash: txHash,
-        confirmations: Math.floor(Math.random() * 12) + 1
-      };
-    } else {
-      throw new Error("Transaction dropped from mempool. Please retry.");
+    if (!response.ok) {
+        throw new Error("Failed to initialize decentralized settlement node.");
     }
+    
+    return await response.json();
   }
 
   /**
-   * Simulates a payout to a seller.
+   * Verifies the status of a specific transaction hash on the blockchain.
    */
-  async processPayout(userId: string, amount: number, method: string): Promise<string> {
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    return `payout_${userId}_${Date.now()}`;
+  async verifyTransaction(txId: string): Promise<any> {
+    const response = await fetch(`/api/payments/status?id=${txId}`);
+    return await response.json();
   }
 }
 

@@ -1,12 +1,13 @@
 
 import React from 'react';
 import { Heart, ShoppingBag, Trash2, ArrowRight } from 'lucide-react';
-import { FEATURED_LISTINGS_DEMO } from '../../constants.ts';
+// FIX: Imported APP_DATA from data.ts as FEATURED_LISTINGS_DEMO was missing in constants.ts
+import { APP_DATA } from '../../data.ts';
 import Badge from '../common/Badge.tsx';
 
 const Wishlist: React.FC = () => {
-  // Simulating wishlist data using a subset of demo listings
-  const savedItems = FEATURED_LISTINGS_DEMO.slice(0, 2);
+  // FIX: Using APP_DATA.protocols to simulate wishlist data for the buyer enclave
+  const savedItems = APP_DATA.protocols.slice(0, 2);
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -31,19 +32,22 @@ const Wishlist: React.FC = () => {
                    <div key={item.id} className="concrete-card p-6 rounded-3xl flex flex-col justify-between group hover:border-neon-cyan/30 transition-all bg-black/40">
                        <div>
                            <div className="flex justify-between items-start mb-4">
-                               <Badge variant="cyan" size="sm">{item.type}</Badge>
+                               {/* FIX: Used item.category from Protocol type */}
+                               <Badge variant="cyan" size="sm">{item.category}</Badge>
                                <button className="text-ghost hover:text-neon-red transition-colors p-2 hover:bg-neon-red/10 rounded-lg">
                                    <Trash2 size={16} />
                                </button>
                            </div>
                            <h3 className="text-lg font-bold text-white mb-2 leading-tight group-hover:text-neon-cyan transition-colors">{item.title}</h3>
-                           <p className="text-xs text-ghost-light line-clamp-2 leading-relaxed mb-6">{item.shortDescription}</p>
+                           {/* FIX: Used item.description from Protocol type */}
+                           <p className="text-xs text-ghost-light line-clamp-2 leading-relaxed mb-6">{item.description}</p>
                        </div>
                        
                        <div className="flex items-center justify-between pt-6 border-t border-white/5">
                            <div className="flex flex-col">
                                <span className="text-[9px] text-ghost font-mono uppercase tracking-widest">Valuation</span>
-                               <span className="text-xl font-bold text-white font-display">${item.pricing.amount}</span>
+                               {/* FIX: Used item.price string from Protocol type directly */}
+                               <span className="text-xl font-bold text-white font-display">{item.price}</span>
                            </div>
                            <button className="bg-white text-black px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-neon-cyan transition-all flex items-center gap-2 shadow-lg">
                                Acquire <ArrowRight size={12} />

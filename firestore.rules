@@ -1,15 +1,37 @@
-
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Users can create and read their own user document
-    match /users/{userId} {
-      allow read, create: if request.auth.uid == userId;
+    
+    // Global Platform Statistics: Publicly readable for HUDs and landing metrics
+    match /statistics/{docId} {
+      allow get, list: if true;
     }
-    // Users can only read/write their own data in their user document subcollections.
-    match /users/{userId}/{collection}/{docId} {
-      allow read, write, delete: if request.auth.uid == userId;
+
+    // Marketplace Protocols: Publicly readable and listable for the marketplace catalog
+    // and featured drops.
+    match /protocols/{protocolId} {
+      allow get, list: if true;
+      // Allow incrementing viewCount publicly to support platform telemetry
+      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewCount']);
+      allow create, delete: if false; // Reserved for administrative nodes
+    }
+
+    // Audits: Users can create audits and read their own results
+    match /audits/{auditId} {
+      allow create: if request.auth != null;
+      allow read: if request.auth != null && (
+        resource == null || resource.data.userId == request.auth.uid
+      );
+    }
+
+    // User Profile & Secure Enclave Data
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+
+      match /{allPaths=**} {
+        allow read, write, delete, list: if request.auth != null && request.auth.uid == userId;
+      }
     }
   }
 }

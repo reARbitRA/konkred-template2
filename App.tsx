@@ -1,15 +1,13 @@
-
-
-
 import React, { useState, useEffect } from 'react';
 import { PageView, Protocol, Listing, LicenseType } from './types.ts';
-import { FEATURED_LISTINGS_DEMO } from './constants.ts';
 import { APP_DATA } from './data.ts';
 
 // Contexts & Hooks
 import { useAuth } from './contexts/AuthContext.tsx';
 import { useToast } from './contexts/ToastContext.tsx';
 import { useModal } from './contexts/ModalContext.tsx';
+import { useGlobalStats } from './hooks/useGlobalStats.ts';
+import { databaseService } from './services/database.ts';
 
 // Layout & Navigation
 import Navbar from './components/Navbar.tsx';
@@ -28,6 +26,8 @@ import LandingPage from './pages/LandingPage.tsx';
 import MarketplacePage from './pages/MarketplacePage.tsx';
 import ListingWizard from './pages/ListingWizard.tsx';
 import ForgePage from './pages/ForgePage.tsx';
+import PlaygroundsPage from './pages/PlaygroundsPage.tsx';
+import IntelReportPage from './pages/IntelReportPage.tsx';
 import WalletPage from './pages/WalletPage.tsx';
 import SellerDashboard from './pages/SellerDashboard.tsx';
 import BuyerDashboard from './pages/BuyerDashboard.tsx';
@@ -50,13 +50,13 @@ import StyleGuide from './pages/StyleGuide.tsx';
 import VerifyEmailPage from './pages/VerifyEmailPage.tsx';
 
 import { 
-    ShoppingBag, Hammer, Wallet, Database, BookOpen, MessageSquare, ChevronRight, Globe 
+    ShoppingBag, Hammer, Wallet, Database, BookOpen, MessageSquare, ChevronRight, Globe, Home, Terminal, Cpu, ShieldAlert
 } from 'lucide-react';
 
 const App: React.FC = () => {
     const auth = useAuth();
     const toast = useToast();
-    const modal = useModal();
+    const { stats } = useGlobalStats();
 
     const [isBooting, setIsBooting] = useState(true);
     const [currentPage, setCurrentPage] = useState<PageView>('landing');
@@ -64,8 +64,8 @@ const App: React.FC = () => {
     const [isCmdOpen, setIsCmdOpen] = useState(false); 
     const [emailForVerification, setEmailForVerification] = useState<string | null>(null);
     
-    const [allListings, setAllListings] = useState<Listing[]>(FEATURED_LISTINGS_DEMO);
-    const [userLibrary, setUserLibrary] = useState<string[]>(['L1']); 
+    const [allListings, setAllListings] = useState<Listing[]>([]);
+    const [userLibrary, setUserLibrary] = useState<string[]>([]); 
     const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
 
     const navigate = (page: PageView) => {
@@ -84,7 +84,19 @@ const App: React.FC = () => {
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, []);
 
-    const handleBuyRequest = (item: Listing | Protocol, license?: LicenseType) => {
+    useEffect(() => {
+        const loadInitialListings = async () => {
+            try {
+                const data = await databaseService.getListings({});
+                setAllListings(data);
+            } catch (err) {
+                console.warn("Failed to load initial active listings:", err);
+            }
+        };
+        loadInitialListings();
+    }, []);
+
+    const handleBuyRequest = (item: Listing | Protocol) => {
         if (!auth.user) {
             navigate('enter');
             return;
@@ -113,7 +125,10 @@ const App: React.FC = () => {
                 reviewCount: 42,
                 featured: false,
                 tags: p.tags,
-                createdAt: new Date()
+                salesCount: p.acquisitionCount,
+                viewCount: p.acquisitionCount * 5,
+                createdAt: new Date(),
+                updatedAt: new Date()
              };
         } else {
             listingToBuy = item as Listing;
@@ -148,14 +163,10 @@ const App: React.FC = () => {
                         <Logo3D size={40} />
                     </div>
                     <nav className="flex-1 p-4 space-y-1 overflow-y-auto custom-scrollbar">
-                        <SideLink id="marketplace" label="Marketplace" icon={ShoppingBag} current={currentPage} onNav={navigate} />
-                        <SideLink id="usage" label="Enclave Vault" icon={Database} current={currentPage} onNav={navigate} />
-                        <SideLink id="forge_audit" label="The Forge" icon={Hammer} current={currentPage} onNav={navigate} />
-                        <SideLink id="wallet" label="Liquidity Node" icon={Wallet} current={currentPage} onNav={navigate} />
-                        <div className="pt-8 pb-4 px-4 text-[9px] font-mono text-ghost uppercase tracking-[0.3em]">Network_Layers</div>
-                        <SideLink id="academy" label="Academy" icon={BookOpen} current={currentPage} onNav={navigate} />
-                        <SideLink id="network" label="Forum" icon={MessageSquare} current={currentPage} onNav={navigate} />
-                        <SideLink id="intel" label="Intelligence" icon={Globe} current={currentPage} onNav={navigate} />
+                        <SideLink id="landing" label="Base Home" icon={Home} current={currentPage} onNav={navigate} />
+                        <SideLink id="playgrounds" label="Playgrounds" icon={Terminal} current={currentPage} onNav={navigate} />
+                        <SideLink id="intel_report" label="Intel Report" icon={Cpu} current={currentPage} onNav={navigate} />
+                        <SideLink id="forge" label="The Forge" icon={Hammer} current={currentPage} onNav={navigate} />
                     </nav>
                     
                     <div className="p-6 border-t border-white/5 bg-black/20 relative">
@@ -192,6 +203,9 @@ const App: React.FC = () => {
                     {currentPage === 'marketplace' && <MarketplacePage onNavigate={navigate} onOpenListing={(l) => { setSelectedListing(l); navigate('listing_detail'); }} />}
                     {currentPage === 'listing_detail' && selectedListing && <ListingPage listing={selectedListing} onNavigate={navigate} onBuy={handleBuyRequest} />}
                     {currentPage === 'forge_audit' && <ForgePage onNavigate={navigate} />}
+                    {currentPage === 'forge' && <ForgePage onNavigate={navigate} />}
+                    {currentPage === 'playgrounds' && <PlaygroundsPage onNavigate={navigate} />}
+                    {currentPage === 'intel_report' && <IntelReportPage onNavigate={navigate} />}
                     {currentPage === 'wallet' && <WalletPage onNavigate={navigate} />}
                     {currentPage === 'usage' && <BuyerDashboard onNavigate={navigate} />}
                     {currentPage === 'account' && <AccountPage user={auth.user} onNavigate={navigate} />}
@@ -216,7 +230,13 @@ const App: React.FC = () => {
                 </div>
 
                 {!['enter', 'join_network', 'checkout', 'wizard', 'verify_email'].includes(currentPage) && (
-                    <SystemFooter data={APP_DATA.footer} counts={{ protocols: allListings.length, tools: 48 }} />
+                    <SystemFooter 
+                        data={APP_DATA.footer} 
+                        counts={{ 
+                            protocols: stats?.totalProtocols || 0, 
+                            tools: stats?.totalAgents || 0 
+                        }} 
+                    />
                 )}
             </main>
         </div>

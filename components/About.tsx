@@ -1,9 +1,9 @@
+
 import React from 'react';
 
 const About: React.FC = () => {
   return (
     <section className="py-24 border-t border-zinc-900 bg-background relative overflow-hidden">
-      {/* Background Graphic */}
       <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-zinc-900/20 to-transparent pointer-events-none" />
       
       <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-12 items-center relative z-10">
@@ -22,22 +22,13 @@ const About: React.FC = () => {
           </p>
         </div>
 
-        <div className="relative concrete-card p-8 aspect-square flex flex-col justify-between">
-          <div className="absolute top-4 right-4 text-zinc-700 font-mono text-xs">EST. 2024</div>
-          <div className="text-6xl font-black text-zinc-800 select-none">KON<br/>KRED</div>
-          <div className="grid grid-cols-3 gap-4 border-t border-zinc-800 pt-8">
-            <div>
-              <div className="text-2xl font-bold text-white">4k+</div>
-              <div className="text-[10px] font-mono text-zinc-500 uppercase mt-1">Users</div>
-            </div>
-             <div>
-              <div className="text-2xl font-bold text-white">120</div>
-              <div className="text-[10px] font-mono text-zinc-500 uppercase mt-1">Protocols</div>
-            </div>
-             <div>
-              <div className="text-2xl font-bold text-white">Zero</div>
-              <div className="text-[10px] font-mono text-zinc-500 uppercase mt-1">Downtime</div>
-            </div>
+        <div className="relative concrete-card p-12 aspect-square flex flex-col justify-between rounded-[3rem]">
+          <div className="absolute top-8 right-8 text-zinc-700 font-mono text-xs uppercase tracking-widest">Est. MMXXIV</div>
+          <div className="text-8xl font-black text-zinc-800 select-none leading-none">KON<br/>KRED</div>
+          <div className="border-t border-zinc-800 pt-8">
+            <p className="text-ghost text-xs font-mono uppercase tracking-widest leading-relaxed">
+                Platform governance maintained by verified architectural nodes. Verified structural capital distributed globally via secure enclaves.
+            </p>
           </div>
         </div>
       </div>

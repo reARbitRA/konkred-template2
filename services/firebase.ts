@@ -1,17 +1,10 @@
 
-import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { initializeApp } from 'firebase/app';
+import { getAuth } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
+import { getStorage } from 'firebase/storage';
 
-// Your web app's Firebase configuration from the prompt
-const firebaseConfig = {
-  apiKey: "AIzaSyACWOsum4PNH6U3UPZF8D7BOU85IH9yLfw",
-  authDomain: "konkred-142c2.firebaseapp.com",
-  projectId: "konkred-142c2",
-  storageBucket: "konkred-142c2.appspot.com",
-  messagingSenderId: "695406358364",
-  appId: "1:695406358364:web:140241a2f3be8cf4f79b99"
-};
+import firebaseConfig from '../firebase-applet-config.json';
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
@@ -20,4 +13,7 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 
 // Initialize Cloud Firestore and get a reference to the service
-export const db = getFirestore(app);
+export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+
+// Initialize Cloud Storage and get a reference to the service
+export const storage = getStorage(app);

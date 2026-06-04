@@ -13,7 +13,7 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     
     <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -26,26 +26,27 @@
                         sans: ['Inter', 'system-ui', 'sans-serif'],
                         mono: ['JetBrains Mono', 'Menlo', 'monospace'],
                         display: ['Space Grotesk', 'Inter', 'sans-serif'],
+                        vazir: ['Vazirmatn', 'Inter', 'sans-serif'],
                     },
                     colors: {
                         'void': {
-                            DEFAULT: '#030304',
-                            50: '#0a0a0c',
-                            100: '#0d0d10',
-                            200: '#111114',
-                            300: '#16161a',
-                            400: '#1c1c21',
-                            500: '#232329',
+                            DEFAULT: '#050505',
+                            50: '#0c0c0d',
+                            100: '#121212',
+                            200: '#18181a',
+                            300: '#1f1f24',
+                            400: '#2a2a30',
+                            500: '#35353d',
                         },
                         'neon': {
-                            cyan: '#ff9500', 
-                            blue: '#3b82f6',
-                            purple: '#a855f7',
-                            pink: '#ec4899',
-                            green: '#10b981',
-                            orange: '#f97316',
-                            red: '#ef4444',
-                            gold: '#fbbf24',
+                            cyan: '#ccff00', 
+                            blue: '#ccff00',
+                            purple: '#ffea00',
+                            pink: '#ffea00',
+                            green: '#ccff00',
+                            orange: '#ffea00',
+                            red: '#ff3366',
+                            gold: '#ffea00',
                         },
                         'metal': {
                             light: '#e4e4e7',
@@ -60,7 +61,7 @@
                         },
                     },
                     boxShadow: {
-                        'neon-cyan': '0 0 15px rgba(255, 149, 0, 0.4)',
+                        'neon-cyan': '0 0 15px rgba(204, 255, 0, 0.4)',
                     },
                     animation: {
                         'slide-up': 'slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards',
@@ -112,8 +113,8 @@
     
     <style>
         :root {
-            --color-void: #030304;
-            --color-neon-cyan: #ff9500;
+            --color-void: #050505;
+            --color-neon-cyan: #ccff00;
             --transition-normal: 300ms;
         }
         body {
@@ -123,21 +124,21 @@
             overflow-x: hidden;
         }
         .bg-void-gradient {
-            background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(255, 149, 0, 0.05) 0%, transparent 50%), #030304;
+            background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(204, 255, 0, 0.05) 0%, transparent 50%), #050505;
         }
         .preserve-3d { transform-style: preserve-3d; }
         .perspective-1000 { perspective: 1000px; }
         
         .btn-primary {
-            background: linear-gradient(135deg, #ff9500 0%, #cc7a00 100%);
-            color: #030304;
+            background: linear-gradient(135deg, #ccff00 0%, #a3cc00 100%);
+            color: #050505;
             font-weight: 600;
             padding: 10px 24px;
             border-radius: 8px;
             transition: all 0.3s ease;
         }
         .gradient-text {
-            background: linear-gradient(135deg, #ff9500 0%, #a855f7 50%, #ec4899 100%);
+            background: linear-gradient(135deg, #ccff00 0%, #ffea00 50%, #cca300 100%);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -151,14 +152,14 @@
             100% { transform: perspective(500px) rotateX(60deg) translateY(40px); }
         }
         .grid-plane {
-            background-image: linear-gradient(rgba(255, 149, 0, 0.1) 1px, transparent 1px), 
-                              linear-gradient(90deg, rgba(255, 149, 0, 0.1) 1px, transparent 1px);
+            background-image: linear-gradient(rgba(204, 255, 0, 0.1) 1px, transparent 1px), 
+                              linear-gradient(90deg, rgba(204, 255, 0, 0.1) 1px, transparent 1px);
             background-size: 40px 40px;
             animation: grid-flow 2s linear infinite;
         }
         .grid-bg {
-             background-image: linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px), 
-                              linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+             background-image: linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px), 
+                              linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
             background-size: 30px 30px;
         }
 
@@ -170,7 +171,7 @@
             width: 100%;
             height: 100px;
             z-index: 10;
-            background: linear-gradient(to bottom, transparent 0%, rgba(255, 149, 0, 0.05) 50%, transparent 100%);
+            background: linear-gradient(to bottom, transparent 0%, rgba(204, 255, 0, 0.05) 50%, transparent 100%);
             position: absolute;
             animation: scanline 4s linear infinite;
         }
@@ -184,7 +185,7 @@
         .delay-500 { animation-delay: 500ms; }
 
         .concrete-card {
-            background-color: #0d0d10;
+            background-color: #121212;
             border: 1px solid rgba(255, 255, 255, 0.05);
             background-image: url('https://www.transparenttextures.com/patterns/concrete-wall.png');
             position: relative;
@@ -202,7 +203,7 @@
         }
         
         .brutalist-bg {
-            background-color: #0d0d10;
+            background-color: #050505;
             background-image: url('https://www.transparenttextures.com/patterns/concrete-wall.png');
             position: relative;
             overflow: hidden;
@@ -230,6 +231,7 @@
   }
 }
 </script>
+<link rel="stylesheet" href="/index.css">
 </head>
 <body class="bg-void-gradient">
     <div id="root"></div>

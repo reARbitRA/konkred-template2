@@ -1,46 +1,18 @@
 {
-  "name": "KONKRED – Executive AI Marketplace",
-  "version": "2.1.0",
-  "description": "The elite ecosystem for structural AI capital. Verified protocols, autonomous agents, and high-stakes decision frameworks.",
+  "name": "KONKRED – Production Node",
+  "version": "2.5.0",
+  "description": "The enterprise-grade ecosystem for Structural AI Capital. Verified protocols, autonomous agents, and deterministic frameworks.",
   "author": {
     "name": "KONKRED Systems",
     "email": "hello@konkred.xyz",
     "url": "https://konkred.xyz"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/konkred/konkred-hub"
-  },
-  "keywords": [
-    "ai",
-    "marketplace",
-    "prompts",
-    "agents",
-    "machine-learning",
-    "executive",
-    "llm",
-    "governance"
-  ],
-  "features": [
-    "AI Asset Marketplace",
-    "Prompt Valuation (AUDIT)",
-    "Documentation Generator",
-    "Multi-Provider AI Support",
-    "Secure Payments via Crypto",
-    "Seller Dashboard & Analytics",
-    "Agent Architect Node Editor"
-  ],
   "tech_stack": {
     "frontend": "React 18",
-    "language": "TypeScript",
-    "styling": "Tailwind CSS",
-    "ai": "Google Gemini 2.0/3.0",
-    "payments": "NowPayments",
-    "icons": "Lucide React"
+    "backend": "Firebase Firestore / Cloud Functions",
+    "ai": "Unified AI Provider Gateway (Gemini 3 Pro + External)",
+    "payments": "NowPayments / Stripe"
   },
-  "license": "Proprietary",
-  "copyright": "© 2025 KONKRED Systems. All rights reserved.",
-  "requestFramePermissions": [
-    "microphone"
-  ]
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

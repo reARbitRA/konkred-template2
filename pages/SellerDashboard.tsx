@@ -1,14 +1,15 @@
 
 import React, { useState } from 'react';
 import { PageView, Listing } from '../types.ts';
-import { ArrowLeft, DollarSign, Package, TrendingUp, Users, Plus, LayoutDashboard, BarChart3, Settings } from 'lucide-react';
+import { ArrowLeft, DollarSign, Package, TrendingUp, Users, Plus, LayoutDashboard, BarChart3, Settings, Presentation } from 'lucide-react';
 import Badge from '../components/common/Badge.tsx';
 import Analytics from '../components/seller/Analytics.tsx';
 import MyListings from '../components/seller/MyListings.tsx';
 import Payouts from '../components/seller/Payouts.tsx';
+import { SlidesConsole } from '../components/seller/SlidesConsole.tsx';
 
 const SellerDashboard: React.FC<{ listings: Listing[]; onNavigate: (page: PageView) => void; onNewListing: () => void }> = ({ listings, onNavigate, onNewListing }) => {
-  const [activeTab, setActiveTab] = useState<'inventory' | 'analytics' | 'payouts'>('inventory');
+  const [activeTab, setActiveTab] = useState<'inventory' | 'analytics' | 'slides' | 'payouts'>('inventory');
 
   return (
     <div className="min-h-screen bg-void pt-28 pb-12 px-12 animate-in fade-in duration-1000">
@@ -45,6 +46,7 @@ const SellerDashboard: React.FC<{ listings: Listing[]; onNavigate: (page: PageVi
              {[
                { id: 'inventory', label: 'My_Inventory', icon: Package },
                { id: 'analytics', label: 'Telemetry_Data', icon: BarChart3 },
+               { id: 'slides', label: 'Slides_Enclave', icon: Presentation },
                { id: 'payouts', label: 'Capital_Liquidity', icon: DollarSign },
              ].map(tab => (
                <button 
@@ -62,7 +64,8 @@ const SellerDashboard: React.FC<{ listings: Listing[]; onNavigate: (page: PageVi
           {/* View Controller */}
           <div className="space-y-12">
              {activeTab === 'inventory' && <MyListings listings={listings} />}
-             {activeTab === 'analytics' && <Analytics />}
+             {activeTab === 'analytics' && <Analytics listings={listings} />}
+             {activeTab === 'slides' && <SlidesConsole listings={listings} />}
              {activeTab === 'payouts' && <Payouts />}
           </div>
        </div>
