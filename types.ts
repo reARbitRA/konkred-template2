@@ -7,7 +7,7 @@ export type PageView =
     | 'network' | 'advisory' | 'documentation' | 'career' | 'resources' 
     | 'pricing' | 'enter' | 'join_network' | 'account' | 'checkout'
     | 'usage_metrics' | 'affiliate' | 'admin' | 'dispute' | 'style_guide'
-    | 'verify_email' | 'playgrounds' | 'intel_report' | 'forge';
+    | 'verify_email' | 'playgrounds' | 'intel_report' | 'forge' | 'contact';
 
 export type AIProviderID = 
   | 'openai' | 'anthropic' | 'google' | 'openrouter' | 'groq' 

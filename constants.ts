@@ -105,12 +105,10 @@ export const SUBSCRIPTION_PLANS = [
 ];
 
 export const CATEGORIES = [
-    { id: 'legal', name: 'Legal' },
-    { id: 'healthcare', name: 'Healthcare' },
-    { id: 'finance', name: 'Finance' },
-    { id: 'support', name: 'Support' },
-    { id: 'marketing', name: 'Marketing' },
-    { id: 'strategy', name: 'Strategy' },
+    { id: 'content', name: 'Content' },
+    { id: 'cybersecurity', name: 'Cybersecurity' },
+    { id: 'business_automation', name: 'Business Automation' },
+    { id: 'creative_tools', name: 'Creative Tools' },
 ];
 
 export const SORT_OPTIONS = [

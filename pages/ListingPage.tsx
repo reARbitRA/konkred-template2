@@ -103,13 +103,35 @@ const ListingPage: React.FC<ListingPageProps> = ({ listing, onNavigate, onBuy })
                 {activeTab === 'details' && (
                   <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2">
                      <div className="prose prose-invert max-w-none text-ghost-light font-light leading-relaxed">
-                        <h3 className="text-white font-bold mb-4 uppercase tracking-widest text-xs font-mono">Payload Description</h3>
-                        <p>{listing.description || listing.shortDescription}</p>
-                        <p className="mt-4">This asset includes comprehensive documentation, implementation guides, and raw source files compatible with standard enterprise environments.</p>
+                        <h3 className="text-white font-bold mb-4 uppercase tracking-widest text-[10px] font-mono">Payload Analysis</h3>
+                        <p className="mb-6">{listing.description || listing.shortDescription}</p>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-10">
+                           <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/5">
+                              <h4 className="text-white text-xs font-mono font-bold uppercase tracking-widest mb-4 flex items-center gap-2">
+                                <FileText size={14} className="text-neon-cyan" /> Implementation Guide
+                              </h4>
+                              <ul className="space-y-3 text-xs list-none p-0">
+                                <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-neon-cyan/50 mt-1.5" /> Direct integration schema for Llama 3.3/GPT-4o</li>
+                                <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-neon-cyan/50 mt-1.5" /> Pre-configured temperature & bias parameters</li>
+                                <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-neon-cyan/50 mt-1.5" /> JSON-formatted system-role prompts included</li>
+                              </ul>
+                           </div>
+                           <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/5">
+                              <h4 className="text-white text-xs font-mono font-bold uppercase tracking-widest mb-4 flex items-center gap-2">
+                                <BarChart3 size={14} className="text-neon-cyan" /> Technical Specs
+                              </h4>
+                              <ul className="space-y-3 text-xs list-none p-0">
+                                <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-neon-cyan/50 mt-1.5" /> Output Consistency: 99.4% Sigma</li>
+                                <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-neon-cyan/50 mt-1.5" /> Token Efficiency: Optimized 1.2k avg</li>
+                                <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-neon-cyan/50 mt-1.5" /> Latency Class: Ultra-Low [Sub 150ms]</li>
+                              </ul>
+                           </div>
+                        </div>
                      </div>
                      
                      <div>
-                        <h3 className="text-white font-bold mb-4 uppercase tracking-widest text-xs font-mono">Architecture Tags</h3>
+                        <h3 className="text-white font-bold mb-4 uppercase tracking-widest text-[10px] font-mono">Conceptual Tags</h3>
                         <div className="flex flex-wrap gap-2">
                           {listing.tags.map(tag => (
                             <Badge key={tag} variant="gray">#{tag}</Badge>

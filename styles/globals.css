@@ -4,12 +4,19 @@
 @tailwind utilities;
 
 :root {
-  --void-bg: #050505;
-  --neon-cyan: #ccff00; /* Acid Green primary */
-  --neon-blue: #ccff00;
-  --neon-purple: #ffea00; /* Cyber Yellow accent */
-  --neon-green: #ccff00;
-  --glass-border: rgba(255, 255, 255, 0.05);
+  --void-bg: #030303;
+  --surface-1: #0A0A0A;
+  --surface-2: #141414;
+  --text-primary: #FAFAFA;
+  --text-secondary: #A1A1AA;
+  --accent-cyan: #22D3EE;
+  --accent-emerald: #10B981;
+  --acid: #ccff00;
+  --crimson: #ff003c;
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --neon-cyan: #22D3EE;
+  --neon-purple: #8B5CF6;
+  --neon-green: #10B981;
 }
 
 /* --- CORE RESET & TYPOGRAPHY --- */

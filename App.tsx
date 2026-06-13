@@ -48,6 +48,7 @@ import AdminPage from './pages/AdminPage.tsx';
 import DisputePage from './pages/DisputePage.tsx';
 import StyleGuide from './pages/StyleGuide.tsx';
 import VerifyEmailPage from './pages/VerifyEmailPage.tsx';
+import ContactPage from './pages/ContactPage.tsx';
 
 import { 
     ShoppingBag, Hammer, Wallet, Database, BookOpen, MessageSquare, ChevronRight, Globe, Home, Terminal, Cpu, ShieldAlert
@@ -65,7 +66,7 @@ const App: React.FC = () => {
     const [emailForVerification, setEmailForVerification] = useState<string | null>(null);
     
     const [allListings, setAllListings] = useState<Listing[]>([]);
-    const [userLibrary, setUserLibrary] = useState<string[]>([]); 
+    const [userLibrary, setUserLibrary] = useState<Listing[]>([]); 
     const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
 
     const navigate = (page: PageView) => {
@@ -95,6 +96,21 @@ const App: React.FC = () => {
         };
         loadInitialListings();
     }, []);
+
+    const { user } = auth;
+
+    // Persistence: Sync library from Firestore on auth change
+    useEffect(() => {
+        async function syncLibrary() {
+            if (user) {
+                const library = await databaseService.getUserLibrary(user.id);
+                setUserLibrary(library);
+            } else {
+                setUserLibrary([]);
+            }
+        }
+        syncLibrary();
+    }, [user]);
 
     const handleBuyRequest = (item: Listing | Protocol) => {
         if (!auth.user) {
@@ -134,13 +150,28 @@ const App: React.FC = () => {
             listingToBuy = item as Listing;
         }
 
-        if (userLibrary.includes(listingToBuy.id)) {
+        if (userLibrary.some(l => l.id === listingToBuy.id)) {
             toast.showToast("Asset already in Enclave", "info");
             navigate('usage');
             return;
         }
         setSelectedListing(listingToBuy);
         navigate('checkout');
+    };
+
+    const handleConfirmedPurchase = async () => {
+        if (!selectedListing || !user) return;
+        
+        try {
+            await databaseService.purchaseAsset(user.id, selectedListing);
+            setUserLibrary(prev => [selectedListing, ...prev]);
+            toast.showToast("License Uplink Successful.", "success");
+            navigate('usage');
+            setSelectedListing(null);
+        } catch (error) {
+            console.error("Acquisition terminal failure:", error);
+            toast.showToast("Transaction failed. System node timeout.", "error");
+        }
     };
 
     const handleDeployProtocol = (newListing: Listing) => {
@@ -154,52 +185,21 @@ const App: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-void text-metal-light selection:bg-neon-cyan selection:text-black font-sans flex overflow-hidden">
-            <SystemHUD />
             <CommandPalette isOpen={isCmdOpen} onClose={() => setIsCmdOpen(false)} onNavigate={navigate} />
 
-            {auth.user && !['enter', 'join_network', 'verify_email'].includes(currentPage) && (
-                <aside className="w-64 border-r border-white/5 h-screen sticky top-0 bg-void-100 flex flex-col hidden lg:flex z-50">
-                    <div className="p-8 border-b border-white/5 cursor-pointer hover:bg-white/[0.02] transition-colors" onClick={() => navigate('landing')}>
-                        <Logo3D size={40} />
-                    </div>
-                    <nav className="flex-1 p-4 space-y-1 overflow-y-auto custom-scrollbar">
-                        <SideLink id="landing" label="Base Home" icon={Home} current={currentPage} onNav={navigate} />
-                        <SideLink id="playgrounds" label="Playgrounds" icon={Terminal} current={currentPage} onNav={navigate} />
-                        <SideLink id="intel_report" label="Intel Report" icon={Cpu} current={currentPage} onNav={navigate} />
-                        <SideLink id="forge" label="The Forge" icon={Hammer} current={currentPage} onNav={navigate} />
-                    </nav>
-                    
-                    <div className="p-6 border-t border-white/5 bg-black/20 relative">
-                        <div className="flex items-center gap-3 cursor-pointer hover:bg-white/5 p-2 rounded-xl transition-all" onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}>
-                            <div className="w-8 h-8 rounded bg-gradient-to-br from-neon-cyan to-neon-purple p-[1px]">
-                                <div className="w-full h-full bg-black rounded-[3px] flex items-center justify-center font-bold text-white text-xs uppercase">
-                                    {auth.user.name.substring(0,2)}
-                                </div>
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <p className="text-xs font-bold text-white truncate">{auth.user.name}</p>
-                                <p className="text-[9px] text-neon-cyan font-mono truncate">${auth.user.balance.fiat.toLocaleString()}</p>
-                            </div>
-                            <ChevronRight size={14} className={`text-ghost transition-transform ${isUserMenuOpen ? 'rotate-90' : ''}`} />
-                        </div>
-                        <UserMenu 
-                            user={auth.user} 
-                            isOpen={isUserMenuOpen} 
-                            onClose={() => setIsUserMenuOpen(false)} 
-                            onNavigate={navigate} 
-                            onLogout={async () => { await auth.logout(); navigate('landing'); }} 
-                        />
-                    </div>
-                </aside>
-            )}
-
             <main className="flex-1 min-h-screen relative w-full overflow-y-auto custom-scrollbar">
-                {!auth.user && !['enter', 'join_network', 'verify_email'].includes(currentPage) && (
-                    <Navbar onNavigate={navigate} currentPage={currentPage} onOpenEnter={() => navigate('enter')} onJoinNetwork={() => navigate('join_network')} />
+                {!['enter', 'join_network', 'verify_email'].includes(currentPage) && (
+                    <Navbar 
+                        onNavigate={navigate} 
+                        currentPage={currentPage}
+                        user={auth.user}
+                        onLogout={async () => { await auth.logout(); navigate('landing'); }}
+                        onOpenCmd={() => setIsCmdOpen(true)}
+                    />
                 )}
 
-                <div className="animate-in fade-in duration-500">
-                    {currentPage === 'landing' && <LandingPage onNavigate={navigate} user={auth.user} isAuthenticated={!!auth.user} onLogin={() => navigate('enter')} onAcquireRequest={(p) => handleBuyRequest(p)} />}
+                <div className="animate-in fade-in duration-500 pt-20 md:pt-24 min-h-[calc(100vh-100px)]">
+                    {currentPage === 'landing' && <LandingPage onNavigate={navigate} />}
                     {currentPage === 'marketplace' && <MarketplacePage onNavigate={navigate} onOpenListing={(l) => { setSelectedListing(l); navigate('listing_detail'); }} />}
                     {currentPage === 'listing_detail' && selectedListing && <ListingPage listing={selectedListing} onNavigate={navigate} onBuy={handleBuyRequest} />}
                     {currentPage === 'forge_audit' && <ForgePage onNavigate={navigate} />}
@@ -207,12 +207,13 @@ const App: React.FC = () => {
                     {currentPage === 'playgrounds' && <PlaygroundsPage onNavigate={navigate} />}
                     {currentPage === 'intel_report' && <IntelReportPage onNavigate={navigate} />}
                     {currentPage === 'wallet' && <WalletPage onNavigate={navigate} />}
-                    {currentPage === 'usage' && <BuyerDashboard onNavigate={navigate} />}
+                    {currentPage === 'usage' && <BuyerDashboard onNavigate={navigate} library={userLibrary} />}
                     {currentPage === 'account' && <AccountPage user={auth.user} onNavigate={navigate} />}
-                    {currentPage === 'checkout' && selectedListing && <CheckoutPage listing={selectedListing} onNavigate={navigate} onConfirmed={() => { if(selectedListing) setUserLibrary(prev => [...prev, selectedListing.id]); toast.showToast("License Uplink Successful.", "success"); navigate('usage'); }} />}
+                    {currentPage === 'checkout' && selectedListing && <CheckoutPage listing={selectedListing} onNavigate={navigate} onConfirmed={handleConfirmedPurchase} />}
                     {currentPage === 'enter' && <EnterGate onEnter={() => navigate('marketplace')} onBack={() => navigate('landing')} onVerificationNeeded={(email) => { setEmailForVerification(email); navigate('verify_email'); }} />}
                     {currentPage === 'join_network' && <JoinNetwork onNavigate={navigate} onComplete={(email) => { setEmailForVerification(email); navigate('verify_email'); }} />}
                     {currentPage === 'verify_email' && <VerifyEmailPage email={emailForVerification!} onNavigateLogin={() => navigate('enter')} />}
+                    {currentPage === 'contact' && <ContactPage onNavigate={navigate} />}
                     {currentPage === 'academy' && <AcademyPage onNavigate={navigate} />}
                     {currentPage === 'intel' && <BlogHub onNavigate={navigate} />}
                     {currentPage === 'network' && <ForumPage onNavigate={navigate} />}

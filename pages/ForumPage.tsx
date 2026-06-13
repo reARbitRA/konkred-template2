@@ -11,6 +11,13 @@ const threads = [
 ];
 
 const ForumPage: React.FC<{ onNavigate: (page: PageView) => void }> = ({ onNavigate }) => {
+  const [searchQuery, setSearchQuery] = React.useState('');
+  
+  const filteredThreads = threads.filter(thread => 
+    thread.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    thread.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    thread.tags.some(t => t.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
   return (
     <div className="p-8 min-h-screen bg-void animate-in fade-in duration-700">
       <div className="max-w-6xl mx-auto space-y-12">
@@ -63,7 +70,11 @@ const ForumPage: React.FC<{ onNavigate: (page: PageView) => void }> = ({ onNavig
            <div className="lg:col-span-3 space-y-4">
              <div className="relative mb-8">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-ghost" size={16} />
-                <input placeholder="Search discussions..." className="w-full bg-void-200 border border-white/10 rounded-xl pl-10 pr-4 py-4 text-sm text-white focus:outline-none focus:border-neon-cyan" />
+                <input 
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search discussions..." 
+                  className="w-full bg-void-200 border border-white/10 rounded-xl pl-10 pr-4 py-4 text-sm text-white focus:outline-none focus:border-neon-cyan" />
              </div>
 
              <div className="bg-void-100 border border-white/10 rounded-2xl overflow-hidden">
@@ -78,7 +89,7 @@ const ForumPage: React.FC<{ onNavigate: (page: PageView) => void }> = ({ onNavig
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-white/5">
-                        {threads.map(thread => (
+                        {filteredThreads.map(thread => (
                           <tr key={thread.id} className="hover:bg-white/[0.03] transition-colors cursor-pointer group">
                             <td className="px-6 py-6">
                                <div className="flex flex-col gap-2">

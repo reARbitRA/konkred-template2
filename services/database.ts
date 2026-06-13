@@ -9,7 +9,9 @@ import {
   getDoc,
   updateDoc,
   increment,
-  onSnapshot
+  onSnapshot,
+  addDoc,
+  serverTimestamp
 } from 'firebase/firestore';
 import { db } from './firebase.ts';
 import { Listing, GlobalStats } from '../types.ts';
@@ -130,7 +132,21 @@ class DatabaseService {
     /**
      * Increments view count for an asset using atomic increment.
      */
-    async recordView(listingId: string) {
+    async createListing(listing: Omit<Listing, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
+    try {
+      const docRef = await addDoc(collection(db, 'protocols'), {
+        ...listing,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+      return docRef.id;
+    } catch (error) {
+      console.error("Error creating listing node:", error);
+      throw error;
+    }
+  }
+
+  async recordView(listingId: string) {
         try {
             const docRef = doc(db, 'protocols', listingId);
             await updateDoc(docRef, { viewCount: increment(1) });
@@ -139,7 +155,7 @@ class DatabaseService {
         }
     }
 
-    async getRecentSearches(): Promise<string[]> {
+  async getRecentSearches(): Promise<string[]> {
         try {
             const stored = localStorage.getItem('konkred_recent_searches');
             return stored ? JSON.parse(stored) : [];
@@ -153,6 +169,38 @@ class DatabaseService {
         const searches = await this.getRecentSearches();
         const updated = [query, ...searches.filter(s => s !== query)].slice(0, 5);
         localStorage.setItem('konkred_recent_searches', JSON.stringify(updated));
+    }
+
+    /**
+     * Retrieves all assets acquired by a specific user from their Firestore library collection.
+     */
+    async getUserLibrary(userId: string): Promise<Listing[]> {
+        try {
+            const libraryRef = collection(db, 'users', userId, 'library');
+            const q = query(libraryRef, orderBy('acquiredAt', 'desc'));
+            const snapshot = await getDocs(q);
+            return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as any as Listing));
+        } catch (error) {
+            console.error("Failed to sync structural library:", error);
+            return [];
+        }
+    }
+
+    /**
+     * Securely records an asset acquisition in the user's permanent enclave.
+     */
+    async purchaseAsset(userId: string, listing: Listing): Promise<void> {
+        try {
+            const libraryRef = collection(db, 'users', userId, 'library');
+            await addDoc(libraryRef, {
+                ...listing,
+                listingId: listing.id,
+                acquiredAt: serverTimestamp()
+            });
+        } catch (error) {
+            console.error("Failed to commit acquisition to ledger:", error);
+            throw error;
+        }
     }
 }
 

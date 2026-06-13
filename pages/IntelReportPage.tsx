@@ -43,7 +43,7 @@ const IntelReportPage: React.FC<{ onNavigate: (page: PageView) => void }> = ({ o
 
   // Compute Softmax normalization (P_i = e^x_i / sum(e^x_j))
   useEffect(() => {
-    const exponents = Object.entries(logits).map(([key, val]) => [key, Math.exp(val)]);
+    const exponents = Object.entries(logits).map(([key, val]) => [key, Math.exp(val as number)]);
     const sumExponents = exponents.reduce((acc, [_, val]) => acc + (val as number), 0) || 1;
     
     const normalized: Record<string, number> = {};

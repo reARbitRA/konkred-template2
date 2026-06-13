@@ -125,6 +125,92 @@ const MarketplacePage: React.FC<MarketplacePageProps> = ({ onNavigate, onOpenLis
             />
           </div>
         </div>
+
+        {/* Pricing Matrix Section */}
+        <section className="mt-28 pt-20 border-t border-white/5 space-y-12" id="marketplace-pricing-matrix">
+           <div className="text-center space-y-4">
+              <span className="text-[10px] font-mono tracking-[0.3em] text-accent-cyan uppercase bg-accent-cyan/10 px-3 py-1.5 rounded-full border border-accent-cyan/20">
+                 Licensing Nodes
+              </span>
+              <h2 className="text-3xl font-bold tracking-tight text-white font-display">Transparent Licensing Plans</h2>
+              <p className="text-text-secondary max-w-md mx-auto text-sm font-light">
+                 Acquire instant access to the entire repository or deploy to independent enclaves.
+              </p>
+           </div>
+
+           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+              {/* Free Plan */}
+              <div className="bg-surface-1 border border-white/5 hover:border-accent-cyan/20 transition-all rounded-2xl p-8 flex flex-col justify-between">
+                 <div className="space-y-4">
+                    <span className="text-[9px] font-mono uppercase tracking-widest text-text-secondary">Free Tier</span>
+                    <h3 className="text-2xl font-bold text-white font-display">Explorer</h3>
+                    <div className="flex items-baseline gap-1">
+                       <span className="text-4xl font-extrabold text-white font-mono">$0</span>
+                       <span className="text-xs text-text-secondary">/ forever</span>
+                    </div>
+                    <p className="text-xs text-text-secondary leading-relaxed font-light">
+                       Access to basic applications, public models, and standardized system instructions with simple email opt-in.
+                    </p>
+                    <ul className="space-y-2 pt-4 text-xs text-text-secondary border-t border-white/5">
+                       <li className="flex items-center gap-2">🟢 Basic App Library</li>
+                       <li className="flex items-center gap-2">🟢 Client-side caching</li>
+                       <li className="flex items-center gap-2">🟢 Standard logic nodes</li>
+                    </ul>
+                 </div>
+                 <button onClick={() => onNavigate('contact')} className="w-full mt-8 py-3 bg-surface-2 hover:bg-surface-1 text-white text-xs font-mono font-bold uppercase tracking-wider rounded-xl border border-white/5 transition-all">
+                    Register Client Node
+                 </button>
+              </div>
+
+              {/* Pro Plan */}
+              <div className="bg-surface-1 border border-accent-cyan/30 shadow-lg shadow-accent-cyan/5 transition-all rounded-2xl p-8 flex flex-col justify-between relative overflow-hidden">
+                 <div className="absolute top-0 right-0 bg-accent-cyan text-black text-[9px] font-mono font-bold uppercase tracking-widest px-4 py-1.5 rounded-bl">
+                    Popular
+                 </div>
+                 <div className="space-y-4">
+                    <span className="text-[9px] font-mono uppercase tracking-widest text-accent-cyan">Pro Tier</span>
+                    <h3 className="text-2xl font-bold text-white font-display">Professional</h3>
+                    <div className="flex items-baseline gap-1">
+                       <span className="text-4xl font-extrabold text-white font-mono">$49</span>
+                       <span className="text-xs text-text-secondary">/ month</span>
+                    </div>
+                    <p className="text-xs text-text-secondary leading-relaxed font-light">
+                       Full access to all 50+ applications, premium agent endpoints, custom prompt variables, and automatic updates.
+                    </p>
+                    <ul className="space-y-2 pt-4 text-xs text-text-secondary border-t border-white/5">
+                       <li className="flex items-center gap-2">🟢 Complete 50+ Apps</li>
+                       <li className="flex items-center gap-2">🟢 Priority model routers</li>
+                       <li className="flex items-center gap-2">🟢 Weekly logic patches</li>
+                    </ul>
+                 </div>
+                 <button onClick={() => onNavigate('contact')} className="w-full mt-8 py-3 bg-white hover:bg-neutral-200 text-black text-xs font-mono font-bold uppercase tracking-wider rounded-xl transition-all font-bold">
+                    Establish Uplink
+                 </button>
+              </div>
+
+              {/* Enterprise Plan */}
+              <div className="bg-surface-1 border border-white/5 hover:border-neon-purple/20 transition-all rounded-2xl p-8 flex flex-col justify-between">
+                 <div className="space-y-4">
+                    <span className="text-[9px] font-mono uppercase tracking-widest text-text-secondary">Dedicated Enclave</span>
+                    <h3 className="text-2xl font-bold text-white font-display">Enterprise / Custom</h3>
+                    <div className="flex items-baseline gap-1">
+                       <span className="text-4xl font-extrabold text-white font-mono">Custom</span>
+                    </div>
+                    <p className="text-xs text-text-secondary leading-relaxed font-light">
+                       Bespoke deployment inside clean server clusters, proprietary database structures, and Arbitra 4 validation.
+                    </p>
+                    <ul className="space-y-2 pt-4 text-xs text-text-secondary border-t border-white/5">
+                       <li className="flex items-center gap-2">🟢 Direct database integrations</li>
+                       <li className="flex items-center gap-2">🟢 Full API proxy systems</li>
+                       <li className="flex items-center gap-2">🟢 Live prompt audits</li>
+                    </ul>
+                 </div>
+                 <button onClick={() => onNavigate('contact')} className="w-full mt-8 py-3 bg-surface-2 hover:bg-surface-1 text-white text-xs font-mono font-bold uppercase tracking-wider rounded-xl border border-white/5 transition-all">
+                    Initiate Advisory
+                 </button>
+              </div>
+           </div>
+        </section>
       </div>
 
       {/* Mobile Filters Overlay */}

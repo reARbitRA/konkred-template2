@@ -4,10 +4,17 @@ import { ArrowLeft, ArrowRight, Shield, Upload, DollarSign, CheckCircle, Info, Z
 import Badge from '../components/common/Badge.tsx';
 import { Listing } from '../types.ts';
 
+import { databaseService } from '../services/database.ts';
+import { useAuth } from '../contexts/AuthContext.tsx';
+import { useToast } from '../contexts/ToastContext.tsx';
+
 const STEPS = ['Identity', 'Architecture', 'Monetization', 'Verification', 'Deployment'];
 
 const ListingWizard: React.FC<{ onComplete: (listing: Listing) => void; onCancel: () => void }> = ({ onComplete, onCancel }) => {
+  const { user } = useAuth();
+  const { showToast } = useToast();
   const [currentStep, setCurrentStep] = useState(0);
+  const [isDeploying, setIsDeploying] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -26,30 +33,38 @@ const ListingWizard: React.FC<{ onComplete: (listing: Listing) => void; onCancel
     }, 2500);
   };
 
-  const handleFinish = () => {
-    // FIX: Updated newListing object to match Listing interface including sellerId and seller object
-    const newListing: Listing = {
-      id: `L-${Date.now()}`,
-      sellerId: 'U1',
-      seller: { name: 'Ari Miyanji', verified: true, totalSales: 0 },
-      title: formData.title || 'Untitled Protocol',
-      shortDescription: formData.description || 'No description provided.',
-      description: formData.description || 'No description provided.',
-      type: formData.type as any,
-      category: formData.category,
-      pricing: { mode: 'one_time', amount: formData.price, currency: 'USD' },
-      delivery: 'api_key',
-      auditScore: auditScore || 0,
-      rating: 0,
-      reviewCount: 0,
-      featured: false,
-      tags: [formData.category, formData.type],
-      salesCount: 0,
-      viewCount: 0,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
-    onComplete(newListing);
+  const handleFinish = async () => {
+    if (!user) return;
+    setIsDeploying(true);
+    
+    try {
+      const newListing: Omit<Listing, 'id' | 'createdAt' | 'updatedAt'> = {
+        sellerId: user.id,
+        seller: { name: user.name, verified: user.verified, totalSales: user.stats.totalSales },
+        title: formData.title || 'Untitled Protocol',
+        shortDescription: formData.description.split('.')[0] + '.',
+        description: formData.description || 'No description provided.',
+        type: formData.type as any,
+        category: formData.category,
+        pricing: { mode: 'one_time', amount: formData.price, currency: 'USD' },
+        delivery: 'download',
+        auditScore: auditScore || 0,
+        rating: 5.0,
+        reviewCount: 0,
+        featured: false,
+        tags: [formData.category, formData.type, 'community-drop'],
+        salesCount: 0,
+        viewCount: 0,
+      };
+
+      const id = await databaseService.createListing(newListing);
+      onComplete({ ...newListing, id, createdAt: new Date(), updatedAt: new Date() } as Listing);
+    } catch (error) {
+      console.error("Uplink failed:", error);
+      showToast("Deployment Handshake Failed. Verify network node.", "error");
+    } finally {
+      setIsDeploying(false);
+    }
   };
 
   const renderStep = () => {
@@ -260,15 +275,15 @@ const ListingWizard: React.FC<{ onComplete: (listing: Listing) => void; onCancel
           )}
           
           <button 
-            disabled={(currentStep === 3 && !auditScore) || isAuditing || (currentStep === 0 && !formData.title)}
+            disabled={(currentStep === 3 && !auditScore) || isAuditing || (currentStep === 0 && !formData.title) || isDeploying}
             onClick={() => {
               if (currentStep === STEPS.length - 1) handleFinish();
               else setCurrentStep(prev => prev + 1);
             }}
             className="px-12 py-4 bg-neon-cyan text-black rounded-xl font-black uppercase tracking-widest hover:shadow-neon-cyan transition-all flex items-center gap-3 text-xs font-mono disabled:opacity-20 disabled:grayscale"
           >
-            {currentStep === STEPS.length - 1 ? 'Deploy to Network' : 'Save & Advance'}
-            <ArrowRight size={16} />
+            {isDeploying ? 'BROADCASTING...' : (currentStep === STEPS.length - 1 ? 'Deploy to Network' : 'Save & Advance')}
+            {isDeploying ? <RefreshCw className="animate-spin" size={16} /> : <ArrowRight size={16} />}
           </button>
         </div>
       </footer>

@@ -14,7 +14,7 @@ import {
 } from 'firebase/auth';
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { useToast } from './ToastContext.tsx';
-import { MOCK_USER } from '../constants.ts';
+
 
 interface AuthContextValue extends AuthState {
   login: (email: string, key: string) => Promise<void>;
@@ -26,13 +26,25 @@ interface AuthContextValue extends AuthState {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-const mapFirebaseUserToAppUser = (firebaseUser: FirebaseUser): User => {
+const mapFirebaseUserToAppUser = (firebaseUser: FirebaseUser, dbData?: any): User => {
   return {
-    ...MOCK_USER,
     id: firebaseUser.uid,
     email: firebaseUser.email || '',
-    name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'Architect',
+    name: dbData?.displayName || firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'Architect',
+    role: dbData?.role || 'buyer',
     verified: firebaseUser.emailVerified,
+    tier: dbData?.tier || dbData?.plan || 'free',
+    balance: dbData?.balance || { fiat: 1000, crypto: 0.1 },
+    stats: dbData?.stats || {
+        totalPurchases: 0,
+        totalSales: 0,
+        totalEarnings: 0,
+        rating: 5.0,
+        reviewCount: 0,
+    },
+    payoutThreshold: dbData?.payoutThreshold || 500,
+    kycStatus: dbData?.kycStatus || 'unverified',
+    createdAt: dbData?.createdAt || new Date(),
   };
 };
 
@@ -42,9 +54,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { showToast } = useToast();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser && firebaseUser.emailVerified) {
-        setUser(mapFirebaseUserToAppUser(firebaseUser));
+        try {
+          const userDocRef = doc(db, 'users', firebaseUser.uid);
+          let userDoc = await getDoc(userDocRef);
+          
+          if (!userDoc.exists()) {
+            const initialProfile = {
+              displayName: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'Architect',
+              email: firebaseUser.email || '',
+              role: 'buyer',
+              tier: 'free',
+              balance: { fiat: 1000, crypto: 0.1 },
+              stats: {
+                  totalPurchases: 0,
+                  totalSales: 0,
+                  totalEarnings: 0,
+                  rating: 5.0,
+                  reviewCount: 0,
+              },
+              payoutThreshold: 500,
+              kycStatus: 'unverified',
+              createdAt: serverTimestamp(),
+            };
+            await setDoc(userDocRef, initialProfile);
+            userDoc = await getDoc(userDocRef);
+          }
+          
+          setUser(mapFirebaseUserToAppUser(firebaseUser, userDoc.data()));
+        } catch (error) {
+          console.error("Error matching or creating secure Firestore profile node:", error);
+          // Standard clinical fallback mapping to ensure user access with initial values
+          setUser(mapFirebaseUserToAppUser(firebaseUser));
+        }
       } else {
         setUser(null);
       }
@@ -62,7 +105,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         await signOut(auth);
         throw { code: 'auth/email-not-verified', email: userCredential.user.email };
       }
-      const appUser = mapFirebaseUserToAppUser(userCredential.user);
+      
+      const userDocRef = doc(db, 'users', userCredential.user.uid);
+      const userDoc = await getDoc(userDocRef);
+      const appUser = mapFirebaseUserToAppUser(userCredential.user, userDoc.exists() ? userDoc.data() : undefined);
       showToast(`Welcome back, ${appUser.name}`, 'success');
     } catch (error: any) {
       if (error.code === 'auth/email-not-verified') throw error;
@@ -82,7 +128,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await setDoc(userDocRef, {
           displayName: name,
           email: email,
-          plan: 'free',
+          role: 'buyer',
+          tier: 'free',
+          balance: { fiat: 1000, crypto: 0.1 },
+          stats: {
+              totalPurchases: 0,
+              totalSales: 0,
+              totalEarnings: 0,
+              rating: 5.0,
+              reviewCount: 0,
+          },
+          payoutThreshold: 500,
+          kycStatus: 'unverified',
           createdAt: serverTimestamp(),
       });
 
@@ -137,9 +194,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     showToast('Session Terminated', 'info');
   }, [showToast]);
 
-  const updateUser = useCallback((updates: Partial<User>) => {
+  const updateUser = useCallback(async (updates: Partial<User>) => {
+    if (!user) return;
     setUser(prev => (prev ? { ...prev, ...updates } : null));
-  }, []);
+    
+    try {
+      const userDocRef = doc(db, 'users', user.id);
+      
+      // Map app balance back to DB structure if updating balance
+      const dbUpdates: any = { ...updates };
+      if (updates.balance) {
+        dbUpdates.balance = updates.balance;
+      }
+      if (updates.stats) {
+        dbUpdates.stats = updates.stats;
+      }
+      
+      await setDoc(userDocRef, dbUpdates, { merge: true });
+    } catch (error) {
+      console.error("Critical: User profile synchronization failed:", error);
+    }
+  }, [user]);
 
   return (
     <AuthContext.Provider value={{ user, isAuthenticated: !!user, isLoading, login, signup, logout, updateUser, signInWithGoogle }}>

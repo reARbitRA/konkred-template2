@@ -30,52 +30,56 @@ const ListingCard: React.FC<ListingCardProps> = ({ listing, onClick }) => {
     booking: <Clock size={12} />,
   }[listing.delivery];
 
+  // Get access tag based on amount
+  const getAccessTag = () => {
+    const amount = listing.pricing.amount;
+    if (amount === 0) return { label: 'Free', color: 'bg-accent-emerald/10 text-accent-emerald border-accent-emerald/20' };
+    if (amount > 0 && amount < 150) return { label: 'Pro', color: 'bg-accent-cyan/10 text-accent-cyan border-accent-cyan/20' };
+    return { label: 'Custom', color: 'bg-neon-purple/10 text-neon-purple border-neon-purple/20' };
+  };
+
+  const accessTag = getAccessTag();
+
   return (
     <div 
       onClick={onClick}
-      className="group concrete-card rounded-lg overflow-hidden hover:border-neon-cyan/50 hover:shadow-elevation-2 transition-all cursor-pointer flex flex-col"
+      className="group bg-surface-1 border border-white/5 rounded-2xl overflow-hidden hover:border-accent-cyan/50 hover:shadow-lg hover:shadow-accent-cyan/5 hover:scale-[1.02] transition-all duration-300 cursor-pointer flex flex-col h-full justify-between"
     >
-      <div className="p-4 flex-1">
-        <div className="flex justify-between items-start mb-3">
-          <span className="text-[10px] font-mono text-ghost uppercase tracking-widest">{listing.type}</span>
-          <div className={`px-2 py-0.5 rounded-sm border text-[10px] font-bold font-mono flex items-center gap-1 ${getAuditColor(listing.auditScore)}`}>
-            <Shield size={10} />
-            AUDIT {listing.auditScore}
+      <div className="p-5 flex-1 flex flex-col justify-between">
+        <div>
+          <div className="flex justify-between items-center mb-4">
+            <span className={`px-2.5 py-1 text-[9px] font-mono rounded-full border ${accessTag.color}`}>
+              {accessTag.label}
+            </span>
+            <div className={`px-2 py-0.5 rounded-sm border text-[10px] font-bold font-mono flex items-center gap-1 ${getAuditColor(listing.auditScore)}`}>
+              <Shield size={10} />
+              AUDIT {listing.auditScore}
+            </div>
           </div>
+
+          <h3 className="text-white font-bold text-lg mb-2 line-clamp-1 group-hover:text-accent-cyan transition-colors font-display">
+            {listing.title}
+          </h3>
+          
+          <p className="text-text-secondary text-xs leading-relaxed mb-6 line-clamp-3 font-light">
+            {listing.shortDescription}
+          </p>
         </div>
 
-        <h3 className="text-white font-bold text-lg mb-1 line-clamp-1 group-hover:text-neon-cyan transition-colors">
-          {listing.title}
-        </h3>
-        <p className="text-ghost-light text-xs leading-relaxed mb-4 line-clamp-2">
-          {listing.shortDescription}
-        </p>
-
-        <div className="flex items-center gap-3 text-[11px] text-ghost">
-          <div className="flex items-center gap-1">
-            <Star size={12} className="text-neon-gold fill-neon-gold" />
-            <span className="text-white">{listing.rating}</span>
-            <span>({listing.reviewCount})</span>
+        <div className="flex items-center justify-between pt-4 border-t border-white/5">
+          <div className="flex flex-col">
+            <span className="text-white font-mono font-bold text-lg">{getPricingDisplay()}</span>
+            <span className="text-[9px] text-text-secondary uppercase tracking-wider font-mono">
+              {listing.pricing.mode.replace('_', ' ')}
+            </span>
           </div>
-          <div className="w-1 h-1 rounded-full bg-white/10" />
-          <div className="flex items-center gap-1">
-            <Award size={12} className="text-neon-blue" />
-            <span>{listing.seller.name}</span>
-          </div>
-        </div>
-      </div>
 
-      <div className="px-4 py-3 bg-white/5 border-t border-white/5 flex items-center justify-between">
-        <div className="flex flex-col">
-          <span className="text-white font-mono font-bold text-lg">{getPricingDisplay()}</span>
-          <span className="text-[9px] text-ghost uppercase tracking-tighter">
-            {listing.pricing.mode.replace('_', ' ')}
-          </span>
-        </div>
-        
-        <div className="flex items-center gap-2 text-ghost-light text-xs font-mono uppercase">
-          {DeliveryIcon}
-          {listing.delivery.replace('_', ' ')}
+          <button 
+            className="px-4 py-2 bg-white hover:bg-neutral-200 text-black text-xs font-mono font-bold uppercase rounded-lg transition-all flex items-center gap-1"
+          >
+            {listing.pricing.amount === 0 ? 'Run App' : 'Get Access'} 
+            <Zap size={10} className="fill-black" />
+          </button>
         </div>
       </div>
     </div>
