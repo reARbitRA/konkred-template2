@@ -25,10 +25,15 @@ import {
   UserCheck,
   ShieldAlert,
   Terminal,
-  Cpu
+  Cpu,
+  Loader2
 } from 'lucide-react';
 import Badge from '../components/common/Badge.tsx';
+import DOMPurify from 'dompurify';
 import { PageView } from '../types.ts';
+import { useAuth } from '../contexts/AuthContext.tsx';
+import { db, OperationType, handleFirestoreError } from '../services/firebase.ts';
+import { collection, addDoc, getDocs, query, orderBy, serverTimestamp, deleteDoc, doc } from 'firebase/firestore';
 
 interface BlogPost {
   id: string | number;
@@ -40,6 +45,7 @@ interface BlogPost {
   views: string;
   comments: number;
   htmlContent: string;
+  authorId?: string;
   isUserUploaded?: boolean;
 }
 
@@ -165,7 +171,9 @@ const DEFAULT_POSTS: BlogPost[] = [
 ];
 
 const BlogHub: React.FC<{ onNavigate: (page: PageView) => void }> = ({ onNavigate }) => {
+  const { user, isAuthenticated } = useAuth();
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   
@@ -181,6 +189,7 @@ const BlogHub: React.FC<{ onNavigate: (page: PageView) => void }> = ({ onNavigat
   const [desc, setDesc] = useState('');
   const [readTime, setReadTime] = useState('5 min');
   const [uploadSuccess, setUploadSuccess] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
   const [fileError, setFileError] = useState('');
 
   // Drag over visual state
@@ -190,30 +199,33 @@ const BlogHub: React.FC<{ onNavigate: (page: PageView) => void }> = ({ onNavigat
   const [emailInput, setEmailInput] = useState('');
 
   // Authorization & Permissions control
-  const [isAuthorized, setIsAuthorized] = useState(() => localStorage.getItem('konkred_blog_authorized') === 'true');
   const [showAuthGate, setShowAuthGate] = useState(false);
-  const [tokenInput, setTokenInput] = useState('');
-  const [authError, setAuthError] = useState('');
-  const [inviteTokens, setInviteTokens] = useState<string[]>(() => {
-    const saved = localStorage.getItem('konkred_invite_tokens');
-    return saved ? JSON.parse(saved) : ['invited-collaborator-99', 'editor-access-token'];
-  });
-  const [showInviteManager, setShowInviteManager] = useState(false);
-  const [newInviteInput, setNewInviteInput] = useState('');
 
-  // Load and merge default posts with user uploaded blogs
+  // Load and merge default posts with Firestore blogs
   useEffect(() => {
-    const saved = localStorage.getItem('konkred_blog_posts');
-    if (saved) {
+    const fetchBlogs = async () => {
+      setLoading(true);
       try {
-        const parsed = JSON.parse(saved) as BlogPost[];
-        setBlogPosts([...parsed, ...DEFAULT_POSTS]);
+        const blogsRef = collection(db, 'blogs');
+        const q = query(blogsRef, orderBy('createdAt', 'desc'));
+        const snapshot = await getDocs(q);
+        const firestorePosts = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          isUserUploaded: true,
+          date: doc.data().createdAt ? new Date(doc.data().createdAt.seconds * 1000).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase() : 'RECENT'
+        } as BlogPost));
+        
+        setBlogPosts([...firestorePosts, ...DEFAULT_POSTS]);
       } catch (err) {
+        console.error("Critical: Hub feed synchronization failed.", err);
         setBlogPosts(DEFAULT_POSTS);
+      } finally {
+        setLoading(false);
       }
-    } else {
-      setBlogPosts(DEFAULT_POSTS);
-    }
+    };
+    
+    fetchBlogs();
   }, []);
 
   // Filter posts based on search
@@ -291,102 +303,91 @@ const BlogHub: React.FC<{ onNavigate: (page: PageView) => void }> = ({ onNavigat
     }
   };
 
-  const handleDeletePost = (id: string | number, e: React.MouseEvent) => {
+  const handleDeletePost = async (id: string | number, e: React.MouseEvent) => {
     e.stopPropagation();
-    const updatedUserPosts = blogPosts
-      .filter(p => p.isUserUploaded && p.id !== id);
-    
-    localStorage.setItem('konkred_blog_posts', JSON.stringify(updatedUserPosts));
-    setBlogPosts([...updatedUserPosts, ...DEFAULT_POSTS]);
-    if (selectedPost?.id === id) {
-      setSelectedPost(null);
+    if (!user) return;
+
+    try {
+      if (typeof id === 'string' && id.startsWith('user-')) {
+          // This case shouldn't happen with firestore but for safety
+          return;
+      }
+      
+      const postRef = doc(db, 'blogs', id as string);
+      await deleteDoc(postRef);
+      setBlogPosts(prev => prev.filter(p => p.id !== id));
+      
+      if (selectedPost?.id === id) {
+        setSelectedPost(null);
+      }
+    } catch (err) {
+      console.error("Disposal failure:", err);
     }
   };
 
-  const handlePublish = (e: React.FormEvent) => {
+  const handlePublish = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user) return;
 
     if (!htmlFileText.trim()) {
       setFileError('Execution error: Raw HTML content core cannot be empty.');
       return;
     }
 
-    const newPost: BlogPost = {
-      id: `user-${Date.now()}`,
-      title: title || 'Strategic Executive Digest',
-      category: category || 'Strategy',
-      date: new Date().toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase(),
-      readTime: readTime || '5 min',
-      desc: desc || 'Briefing with verified computational protocols.',
-      views: '1',
-      comments: 0,
-      htmlContent: htmlFileText,
-      isUserUploaded: true
-    };
+    setIsPublishing(true);
+    setFileError('');
 
-    const saved = localStorage.getItem('konkred_blog_posts');
-    let currentUploaded: BlogPost[] = [];
-    if (saved) {
-      try {
-        currentUploaded = JSON.parse(saved);
-      } catch (err) {}
-    }
+    try {
+      const blogsRef = collection(db, 'blogs');
+      const blogData = {
+        authorId: user.id,
+        title: title || 'Strategic Executive Digest',
+        category: category || 'Strategy',
+        readTime: readTime || '5 min',
+        desc: desc || 'Briefing with verified computational protocols.',
+        views: '1',
+        comments: 0,
+        htmlContent: htmlFileText,
+        createdAt: serverTimestamp()
+      };
 
-    const updated = [newPost, ...currentUploaded];
-    localStorage.setItem('konkred_blog_posts', JSON.stringify(updated));
-    setBlogPosts([...updated, ...DEFAULT_POSTS]);
+      const docRef = await addDoc(blogsRef, blogData);
+      
+      const newPost: BlogPost = {
+        id: docRef.id,
+        ...blogData,
+        date: new Date().toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase(),
+        isUserUploaded: true
+      } as BlogPost;
 
-    setUploadSuccess(true);
-    setTimeout(() => {
-      setUploadSuccess(false);
-      setShowConsole(false);
-      setHtmlFileText('');
-      setFileName('');
-      setTitle('');
-      setDesc('');
-    }, 1500);
-  };
+      setBlogPosts(prev => [newPost, ...prev]);
 
-  const handleAuthorize = (e: React.FormEvent) => {
-    e.preventDefault();
-    const token = tokenInput.trim();
-    if (token === 'admin777' || inviteTokens.includes(token)) {
-      setIsAuthorized(true);
-      localStorage.setItem('konkred_blog_authorized', 'true');
-      setAuthError('');
-      setTokenInput('');
-      setShowAuthGate(false);
-      setShowConsole(true);
-    } else {
-      setAuthError('INVALID ACCESS TOKEN. Authority sequence terminated.');
+      setUploadSuccess(true);
+      setTimeout(() => {
+        setUploadSuccess(false);
+        setShowConsole(false);
+        setHtmlFileText('');
+        setFileName('');
+        setTitle('');
+        setDesc('');
+      }, 1500);
+    } catch (err) {
+      handleFirestoreError(err, OperationType.CREATE, 'blogs');
+    } finally {
+      setIsPublishing(false);
     }
   };
 
-  const handleDeauthorize = () => {
-    setIsAuthorized(false);
-    localStorage.removeItem('konkred_blog_authorized');
-    setShowConsole(false);
-  };
+  const canShowConsole = user?.canGenerateBlogs && user?.acceptedCopyrightTerms;
 
-  const handleGenerateInvite = (e: React.FormEvent) => {
-    e.preventDefault();
-    const token = newInviteInput.trim();
-    if (!token) return;
-    if (inviteTokens.includes(token)) {
-      setNewInviteInput('');
-      return;
-    }
-    const updated = [...inviteTokens, token];
-    setInviteTokens(updated);
-    localStorage.setItem('konkred_invite_tokens', JSON.stringify(updated));
-    setNewInviteInput('');
-  };
-
-  const handleRevokeInvite = (tokenToDelete: string) => {
-    const updated = inviteTokens.filter(t => t !== tokenToDelete);
-    setInviteTokens(updated);
-    localStorage.setItem('konkred_invite_tokens', JSON.stringify(updated));
-  };
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-void font-mono">
+        <Loader2 size={48} className="text-neon-cyan animate-spin mb-4" />
+        <p className="text-[10px] text-neon-cyan uppercase tracking-[0.4em] animate-pulse">SYNCHRONIZING_INTEL_NETWORK...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 md:p-8 min-h-screen brutalist-bg concrete-texture bg-blend-overlay pt-28 font-sans text-text-primary selection:bg-neon-cyan selection:text-black relative">
@@ -517,19 +518,14 @@ const BlogHub: React.FC<{ onNavigate: (page: PageView) => void }> = ({ onNavigat
           </button>
 
           <div className="flex flex-wrap items-center gap-3">
-            {isAuthorized && (
-              <button
-                onClick={handleDeauthorize}
-                className="px-4 py-2 border-2 border-red-500/30 bg-red-950/20 text-[10px] text-red-400 font-mono tracking-wider uppercase font-bold hover:bg-red-950/40 hover:border-red-500/50 transition-all duration-200"
-                id="btn-deauth-operator"
-              >
-                DEAUTHORIZE_OPERATOR
-              </button>
-            )}
-
             <button
               onClick={() => {
-                if (isAuthorized) {
+                if (!isAuthenticated) {
+                  onNavigate('enter');
+                  return;
+                }
+                
+                if (canShowConsole) {
                   setShowConsole(!showConsole);
                   setShowAuthGate(false);
                 } else {
@@ -545,69 +541,56 @@ const BlogHub: React.FC<{ onNavigate: (page: PageView) => void }> = ({ onNavigat
               id="btn-toggle-publisher"
             >
               <Plus size={14} className={`transform transition-transform duration-300 ${showConsole || showAuthGate ? 'rotate-45' : ''}`} />
-              {isAuthorized ? (showConsole ? 'CLOSE_CONSOLE' : 'UPLINK_HTML_BLOG') : (showAuthGate ? 'CANCEL_SYS_AUTH' : 'AUTHORIZE_UPLINK')}
+              {isAuthenticated ? (canShowConsole ? (showConsole ? 'CLOSE_CONSOLE' : 'UPLINK_HTML_BLOG') : (showAuthGate ? 'CANCEL_SYS_AUTH' : 'AUTHORIZE_UPLINK')) : 'LOGIN_TO_UPLINK'}
             </button>
           </div>
         </div>
 
         {/* Secure Authorization Gate Section */}
-        {showAuthGate && !isAuthorized && (
+        {showAuthGate && !canShowConsole && isAuthenticated && (
           <div className="bg-[#0A0A0A] border-2 border-red-500/40 concrete-card p-6 md:p-8 animate-in fade-in slide-in-from-top-4 duration-300 relative overflow-hidden" id="authority-barrier-box">
             {/* Red alert accent boundary */}
             <div className="absolute top-0 left-0 w-full h-[4px] bg-gradient-to-r from-red-600 via-red-500 to-red-600"></div>
             
-            <div className="max-w-md mx-auto text-center space-y-6">
+            <div className="max-w-xl mx-auto text-center space-y-6">
               <div className="w-14 h-14 bg-red-500/10 border-2 border-red-500/30 text-red-400 rounded-none flex items-center justify-center mx-auto shadow-[3px_3px_0px_rgba(239,68,68,0.2)]">
                 <Lock size={22} className="animate-pulse" />
               </div>
               
-              <div className="space-y-2">
-                <h3 className="text-xl font-bold text-white font-display tracking-tight uppercase">OPERATOR AUTH REQUIRED</h3>
-                <p className="text-xs text-text-secondary font-mono leading-relaxed px-4">
-                  Deploying articles directly to the live feed requires cryptographic clearance. Enter your bypass token to unlock publish and peer privilege managers index.
-                </p>
-              </div>
-
-              <form onSubmit={handleAuthorize} className="space-y-4">
-                <div className="space-y-3 text-left">
-                  <label className="text-[9px] font-mono text-red-400 uppercase tracking-[0.2em] block text-center">NODE_VERIFICATION_PASSCODE</label>
+              <div className="space-y-4">
+                <h3 className="text-xl font-bold text-white font-display tracking-tight uppercase">PRECISE PERMISSION REQUIRED</h3>
+                <div className="text-xs text-text-secondary font-mono leading-relaxed px-4 space-y-4 text-left">
+                  <p>Deploying articles to the live KONKRED Intel feed requires explicit cryptographic clearance from the Root Administrator.</p>
                   
-                  <input
-                    type="password"
-                    placeholder="ENTER CRUNCH_KEY_STRAP..."
-                    value={tokenInput}
-                    onChange={(e) => setTokenInput(e.target.value)}
-                    className="w-full bg-[#111] border-2 border-neutral-800 rounded-none px-4 py-3.5 text-xs text-center text-white font-mono focus:outline-none focus:border-red-500 transition-all placeholder:text-neutral-700 tracking-widest focus:shadow-[2px_2px_8px_rgba(239,68,68,0.1)]"
-                  />
-                  
-                  <div className="text-center">
-                    <p className="text-[10px] text-text-secondary font-mono inline-block">
-                      ⚙️ Operator Key: <span className="text-neon-cyan bg-neon-cyan/10 font-bold px-2 py-0.5 border border-neon-cyan/20 font-mono">admin777</span>
+                  <div className="p-4 bg-white/[0.02] border border-white/5 rounded-xl space-y-2">
+                    <p className="text-white flex items-center gap-2">
+                       {user?.acceptedCopyrightTerms ? <CheckCircle2 size={12} className="text-neon-cyan" /> : <Lock size={12} className="text-red-500" />}
+                       COPYRIGHT_TERMS_ACCEPTED: {user?.acceptedCopyrightTerms ? 'TRUE' : 'FALSE'}
+                    </p>
+                    <p className="text-white flex items-center gap-2">
+                       {user?.canGenerateBlogs ? <CheckCircle2 size={12} className="text-neon-cyan" /> : <Lock size={12} className="text-red-500" />}
+                       INTEL_PUBLISH_PERMISSION: {user?.canGenerateBlogs ? 'TRUE' : 'FALSE'}
                     </p>
                   </div>
+                  
+                  <p className="italic opacity-60">Sequence: Only members who signed up agreeing to precise KONKRED copyright rules can be granted this permission. If you have not agreed, your node cannot be elevated.</p>
                 </div>
+              </div>
 
-                {authError && (
-                  <p className="text-xs text-red-500 font-mono text-center flex items-center justify-center gap-1">
-                    <ShieldAlert size={12} /> {authError}
-                  </p>
-                )}
-
-                <div className="pt-2">
-                  <button
-                    type="submit"
-                    className="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3.5 rounded-none text-xs font-mono tracking-widest uppercase transition-all shadow-[3px_3px_0px_#ffffff] hover:shadow-[4px_4px_0px_#ffffff]"
-                  >
-                    CONFIRM_DEPLOYMENT_ROUTE
-                  </button>
-                </div>
-              </form>
+              <div className="pt-2">
+                <button
+                  onClick={() => setShowAuthGate(false)}
+                  className="w-full bg-[#111] border-2 border-neutral-800 text-white font-bold py-3.5 rounded-none text-xs font-mono tracking-widest uppercase transition-all hover:bg-neutral-900"
+                >
+                  DISMISS_BARRIER
+                </button>
+              </div>
             </div>
           </div>
         )}
 
         {/* HTML Uploader Console Area - Matches brutalist concrete panel */}
-        {showConsole && isAuthorized && (
+        {showConsole && canShowConsole && (
           <div className="bg-[#111114] border-2 border-neon-cyan/40 concrete-card p-6 md:p-8 animate-in fade-in slide-in-from-top-6 duration-300 relative overflow-hidden" id="publisher-console-box">
             <div className="absolute top-0 right-0 p-2 font-mono text-[9px] text-neon-cyan/40 pointer-events-none select-none">
               UPLINK_TERM_v4.45
@@ -618,7 +601,7 @@ const BlogHub: React.FC<{ onNavigate: (page: PageView) => void }> = ({ onNavigat
                 <h3 className="text-2xl font-bold text-white font-display flex items-center gap-2 tracking-tight">
                   <Cpu size={22} className="text-neon-cyan" /> TERMINAL: HTML DIRECT_DEPLOY
                 </h3>
-                <p className="text-xs text-text-secondary font-mono mt-0.5">Publish custom responsive HTML payloads directly to root directories.</p>
+                <p className="text-xs text-text-secondary font-mono mt-0.5">Publish custom responsive HTML payloads directly to root directories as {user?.name}.</p>
               </div>
 
               {/* Console Mode Tab Controller */}
@@ -780,9 +763,10 @@ const BlogHub: React.FC<{ onNavigate: (page: PageView) => void }> = ({ onNavigat
                     <div className="flex items-center justify-end border-t border-neutral-850 pt-4">
                       <button
                         type="submit"
-                        className="px-6 py-3.5 bg-neon-cyan text-black font-semibold text-xs font-mono uppercase tracking-widest hover:bg-white transition-all duration-200 flex items-center gap-1.5 shadow-[3px_3px_0px_#ffffff]"
+                        disabled={isPublishing}
+                        className="px-6 py-3.5 bg-neon-cyan text-black font-semibold text-xs font-mono uppercase tracking-widest hover:bg-white transition-all duration-200 flex items-center gap-1.5 shadow-[3px_3px_0px_#ffffff] disabled:opacity-50"
                       >
-                        DEPLOY TO INTEL NODE <ChevronRight size={14} />
+                        {isPublishing ? <Loader2 size={14} className="animate-spin" /> : <>DEPLOY TO INTEL NODE <ChevronRight size={14} /></>}
                       </button>
                     </div>
                   </div>
@@ -796,68 +780,11 @@ const BlogHub: React.FC<{ onNavigate: (page: PageView) => void }> = ({ onNavigat
               </form>
             )}
 
-            {/* Owner Permission Code Generator Section */}
+            {/* Operator Guidelines */}
             <div className="mt-8 pt-6 border-t-2 border-neutral-800 space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <h4 className="text-xs font-mono font-bold tracking-wider text-white uppercase flex items-center gap-1.5">
-                    🔑 CO-PUBLISHER PERMISSIONS ENGINE
-                  </h4>
-                  <p className="text-[10px] text-text-secondary font-mono">Generate and distribute bypass passcodes to grant trusted colleagues HTML upload access.</p>
+                <div className="bg-white/[0.02] border border-white/5 p-4 rounded-xl">
+                   <p className="text-[10px] text-text-secondary font-mono leading-relaxed"><span className="text-neon-cyan">NOTICE:</span> Your credentials are bound to this deployment. All HTML briefings must comply with the <span className="text-neon-cyan">KONKRED Copyright Rules</span>. Plagiarism or unauthorized asset extraction will result in severe reputation penalties and node revocation.</p>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setShowInviteManager(!showInviteManager)}
-                  className="px-4 py-2 bg-[#0A0A0A] hover:bg-neutral-900 hover:text-white text-text-secondary text-[9px] font-mono tracking-widest uppercase border-2 border-neutral-800 transition-all shadow-[2px_2px_0px_rgba(255,255,255,0.05)]"
-                >
-                  {showInviteManager ? 'CLOSE_MANAGER' : 'OPERATE_DELEGATES'}
-                </button>
-              </div>
-
-              {showInviteManager && (
-                <div className="space-y-4 bg-[#0a0a0c] p-4 border-2 border-neutral-800 animate-in fade-in duration-200">
-                  <form onSubmit={handleGenerateInvite} className="flex gap-2">
-                    <input
-                      type="text"
-                      placeholder="e.g. guest-author-alpha"
-                      value={newInviteInput}
-                      onChange={(e) => setNewInviteInput(e.target.value)}
-                      className="bg-[#111] border-2 border-neutral-800 px-4 py-2 text-xs text-white focus:outline-none focus:border-neon-cyan transition-all font-mono flex-1"
-                    />
-                    <button
-                      type="submit"
-                      className="px-4 py-2.5 bg-neon-cyan text-black hover:bg-opacity-95 text-xs font-mono font-bold uppercase transition-all shadow-[2px_2px_0px_#ffffff]"
-                    >
-                      CREATE_TOKEN
-                    </button>
-                  </form>
-
-                  <div className="space-y-2">
-                    <span className="text-[10px] font-mono text-text-secondary uppercase tracking-widest block">Active Delegate Access Tokens:</span>
-                    {inviteTokens.length === 0 ? (
-                      <p className="text-[10px] text-text-secondary font-mono px-3 py-2 bg-[#111] border border-neutral-800 inline-block">No active custom bypass codes. Only master bypass admin777 is active.</p>
-                    ) : (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        {inviteTokens.map((t) => (
-                          <div 
-                            key={t}
-                            className="flex items-center justify-between bg-[#111] px-3 py-2 border border-neutral-800 font-mono text-[10px]"
-                          >
-                            <span className="text-neon-cyan truncate">{t}</span>
-                            <button
-                              type="button"
-                              onClick={() => handleRevokeInvite(t)}
-                              className="text-red-400 hover:text-red-500 hover:bg-red-500/10 px-2.5 py-1 transition-colors text-[9px] font-bold uppercase font-mono tracking-widest"
-                            >
-                              REVOKE
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
             </div>
 
           </div>
@@ -890,7 +817,7 @@ const BlogHub: React.FC<{ onNavigate: (page: PageView) => void }> = ({ onNavigat
             {/* Pure markup direct HTML render */}
             <div 
               className="prose prose-invert max-w-none text-text-secondary leading-relaxed font-light font-sans space-y-6"
-              dangerouslySetInnerHTML={{ __html: selectedPost.htmlContent }}
+              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(selectedPost.htmlContent) }}
               id="raw-html-outlet"
             />
 

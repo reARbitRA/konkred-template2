@@ -14,7 +14,10 @@ interface LandingPageProps {
 
 const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
   return (
-    <div className="min-h-screen bg-zinc-950 text-white selection:bg-cyan-500 selection:text-black overflow-x-hidden">
+    <div className="min-h-screen bg-void text-metal-light selection:bg-signal selection:text-black overflow-x-hidden">
+      {/* Dynamic Scanline overlay across the screen */}
+      <div className="scanline" />
+
       {/* Structural layout alignment wrapper avoids margin leaks & horizontal overflows */}
       <div className="flex flex-col w-full relative">
         {/* Section 1: Navigation & Hero */}

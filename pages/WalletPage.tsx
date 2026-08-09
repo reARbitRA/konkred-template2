@@ -15,7 +15,7 @@ const WalletPage: React.FC<{ onNavigate: (page: PageView) => void }> = ({ onNavi
   const [earnings, setEarnings] = useState(user?.stats?.totalEarnings ?? 0);
   const [isProcessing, setIsProcessing] = useState(false);
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
-  const [withdrawAddress, setWithdrawAddress] = useState('');
+  const [withdrawAddress, setWithdrawAddress] = useState((import.meta as any).env?.VITE_TRUST_WALLET_USDT_TRON || '');
   const [withdrawAmount, setWithdrawAmount] = useState('');
   const [isSubmittingWithdraw, setIsSubmittingWithdraw] = useState(false);
 

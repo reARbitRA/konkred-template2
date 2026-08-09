@@ -67,19 +67,19 @@ const Navbar: React.FC<NavbarProps> = ({
 
   return (
     <>
-      {/* Sleek Accent Indicator Top Line */}
-      <div className="fixed top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-cyan-500 via-emerald-400 to-purple-500 z-50 pointer-events-none" />
+      {/* Solid Caution Accent Top Line */}
+      <div className="fixed top-0 left-0 right-0 h-1.5 bg-signal z-50 pointer-events-none" />
 
       {/* Primary Sticky Header */}
       <motion.nav
-        className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 w-full select-none ${
+        className={`fixed top-0 left-0 right-0 z-40 transition-all duration-150 w-full select-none ${
           isScrolled 
-            ? 'py-3 bg-zinc-950/90 backdrop-blur-md border-b border-zinc-900 shadow-[0_8px_32px_rgba(0,0,0,0.6)]' 
-            : 'py-5 bg-zinc-950/40 backdrop-blur-sm border-b border-zinc-900/40'
+            ? 'py-3 bg-void-100 border-b-4 border-black shadow-brutalist' 
+            : 'py-4 bg-void-100 border-b-4 border-black'
         }`}
         initial={{ y: -60, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.4, ease: 'easeOut' }}
+        transition={{ duration: 0.2 }}
       >
         <div className="max-w-7xl mx-auto px-6 md:px-8 flex items-center justify-between">
           
@@ -88,23 +88,23 @@ const Navbar: React.FC<NavbarProps> = ({
             className="flex items-center gap-3 cursor-pointer group pr-4 shrink-0" 
             onClick={() => onNavigate('landing')}
           >
-            <div className="transition-all duration-300 group-hover:scale-105 group-hover:rotate-6">
+            <div className="transition-all duration-150 group-hover:scale-105">
               <Logo3D size={28} />
             </div>
             <div className="flex flex-col text-left">
               <div className="flex items-center gap-1.5">
                 <span className="text-xs font-mono font-black tracking-[0.25em] text-white uppercase sm:text-sm">KONKRED</span>
-                <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-pulse hidden sm:inline-block" />
+                <span className="h-1.5 w-1.5 rounded-none bg-signal animate-pulse hidden sm:inline-block" />
               </div>
-              <p className="text-[8px] text-zinc-500 font-mono tracking-wider -mt-0.5 uppercase">SYSTEM_NODE://PRE_ALPHA</p>
+              <p className="text-[8px] text-void-600 font-mono tracking-wider -mt-0.5 uppercase">SYSTEM_NODE://CORE</p>
             </div>
           </div>
 
           {/* Active Module Indicator (Only shown on mobile/tablet when Logged In) */}
           {user && (
-            <div className="lg:hidden flex items-center gap-1.5 bg-zinc-900/60 border border-zinc-805 py-0.5 px-2.5 rounded-md">
-              <span className="w-1.5 h-1.5 bg-emerald-450 rounded-full animate-pulse" />
-              <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-zinc-300">
+            <div className="lg:hidden flex items-center gap-1.5 bg-black border-2 border-black py-0.5 px-2.5 rounded-none">
+              <span className="w-1.5 h-1.5 bg-signal rounded-none animate-pulse" />
+              <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-white">
                 {getPageTitle(currentPage)}
               </span>
             </div>
@@ -114,11 +114,11 @@ const Navbar: React.FC<NavbarProps> = ({
           {!user && onOpenCmd && (
             <div 
               onClick={onOpenCmd}
-              className="hidden lg:flex items-center gap-2.5 bg-zinc-950 hover:bg-zinc-900 border border-zinc-850 hover:border-zinc-750 rounded-lg px-3 py-1.5 select-none cursor-pointer transition-all duration-200 w-44 xl:w-52 text-left ml-4"
+              className="hidden lg:flex items-center gap-2.5 bg-black hover:bg-void-200 border-2 border-black rounded-none px-3 py-1.5 select-none cursor-pointer transition-all duration-150 w-44 xl:w-52 text-left ml-4"
             >
-              <Search size={11} className="text-zinc-500 shrink-0" />
-              <span className="text-[9px] font-mono text-zinc-400 tracking-wider truncate">SEARCH CORE...</span>
-              <span className="text-[8px] px-1 bg-zinc-900 border border-zinc-800 rounded font-mono text-zinc-650 ml-auto select-none shrink-0">⌘K</span>
+              <Search size={11} className="text-void-550 shrink-0" />
+              <span className="text-[9px] font-mono text-void-500 tracking-wider truncate">SEARCH CORE_</span>
+              <span className="text-[8px] px-1 bg-void-100 border border-void-300 rounded-none font-mono text-void-600 ml-auto select-none shrink-0 font-bold">⌘K</span>
             </div>
           )}
 
@@ -130,20 +130,11 @@ const Navbar: React.FC<NavbarProps> = ({
                 <button
                   key={item.label}
                   onClick={() => onNavigate(item.page)}
-                  className="relative text-[10px] font-mono uppercase tracking-widest py-1.5 text-zinc-450 hover:text-white font-bold transition-all duration-200 group/link"
+                  className="relative text-[10px] font-mono uppercase tracking-widest py-1.5 hover:text-signal font-black transition-all duration-150 group/link"
                 >
-                  <span className={isActive ? 'text-cyan-400' : 'text-zinc-400 group-hover/link:text-white transition-colors'}>
+                  <span className={isActive ? 'text-signal font-black underline underline-offset-4 decoration-2' : 'text-void-500 group-hover/link:text-white'}>
                     {item.label}
                   </span>
-                  {isActive ? (
-                    <motion.div 
-                      className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-cyan-400" 
-                      layoutId="activeNavIndicator"
-                      transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                    />
-                  ) : (
-                    <span className="absolute bottom-0 left-1/2 w-0 h-[1.5px] bg-zinc-500 transition-all duration-300 group-hover/link:w-full group-hover/link:left-0" />
-                  )}
                 </button>
               );
             })}
@@ -155,37 +146,37 @@ const Navbar: React.FC<NavbarProps> = ({
               <>
                 <button
                   onClick={() => onNavigate('enter')}
-                  className="text-[10px] font-mono uppercase tracking-widest font-bold text-zinc-400 hover:text-white py-2 px-3 transition-colors"
+                  className="text-[10px] font-mono uppercase tracking-widest font-black text-void-500 hover:text-white py-2 px-3 transition-colors"
                 >
                   Sign In
                 </button>
                 <button
                   onClick={() => onNavigate('join_network')}
-                  className="relative overflow-hidden px-4 py-2 bg-gradient-to-r from-cyan-500 to-cyan-600 text-black text-[10px] font-mono tracking-widest font-black rounded-md transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] hover:shadow-[0_0_15px_rgba(34,211,238,0.3)]"
+                  className="relative overflow-hidden px-4 py-2.5 bg-signal text-black text-[10px] font-mono tracking-widest font-black rounded-none border-2 border-black shadow-brutalist hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-brutalist-hover transition-all"
                 >
-                  JOIN_NETWORK
+                  JOIN_NETWORK_
                 </button>
               </>
             ) : (
               /* Compact dashboard user badge */
               <div className="flex items-center gap-4">
-                <div className="flex items-center gap-3 bg-zinc-900/60 border border-zinc-800 py-1 px-3 rounded-lg">
+                <div className="flex items-center gap-3 bg-black border-2 border-black py-1 px-3 rounded-none">
                   <div className="flex flex-col text-right">
-                    <span className="text-[9px] font-bold text-white uppercase tracking-wider">{user.name}</span>
-                    <span className="text-[9px] font-mono text-emerald-400 font-semibold">${user.balance.fiat.toLocaleString()}</span>
+                    <span className="text-[9px] font-black text-white uppercase tracking-wider">{user.name}</span>
+                    <span className="text-[9px] font-mono text-signal font-bold">${user.balance.fiat.toLocaleString()}</span>
                   </div>
                   <div 
-                    className="w-7 h-7 rounded-md bg-gradient-to-br from-cyan-400 to-purple-500 p-[1px] cursor-pointer hover:opacity-80 transition-opacity" 
+                    className="w-7 h-7 rounded-none bg-signal p-[1px] cursor-pointer hover:opacity-80 transition-opacity" 
                     onClick={() => onNavigate('account')}
                   >
-                    <div className="w-full h-full bg-zinc-950 rounded-[5px] flex items-center justify-center font-bold text-white text-[9px]">
+                    <div className="w-full h-full bg-void-100 rounded-none flex items-center justify-center font-bold text-white text-[9px] border border-black">
                       {user.name.substring(0, 2).toUpperCase()}
                     </div>
                   </div>
                 </div>
                 <button 
                   onClick={onLogout}
-                  className="p-2 text-zinc-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
+                  className="p-2 text-void-600 hover:text-red-500 hover:bg-black border border-transparent hover:border-black rounded-none transition-all"
                   title="Terminate Session"
                 >
                   <LogOut size={16} />
@@ -196,7 +187,7 @@ const Navbar: React.FC<NavbarProps> = ({
 
           {/* Responsive Hamburger Toggle - ONLY show below md/lg viewports */}
           <button 
-            className="md:hidden p-2 border border-zinc-850 hover:border-zinc-750 hover:bg-zinc-900 text-zinc-400 hover:text-white rounded-lg transition-all focus:outline-none" 
+            className="md:hidden p-2 border-2 border-black bg-black text-zinc-400 hover:text-white rounded-none transition-all focus:outline-none" 
             onClick={() => setIsOpen(!isOpen)}
             aria-label="Toggle Menu"
           >

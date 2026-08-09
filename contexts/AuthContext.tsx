@@ -10,7 +10,8 @@ import {
   updateProfile,
   type User as FirebaseUser,
   GoogleAuthProvider,
-  signInWithPopup
+  signInWithPopup,
+  signInWithCustomToken
 } from 'firebase/auth';
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { useToast } from './ToastContext.tsx';
@@ -18,10 +19,11 @@ import { useToast } from './ToastContext.tsx';
 
 interface AuthContextValue extends AuthState {
   login: (email: string, key: string) => Promise<void>;
-  signup: (email: string, key: string, name: string) => Promise<string | null>;
+  signup: (email: string, key: string, name: string, acceptedCopyrightTerms: boolean) => Promise<string | null>;
   logout: () => Promise<void>;
   updateUser: (updates: Partial<User>) => void;
   signInWithGoogle: () => Promise<void>;
+  signInWithGithub: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -44,6 +46,8 @@ const mapFirebaseUserToAppUser = (firebaseUser: FirebaseUser, dbData?: any): Use
     },
     payoutThreshold: dbData?.payoutThreshold || 500,
     kycStatus: dbData?.kycStatus || 'unverified',
+    acceptedCopyrightTerms: dbData?.acceptedCopyrightTerms || false,
+    canGenerateBlogs: dbData?.canGenerateBlogs || false,
     createdAt: dbData?.createdAt || new Date(),
   };
 };
@@ -54,6 +58,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { showToast } = useToast();
 
   useEffect(() => {
+    const handleOauthMessage = async (event: MessageEvent) => {
+      const origin = event.origin;
+      if (!origin.endsWith('.run.app') && !origin.includes('localhost')) {
+        return;
+      }
+      
+      if (event.data?.type === 'OAUTH_AUTH_SUCCESS' && event.data?.token) {
+        setIsLoading(true);
+        try {
+          const result = await signInWithCustomToken(auth, event.data.token);
+          const firebaseUser = result.user;
+          const userDocRef = doc(db, 'users', firebaseUser.uid);
+          const userDoc = await getDoc(userDocRef);
+          
+          setUser(mapFirebaseUserToAppUser(firebaseUser, userDoc.exists() ? userDoc.data() : undefined));
+          showToast(`Neural Link Elevated: GitHub Connection Secure`, 'success');
+        } catch (error: any) {
+          console.error("Custom token authentication failed:", error);
+          showToast(error.message || 'Custom credential parsing failed.', 'error');
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    window.addEventListener('message', handleOauthMessage);
+
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser && firebaseUser.emailVerified) {
         try {
@@ -83,8 +114,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }
           
           setUser(mapFirebaseUserToAppUser(firebaseUser, userDoc.data()));
-        } catch (error) {
-          console.error("Error matching or creating secure Firestore profile node:", error);
+        } catch (error: any) {
+          console.warn("Firestore profile sync notice (using local profile session fallback):", error?.message || error);
           // Standard clinical fallback mapping to ensure user access with initial values
           setUser(mapFirebaseUserToAppUser(firebaseUser));
         }
@@ -94,8 +125,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsLoading(false);
     });
 
-    return () => unsubscribe();
-  }, []);
+    return () => {
+      window.removeEventListener('message', handleOauthMessage);
+      unsubscribe();
+    };
+  }, [showToast]);
 
   const login = useCallback(async (email: string, key: string) => {
     try {
@@ -119,7 +153,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [showToast]);
 
-  const signup = useCallback(async (email: string, key: string, name: string): Promise<string | null> => {
+  const signup = useCallback(async (email: string, key: string, name: string, acceptedCopyrightTerms: boolean): Promise<string | null> => {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, key);
       await updateProfile(userCredential.user, { displayName: name });
@@ -140,6 +174,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           },
           payoutThreshold: 500,
           kycStatus: 'unverified',
+          acceptedCopyrightTerms,
+          canGenerateBlogs: false, // Default to false, needs manual elevation by admin
           createdAt: serverTimestamp(),
       });
 
@@ -188,6 +224,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [showToast]);
 
+  const signInWithGithub = useCallback(async () => {
+    try {
+      const response = await fetch(`/api/auth/github/url?redirectUri=${encodeURIComponent(window.location.origin + '/auth/callback')}`);
+      if (!response.ok) {
+        const errTxt = await response.text();
+        throw new Error(errTxt || 'Failed to initiate GitHub authentication sequence.');
+      }
+      const { url } = await response.json();
+      const width = 600;
+      const height = 700;
+      const left = window.screen.width / 2 - width / 2;
+      const top = window.screen.height / 2 - height / 2;
+      const popup = window.open(
+        url,
+        'github_oauth_popup',
+        `width=${width},height=${height},top=${top},left=${left},scrollbars=yes`
+      );
+      if (!popup) {
+        showToast('Please enable popups to establish GitHub Handshake Uplink.', 'error');
+      }
+    } catch (error: any) {
+      console.error('GitHub Auth initiation failed:', error);
+      showToast(error.message || 'GitHub Handshake failed.', 'error');
+      throw error;
+    }
+  }, [showToast]);
+
   const logout = useCallback(async () => {
     await signOut(auth);
     setUser(null);
@@ -217,7 +280,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [user]);
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: !!user, isLoading, login, signup, logout, updateUser, signInWithGoogle }}>
+    <AuthContext.Provider value={{ user, isAuthenticated: !!user, isLoading, login, signup, logout, updateUser, signInWithGoogle, signInWithGithub }}>
       {children}
     </AuthContext.Provider>
   );

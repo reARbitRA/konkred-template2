@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { X, ArrowRight, CheckCircle2, Github, Mail, Sparkles, ArrowLeft, Loader2, Lock } from 'lucide-react';
+import { X, ArrowRight, CheckCircle2, Github, Mail, Sparkles, ArrowLeft, Loader2, Lock, Check } from 'lucide-react';
 import { PageView } from '../types';
 import { useAuth } from '../contexts/AuthContext.tsx';
 
@@ -14,15 +14,22 @@ const JoinNetwork: React.FC<JoinNetworkProps> = ({ onNavigate, onComplete }) => 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [acceptedCopyright, setAcceptedCopyright] = useState(false);
   const [status, setStatus] = useState<'idle' | 'loading' | 'success'>('idle');
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!acceptedCopyright) {
+      setError("You must agree to the KONKRED Copyright Rules to proceed.");
+      return;
+    }
+
     setStatus('loading');
     setError(null);
     try {
-      const userEmail = await signup(email, password, name);
+      const userEmail = await signup(email, password, name, acceptedCopyright);
       if (userEmail) {
         onComplete(userEmail);
       } else {
@@ -100,6 +107,23 @@ const JoinNetwork: React.FC<JoinNetworkProps> = ({ onNavigate, onComplete }) => 
                 className="w-full bg-void-200 concrete-card px-4 py-4 text-sm text-white placeholder-ghost outline-none transition-all rounded-xl font-mono"
                 required
               />
+            </div>
+
+            <div 
+              className="flex items-start gap-3 p-4 bg-white/[0.02] border border-white/5 rounded-2xl cursor-pointer hover:bg-white/[0.04] transition-all" 
+              onClick={() => setAcceptedCopyright(!acceptedCopyright)}
+            >
+                <div className={`mt-1 w-4 h-4 border rounded flex items-center justify-center transition-all ${acceptedCopyright ? 'bg-neon-cyan border-neon-cyan' : 'border-white/20'}`}>
+                    {acceptedCopyright && <Check size={10} className="text-black" />}
+                </div>
+                <div className="text-left">
+                    <p className="text-[9px] text-ghost leading-tight font-mono uppercase tracking-wider">
+                        I agree to the precise terms and conditions of <span className="text-neon-cyan font-bold underline">KONKRED copyright rules</span>. 
+                    </p>
+                    <p className="text-[8px] text-ghost/60 font-mono mt-1 leading-relaxed">
+                        Only verified members with precise permission can generate and publish HTML briefings.
+                    </p>
+                </div>
             </div>
             
             <button 

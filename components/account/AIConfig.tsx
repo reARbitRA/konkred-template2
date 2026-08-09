@@ -77,8 +77,8 @@ const AIConfig: React.FC = () => {
   };
 
   const handleTest = async (id: AIProviderID) => {
-    // FIX: Using environment key directly for Google provider testing as per guidelines.
-    const keyToUse = id === 'google' ? process.env.API_KEY : keys[id];
+    // SECURED: Using internal secure proxy on server side to test Google nodes, completely hiding key
+    const keyToUse = id === 'google' ? 'internal-secured' : keys[id];
     if (!keyToUse) {
       showToast("Uplink requires a valid access key.", "warning");
       return;

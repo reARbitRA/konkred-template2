@@ -2,8 +2,9 @@
 import React, { useState } from 'react';
 import { Listing, LicenseType } from '../../types.ts';
 import { LICENSE_TYPES } from '../../constants.ts';
-import { X, CheckCircle, Shield, Zap, Download, Star, Award, Clock, FileText, ChevronRight } from 'lucide-react';
+import { X, CheckCircle, Shield, Zap, Download, Star, Award, Clock, FileText, ChevronRight, Terminal, Activity } from 'lucide-react';
 import Badge from '../common/Badge.tsx';
+import AppTester from '../common/AppTester.tsx';
 
 interface ListingDetailsProps {
   listing: Listing;
@@ -13,9 +14,11 @@ interface ListingDetailsProps {
 
 const ListingDetails: React.FC<ListingDetailsProps> = ({ listing, onClose, onAcquire }) => {
   const [selectedLicense, setSelectedLicense] = useState<LicenseType>('personal');
+  const [showTester, setShowTester] = useState(false);
   
   const currentLicense = LICENSE_TYPES.find(l => l.id === selectedLicense)!;
   const totalPrice = listing.pricing.amount * currentLicense.multiplier;
+  const estimatedCost = Math.round(totalPrice + 18);
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 sm:p-12 overflow-y-auto bg-void/95 backdrop-blur-2xl">
@@ -92,21 +95,40 @@ const ListingDetails: React.FC<ListingDetailsProps> = ({ listing, onClose, onAcq
 
               <div className="space-y-4">
                  <h3 className="text-xs font-mono font-black text-ghost uppercase tracking-[0.4em]">2. Value Allocation</h3>
-                 <div className="concrete-card p-8 rounded-2xl bg-black border-white/10">
+                 <div className="concrete-card p-6 rounded-2xl bg-black border-white/10 space-y-3">
                     <div className="flex justify-between items-end">
                        <div>
-                          <p className="text-[10px] font-mono text-ghost uppercase mb-2">Total Settlement</p>
-                          <div className="text-5xl font-black text-white font-display">${totalPrice.toLocaleString()}</div>
+                          <p className="text-[10px] font-mono text-ghost uppercase mb-1">Total Settlement</p>
+                          <div className="text-4xl font-black text-white font-display">${totalPrice.toLocaleString()}</div>
                        </div>
-                       <Badge variant="cyan" className="mb-2">USD Equivalency</Badge>
+                       <Badge variant="cyan" className="mb-1">USD Equivalency</Badge>
+                    </div>
+
+                    {/* Live Estimated Cost Bar */}
+                    <div className="pt-3 border-t border-white/5 space-y-1.5">
+                      <div className="flex justify-between text-[9px] font-mono">
+                        <span className="text-ghost uppercase flex items-center gap-1">
+                          <Activity size={10} className="text-neon-cyan" /> Est. Monthly Compute
+                        </span>
+                        <span className="text-neon-cyan font-bold">~${estimatedCost}/mo</span>
+                      </div>
+                      <div className="h-1 bg-white/5 rounded-full overflow-hidden">
+                        <div className="h-full bg-neon-cyan" style={{ width: `${Math.min(100, (totalPrice / estimatedCost) * 100)}%` }} />
+                      </div>
                     </div>
                  </div>
               </div>
             </div>
 
-            <div className="space-y-6 pt-12">
-               <button onClick={() => onAcquire(selectedLicense)} className="w-full bg-neon-cyan text-black py-6 rounded-2xl font-black tracking-[0.2em] hover:shadow-[0_0_30px_rgba(255,149,0,0.3)] transition-all flex items-center justify-center gap-3 text-sm uppercase">
+            <div className="space-y-4 pt-8">
+               <button onClick={() => onAcquire(selectedLicense)} className="w-full bg-neon-cyan text-black py-5 rounded-2xl font-black tracking-[0.2em] hover:shadow-[0_0_30px_rgba(255,149,0,0.3)] transition-all flex items-center justify-center gap-3 text-sm uppercase">
                   INITIALIZE ACQUISITION <ChevronRight size={18} />
+               </button>
+               <button 
+                  onClick={() => setShowTester(true)} 
+                  className="w-full py-4 rounded-2xl border border-neon-cyan/30 bg-neon-cyan/10 hover:bg-neon-cyan/20 text-neon-cyan text-xs font-mono font-bold tracking-[0.2em] uppercase transition-all flex items-center justify-center gap-2"
+               >
+                  <Terminal size={14} /> Quick Test Runtime
                </button>
                <div className="flex items-center justify-center gap-3 opacity-40">
                   <Shield size={14} className="text-neon-green" />
@@ -116,6 +138,16 @@ const ListingDetails: React.FC<ListingDetailsProps> = ({ listing, onClose, onAcq
           </div>
         </div>
       </div>
+
+      <AppTester 
+        listing={listing} 
+        isOpen={showTester} 
+        onClose={() => setShowTester(false)} 
+        onAcquire={() => {
+          setShowTester(false);
+          onAcquire(selectedLicense);
+        }} 
+      />
     </div>
   );
 };

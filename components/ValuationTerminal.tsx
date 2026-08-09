@@ -1,8 +1,8 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { X, LayoutDashboard, Database, Settings, Search, ArrowLeft, Loader2, Link as LinkIcon, Zap, TrendingUp, Percent, DollarSign, Activity, Cpu, Lock, RefreshCw, BarChart2 } from 'lucide-react';
-import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
 import Badge from './common/Badge.tsx';
+import DOMPurify from 'dompurify';
 import VoiceOrb from './common/VoiceOrb.tsx';
 
 interface ValuationTerminalProps {
@@ -46,17 +46,31 @@ const ValuationTerminal: React.FC<ValuationTerminalProps> = ({ onExit }) => {
     setGroundingUrls([]);
 
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-      const response: GenerateContentResponse = await ai.models.generateContent({
-        model: "gemini-3-pro-preview",
-        contents: `Analyze the current market demand, valuation multiples, recent funding rounds, and key competitors for: "${searchQuery}". Provide a concise executive summary formatted in markdown.`,
-        config: {
-          tools: [{ googleSearch: {} }],
+      const response = await fetch('/api/ai/generate', {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
+        body: JSON.stringify({
+          provider: "google",
+          messages: [{
+            role: "user",
+            content: `Analyze the current market demand, valuation multiples, recent funding rounds, and key competitors for: "${searchQuery}". Provide a concise executive summary formatted in markdown.`
+          }],
+          config: {
+            defaultModel: "gemini-3-pro-preview",
+            tools: [{ googleSearch: {} }],
+          },
+        })
       });
 
-      const text = response.text;
-      const groundingChunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks;
+      if (!response.ok) {
+        throw new Error("Failed to authenticate AI synthesis uplink.");
+      }
+
+      const resultData = await response.json();
+      const text = resultData.text;
+      const groundingChunks = resultData.groundingChunks;
 
       setAiResponse(text || 'System failed to synthesize a response. Connection verified but telemetry data empty.');
 
@@ -188,7 +202,7 @@ const ValuationTerminal: React.FC<ValuationTerminalProps> = ({ onExit }) => {
                 <span className="text-[10px] font-mono text-neon-cyan uppercase tracking-widest">Synthesis Report</span>
                 <span className="text-[10px] font-mono text-ghost uppercase">Source: Deep_Graph_v4</span>
             </div>
-            <div className="prose prose-sm prose-invert" dangerouslySetInnerHTML={{ __html: aiResponse.replace(/\n/g, '<br />') }} />
+            <div className="prose prose-sm prose-invert" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(aiResponse.replace(/\n/g, '<br />')) }} />
 
             {groundingUrls.length > 0 && (
               <div className="mt-8 pt-6 border-t border-white/5">

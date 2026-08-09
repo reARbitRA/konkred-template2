@@ -13,7 +13,7 @@ import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 interface AuthContextValue extends AuthState {
     login: (email: string, password: string) => Promise<void>;
-    signup: (email: string, password: string, name: string) => Promise<void>;
+    signup: (email: string, password: string, name: string, acceptedCopyrightTerms: boolean) => Promise<void>;
     logout: () => void;
     updateUser: (updates: Partial<User>) => void;
 }
@@ -42,6 +42,8 @@ const mapFirebaseToAppUser = async (firebaseUser: FirebaseUser): Promise<User> =
     },
     payoutThreshold: userData?.payoutThreshold || 100,
     kycStatus: userData?.kycStatus || 'unverified',
+    acceptedCopyrightTerms: userData?.acceptedCopyrightTerms || false,
+    canGenerateBlogs: userData?.canGenerateBlogs || false,
     createdAt: userData?.createdAt || new Date(),
   };
 };
@@ -69,7 +71,7 @@ export const useAuthProvider = (): AuthContextValue => {
         await signInWithEmailAndPassword(auth, email, pass);
     }, []);
 
-    const signup = useCallback(async (email: string, pass: string, name: string) => {
+    const signup = useCallback(async (email: string, pass: string, name: string, acceptedCopyrightTerms: boolean) => {
         // FIX: Using modular createUserWithEmailAndPassword function
         const res = await createUserWithEmailAndPassword(auth, email, pass);
         const userRef = doc(db, 'users', res.user.uid);
@@ -80,6 +82,8 @@ export const useAuthProvider = (): AuthContextValue => {
             tier: 'free',
             createdAt: serverTimestamp(),
             balance: { fiat: 0, crypto: 0 },
+            acceptedCopyrightTerms,
+            canGenerateBlogs: false,
             stats: { totalPurchases: 0, totalSales: 0, totalEarnings: 0, rating: 0, reviewCount: 0 }
         });
     }, []);

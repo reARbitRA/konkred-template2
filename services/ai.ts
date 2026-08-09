@@ -1,5 +1,4 @@
 
-import { GoogleGenAI, Type } from "@google/genai";
 import { AIProviderID, AIProviderConfig, AuditResult } from '../types.ts';
 import { db } from './firebase.ts';
 import { doc, setDoc, serverTimestamp, getDoc } from 'firebase/firestore';
@@ -14,35 +13,45 @@ class UnifiedAIService {
    * This is the core verification layer for all assets on the platform.
    */
   async runAudit(payload: string, userId: string): Promise<AuditResult> {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-    const response = await ai.models.generateContent({
-      model: "gemini-3-pro-preview",
-      contents: [{
-        parts: [{
-          text: `Perform an exhaustive architecture audit for KONKRED Executive Systems.
+    const response = await fetch('/api/ai/generate', {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        provider: "google",
+        messages: [{
+          role: "user",
+          content: `Perform an exhaustive architecture audit for KONKRED Executive Systems.
           Score the payload on: Logical Integrity (0-100), Safety/Compliance (0-100), and Execution Efficiency (0-100).
           Input: "${payload}"`
-        }]
-      }],
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            overallScore: { type: Type.NUMBER },
-            logic: { type: Type.NUMBER },
-            safety: { type: Type.NUMBER },
-            efficiency: { type: Type.NUMBER },
-            summary: { type: Type.STRING },
-            vulnerabilities: { type: Type.ARRAY, items: { type: Type.STRING } },
-            recommendations: { type: Type.ARRAY, items: { type: Type.STRING } }
-          },
-          required: ["overallScore", "logic", "safety", "efficiency", "summary"]
+        }],
+        config: {
+          defaultModel: "gemini-3-pro-preview",
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: "OBJECT",
+            properties: {
+              overallScore: { type: "NUMBER" },
+              logic: { type: "NUMBER" },
+              safety: { type: "NUMBER" },
+              efficiency: { type: "NUMBER" },
+              summary: { type: "STRING" },
+              vulnerabilities: { type: "ARRAY", items: { type: "STRING" } },
+              recommendations: { type: "ARRAY", items: { type: "STRING" } }
+            },
+            required: ["overallScore", "logic", "safety", "efficiency", "summary"]
+          }
         }
-      }
+      })
     });
 
-    const data = JSON.parse(response.text?.trim() || '{}');
+    if (!response.ok) {
+      throw new Error("Audit service uplink failed.");
+    }
+
+    const resultData = await response.json();
+    const data = JSON.parse(resultData.text?.trim() || '{}');
     const auditId = `aud_${Date.now()}`;
     
     const result: AuditResult = {
@@ -59,6 +68,37 @@ class UnifiedAIService {
   }
 
   /**
+   * Executes a highly structured enterprise-grade agent logic sequence.
+   */
+  async runGenericAgent(prompt: string, schema: any, userId: string): Promise<any> {
+    const response = await fetch('/api/ai/generate', {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        provider: "google",
+        messages: [{
+          role: "user",
+          content: prompt
+        }],
+        config: {
+          defaultModel: "gemini-3.1-pro-preview",
+          responseMimeType: "application/json",
+          responseSchema: schema
+        }
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error("Enterprise Agent execution failed.");
+    }
+
+    const resultData = await response.json();
+    return JSON.parse(resultData.text?.trim() || '{}');
+  }
+
+  /**
    * Executes a chat completion using the user's preferred external provider.
    */
   async executiveChat(userId: string, messages: ChatMessage[]) {
@@ -70,18 +110,25 @@ class UnifiedAIService {
 
     if (!configSnap.exists() || !keysSnap.exists()) {
         // Default to internal Gemini if user has no keys
-        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-        const response = await ai.models.generateContent({
-          model: "gemini-3-flash-preview",
-          contents: messages.map(m => ({
-            role: m.role === 'assistant' ? 'model' : 'user',
-            parts: [{ text: m.content }]
-          })),
-          config: {
-            temperature: 0.7,
-          }
+        const response = await fetch('/api/ai/generate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            provider: 'google',
+            messages,
+            config: {
+              defaultModel: 'gemini-3-flash-preview',
+              temperature: 0.7,
+            }
+          })
         });
-        return response.text;
+        if (!response.ok) {
+          throw new Error("Gateway failed to proxy internal Gemini node.");
+        }
+        const data = await response.json();
+        return data.text;
     }
 
     const config = configSnap.data() as AIProviderConfig;

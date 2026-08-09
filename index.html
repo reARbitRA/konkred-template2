@@ -9,11 +9,10 @@
     
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>◆</text></svg>">
-    
-    <!-- Fonts -->
+       <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700;800;900&family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     
     <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -23,45 +22,56 @@
             theme: {
                 extend: {
                     fontFamily: {
-                        sans: ['Inter', 'system-ui', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'Menlo', 'monospace'],
-                        display: ['Space Grotesk', 'Inter', 'sans-serif'],
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['IBM Plex Mono', 'monospace'],
+                        display: ['IBM Plex Mono', 'monospace'],
                         vazir: ['Vazirmatn', 'Inter', 'sans-serif'],
                     },
                     colors: {
                         'void': {
-                            DEFAULT: '#050505',
-                            50: '#0c0c0d',
-                            100: '#121212',
-                            200: '#18181a',
-                            300: '#1f1f24',
-                            400: '#2a2a30',
-                            500: '#35353d',
+                            DEFAULT: '#0B0F14',   // Void-1
+                            50: '#0B0F14',
+                            100: '#0E1319',  // Void-2 / Card
+                            200: '#0D1218',  // Card / alt / Tool rows
+                            300: '#1A212B',  // Line / Border
+                            400: '#222B36',  // Line-2 / Hover
+                            500: '#9AA0A8',  // Muted secondary text
+                            600: '#6B717A',  // Mid / Meta
                         },
-                        'neon': {
-                            cyan: '#ccff00', 
-                            blue: '#ccff00',
-                            purple: '#ffea00',
-                            pink: '#ffea00',
-                            green: '#ccff00',
-                            orange: '#ffea00',
-                            red: '#ff3366',
-                            gold: '#ffea00',
+                        'clinical': {
+                            DEFAULT: '#D7D9DD', // Light Gray
+                            light: '#E8E9EC',   // Concrete Light / Cube top
+                            shadow: '#C1C4C9',  // Concrete Shadow / Cube right
+                        },
+                        'signal': {
+                            DEFAULT: '#D98A2E', // Signal Amber / Accent
+                            accent: '#D98A2E',
+                            hover: '#C2751E',
+                        },
+                        'caution': {
+                            DEFAULT: '#D98A2E', // Alias of signal accent
+                            accent: '#D98A2E',
+                            hover: '#C2751E',
                         },
                         'metal': {
-                            light: '#e4e4e7',
-                            DEFAULT: '#a1a1aa',
-                            dark: '#52525b',
-                            darker: '#27272a',
+                            light: '#D7D9DD',
+                            DEFAULT: '#9AA0A8',
+                            dark: '#6B717A',
+                            darker: '#222B36',
                         },
                         'ghost': {
-                            DEFAULT: '#71717a',
-                            light: '#a1a1aa',
-                            lighter: '#d4d4d8',
+                            DEFAULT: '#9AA0A8',
+                            light: '#D7D9DD',
+                            lighter: '#E8E9EC',
                         },
                     },
                     boxShadow: {
-                        'neon-cyan': '0 0 15px rgba(204, 255, 0, 0.4)',
+                        'brutalist': '4px 4px 0px 0px #000000',
+                        'brutalist-hover': '6px 6px 0px 0px #000000',
+                        'brutalist-lg': '8px 8px 0px 0px #000000',
+                        'brutalist-yellow': '4px 4px 0px 0px #D98A2E',
+                        'brutalist-yellow-lg': '8px 8px 0px 0px #D98A2E',
+                        'neon-cyan': '0 0 15px rgba(217, 138, 46, 0.4)',
                     },
                     animation: {
                         'slide-up': 'slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards',
@@ -113,38 +123,74 @@
     
     <style>
         :root {
-            --color-void: #050505;
-            --color-neon-cyan: #ccff00;
-            --transition-normal: 300ms;
+            --color-void: #0B0F14;
+            --color-caution: #D98A2E;
+            --color-neon-cyan: #D98A2E;
+            --transition-normal: 150ms;
         }
         body {
             background: var(--color-void);
-            color: #e4e4e7;
-            font-family: 'Inter', system-ui, sans-serif;
+            color: #D7D9DD;
+            font-family: 'Inter', sans-serif;
             overflow-x: hidden;
         }
         .bg-void-gradient {
-            background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(204, 255, 0, 0.05) 0%, transparent 50%), #050505;
+            background-color: #0B0F14;
+            background-image: 
+                radial-gradient(ellipse 60% 40% at 50% 0%, rgba(217, 138, 46, 0.03) 0%, transparent 60%),
+                linear-gradient(rgba(255, 255, 255, 0.01) 1px, transparent 1px), 
+                linear-gradient(90deg, rgba(255, 255, 255, 0.01) 1px, transparent 1px);
+            background-size: 100% 100%, 30px 30px, 30px 30px;
         }
         .preserve-3d { transform-style: preserve-3d; }
         .perspective-1000 { perspective: 1000px; }
         
         .btn-primary {
-            background: linear-gradient(135deg, #ccff00 0%, #a3cc00 100%);
-            color: #050505;
-            font-weight: 600;
-            padding: 10px 24px;
-            border-radius: 8px;
-            transition: all 0.3s ease;
+            background: #D98A2E;
+            color: #000000;
+            font-weight: 800;
+            text-transform: uppercase;
+            padding: 12px 24px;
+            border: 3px solid #000000;
+            border-radius: 0px !important;
+            box-shadow: 4px 4px 0px 0px #000000;
+            transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
         }
+        .btn-primary:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0px 0px #000000;
+        }
+        .btn-primary:active {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0px 0px #000000;
+        }
+        
+        /* Brutalist classes */
+        .brutalist-border {
+            border: 3px solid #1A212B !important;
+            border-radius: 0px !important;
+        }
+        
+        .brutalist-card {
+            background-color: #0E1319;
+            border: 3px solid #1A212B !important;
+            border-radius: 0 tracking-tight;
+            box-shadow: 4px 4px 0px 0px #000000;
+            transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        
+        .brutalist-card:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0px 0px #000000;
+        }
+        
         .gradient-text {
-            background: linear-gradient(135deg, #ccff00 0%, #ffea00 50%, #cca300 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: #D98A2E;
+            font-weight: 900;
+            text-transform: uppercase;
         }
         .logo-3d-effect {
-            text-shadow: 1px 1px 0px #000, 2px 2px 0px rgba(255,255,255,0.05);
+            text-shadow: 2px 2px 0px #000, 4px 4px 0px #D98A2E;
         }
 
         @keyframes grid-flow {
@@ -152,14 +198,14 @@
             100% { transform: perspective(500px) rotateX(60deg) translateY(40px); }
         }
         .grid-plane {
-            background-image: linear-gradient(rgba(204, 255, 0, 0.1) 1px, transparent 1px), 
-                              linear-gradient(90deg, rgba(204, 255, 0, 0.1) 1px, transparent 1px);
+            background-image: linear-gradient(rgba(217, 138, 46, 0.05) 1px, transparent 1px), 
+                              linear-gradient(90deg, rgba(217, 138, 46, 0.05) 1px, transparent 1px);
             background-size: 40px 40px;
             animation: grid-flow 2s linear infinite;
         }
         .grid-bg {
-             background-image: linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px), 
-                              linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+             background-image: linear-gradient(rgba(255, 255, 255, 0.01) 1px, transparent 1px), 
+                              linear-gradient(90deg, rgba(255, 255, 255, 0.01) 1px, transparent 1px);
             background-size: 30px 30px;
         }
 
@@ -169,11 +215,12 @@
         }
         .scanline {
             width: 100%;
-            height: 100px;
-            z-index: 10;
-            background: linear-gradient(to bottom, transparent 0%, rgba(204, 255, 0, 0.05) 50%, transparent 100%);
-            position: absolute;
-            animation: scanline 4s linear infinite;
+            height: 120px;
+            z-index: 99;
+            background: linear-gradient(to bottom, transparent 0%, rgba(217, 138, 46, 0.02) 50%, transparent 100%);
+            position: fixed;
+            pointer-events: none;
+            animation: scanline 6s linear infinite;
         }
         
         .fill-mode-forwards {
@@ -185,38 +232,17 @@
         .delay-500 { animation-delay: 500ms; }
 
         .concrete-card {
-            background-color: #121212;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            background-image: url('https://www.transparenttextures.com/patterns/concrete-wall.png');
-            position: relative;
-            overflow: hidden;
-        }
-        .concrete-card::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(circle at center, rgba(255, 255, 255, 0.03) 0%, transparent 70%);
-            background-size: 200% 200%;
-            animation: dust-shimmer 8s ease-in-out infinite;
-            pointer-events: none;
-            opacity: 0.8;
+            background-color: #0E1319;
+            border: 3px solid #1A212B !important;
+            border-radius: 0px !important;
+            box-shadow: 4px 4px 0px 0px #000000;
         }
         
         .brutalist-bg {
-            background-color: #050505;
+            background-color: #0B0F14;
             background-image: url('https://www.transparenttextures.com/patterns/concrete-wall.png');
             position: relative;
             overflow: hidden;
-        }
-        .brutalist-bg::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(circle at center, rgba(255, 255, 255, 0.03) 0%, transparent 70%);
-            background-size: 200% 200%;
-            animation: dust-shimmer 8s ease-in-out infinite;
-            pointer-events: none;
-            opacity: 0.8;
         }
     </style>
 <script type="importmap">

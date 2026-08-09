@@ -134,28 +134,8 @@ export const HOW_IT_WORKS_SELLER = [
 ];
 
 /**
- * FIX: Added missing MOCK_USER constant for authentication development and default states.
+ * Trust and verification pillars.
  */
-export const MOCK_USER: any = {
-    id: 'system-architect-01',
-    email: 'architect@konkred.xyz',
-    name: 'Ari Miyanji',
-    role: 'pro_seller',
-    verified: true,
-    tier: 'enterprise',
-    balance: { fiat: 12500, crypto: 1.25 },
-    stats: {
-        totalPurchases: 24,
-        totalSales: 156,
-        totalEarnings: 42850,
-        rating: 5.0,
-        reviewCount: 88,
-    },
-    payoutThreshold: 500,
-    kycStatus: 'verified',
-    createdAt: new Date(),
-};
-
 export const TRUST_POINTS = [
   {
     title: 'Deterministic Logic',

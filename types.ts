@@ -46,6 +46,8 @@ export interface User {
   aiConfig?: AIProviderConfig;
   payoutThreshold: number;
   kycStatus: 'unverified' | 'verified' | 'pending';
+  acceptedCopyrightTerms: boolean;
+  canGenerateBlogs: boolean;
   createdAt: any; // Firestore Timestamp
 }
 

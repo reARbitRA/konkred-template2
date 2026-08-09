@@ -9,9 +9,10 @@ interface EnterGateProps {
 }
 
 const EnterGate: React.FC<EnterGateProps> = ({ onEnter, onBack, onVerificationNeeded }) => {
-  const { login, signInWithGoogle } = useAuth();
+  const { login, signInWithGoogle, signInWithGithub } = useAuth();
   const [isProcessing, setIsProcessing] = useState(false);
   const [isGoogleProcessing, setIsGoogleProcessing] = useState(false);
+  const [isGithubProcessing, setIsGithubProcessing] = useState(false);
   const [identity, setIdentity] = useState('');
   const [key, setKey] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -45,6 +46,18 @@ const EnterGate: React.FC<EnterGateProps> = ({ onEnter, onBack, onVerificationNe
     } catch (err: any) {
       setError(err.message || "Google sign-in failed.");
       setIsGoogleProcessing(false);
+    }
+  };
+
+  const handleGithubAuthenticate = async () => {
+    setError(null);
+    setIsGithubProcessing(true);
+    try {
+      await signInWithGithub();
+    } catch (err: any) {
+      setError(err.message || "GitHub sign-in failed.");
+    } finally {
+      setIsGithubProcessing(false);
     }
   };
 
@@ -155,12 +168,24 @@ const EnterGate: React.FC<EnterGateProps> = ({ onEnter, onBack, onVerificationNe
               <button 
                   type="button"
                   onClick={handleGoogleAuthenticate}
-                  disabled={isProcessing || isGoogleProcessing}
+                  disabled={isProcessing || isGoogleProcessing || isGithubProcessing}
                   className="group relative w-full inline-flex items-center justify-center px-10 py-4 overflow-hidden font-mono text-xs font-bold tracking-[0.25em] text-white uppercase transition-all duration-500 bg-transparent border border-zinc-800 hover:border-zinc-500 cursor-pointer concrete-card disabled:opacity-50"
               >
                   <span className="relative z-10 group-hover:text-white transition-colors duration-200 flex items-center gap-3">
                       {isGoogleProcessing ? <Loader2 size={12} className="animate-spin" /> : <GoogleIcon />}
                       Continue with Google
+                  </span>
+              </button>
+
+              <button 
+                  type="button"
+                  onClick={handleGithubAuthenticate}
+                  disabled={isProcessing || isGoogleProcessing || isGithubProcessing}
+                  className="group relative w-full inline-flex items-center justify-center px-10 py-4 overflow-hidden font-mono text-xs font-bold tracking-[0.25em] text-white uppercase transition-all duration-500 bg-transparent border border-zinc-800 hover:border-neon-cyan cursor-pointer concrete-card mt-3 disabled:opacity-50"
+              >
+                  <span className="relative z-10 group-hover:text-neon-cyan transition-colors duration-200 flex items-center gap-3">
+                      {isGithubProcessing ? <Loader2 size={12} className="animate-spin" /> : <Github size={16} />}
+                      Continue with GitHub
                   </span>
               </button>
              

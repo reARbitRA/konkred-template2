@@ -1,7 +1,6 @@
 
 import React, { useState } from 'react';
 import { FileText, Sparkles, Download, ArrowRight, Loader2, Cpu, Database } from 'lucide-react';
-import { GoogleGenAI } from "@google/genai";
 import Badge from '../common/Badge.tsx';
 
 const DocumentTool: React.FC = () => {
@@ -13,12 +12,29 @@ const DocumentTool: React.FC = () => {
     if (!input.trim()) return;
     setIsLoading(true);
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-      const response = await ai.models.generateContent({
-        model: 'gemini-3-pro-preview',
-        contents: [{ parts: [{ text: `Act as a Technical Documentation Architect. Synthesize a professional technical whitepaper, including deployment guides and structural logic maps, for the following AI protocol architecture: "${input}". Format with clear headings and markdown.` }] }]
+      const response = await fetch('/api/ai/generate', {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          provider: "google",
+          messages: [{
+            role: "user",
+            content: `Act as a Technical Documentation Architect. Synthesize a professional technical whitepaper, including deployment guides and structural logic maps, for the following AI protocol architecture: "${input}". Format with clear headings and markdown.`
+          }],
+          config: {
+            defaultModel: 'gemini-3-pro-preview'
+          }
+        })
       });
-      setResult(response.text);
+
+      if (!response.ok) {
+        throw new Error("Failed to authenticate AI synthesis uplink.");
+      }
+
+      const resultData = await response.json();
+      setResult(resultData.text);
     } catch (err) {
       console.error(err);
     } finally {

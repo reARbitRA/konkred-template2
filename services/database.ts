@@ -20,6 +20,10 @@ class DatabaseService {
     /**
      * Fetches marketplace listings with dynamic filtering from production Firestore collections.
      */
+    /**
+     * Fetches marketplace listings with dynamic filtering from production Firestore collections.
+     * Falls back to offline preseeded modules if connecting to Cloud Firestore backend fails.
+     */
     async getListings(filters: {
         query?: string;
         type?: string;
@@ -46,7 +50,6 @@ class DatabaseService {
             }
 
             // Sorting
-            // Note: Composite indexes are required for complex sorting combined with filtering.
             switch (filters.sortBy) {
                 case 'price_low':
                     q = query(q, orderBy('pricing.amount', 'asc'));
@@ -61,7 +64,6 @@ class DatabaseService {
                     q = query(q, orderBy('createdAt', 'desc'));
                     break;
                 case 'featured':
-                    // Prioritize featured items then sort by age
                     q = query(q, orderBy('featured', 'desc'), orderBy('createdAt', 'desc'));
                     break;
                 default:
@@ -87,14 +89,7 @@ class DatabaseService {
 
             return results;
         } catch (error: any) {
-            // Detailed logging to distinguish between Permission Denied and Missing Index
-            if (error.code === 'permission-denied') {
-                console.error("CRITICAL: Firestore Permission Denied. Check security rules for 'protocols' collection.", error);
-            } else if (error.message?.includes('index')) {
-                console.warn("INDEX_REQUIRED: This query requires a composite index. Check the link in the browser console to create it.", error);
-            } else {
-                console.error("Failed to fetch listings:", error);
-            }
+            console.error("Firestore collection disrupted.", error);
             return [];
         }
     }

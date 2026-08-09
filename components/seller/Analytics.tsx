@@ -17,7 +17,7 @@ interface AnalyticsProps {
 }
 
 const Analytics: React.FC<AnalyticsProps> = ({ listings }) => {
-  // Define fallback high-fidelity default listings so the dashboard is beautifully populated on first load
+  // Define fallback high-fidelity default listings
   const defaultSellerListings: Listing[] = [
     {
       id: "p1",
@@ -36,8 +36,8 @@ const Analytics: React.FC<AnalyticsProps> = ({ listings }) => {
       featured: true,
       salesCount: 142,
       viewCount: 710,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
       tags: ["Structured Output", "XLSX Source"]
     },
     {
@@ -57,51 +57,9 @@ const Analytics: React.FC<AnalyticsProps> = ({ listings }) => {
       featured: true,
       salesCount: 210,
       viewCount: 940,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
       tags: ["PDF Gen", "Legal"]
-    },
-    {
-      id: "p3",
-      sellerId: "U1",
-      seller: { name: "KONKRED Archive", verified: true, totalSales: 88 },
-      title: "Crisis Response Unit",
-      shortDescription: "Templates for immediate PR crisis management.",
-      description: "",
-      type: "protocol",
-      category: "Operations",
-      pricing: { mode: "one_time", amount: 89, currency: "USD" },
-      delivery: "download",
-      auditScore: 82,
-      rating: 4.2,
-      reviewCount: 15,
-      featured: false,
-      salesCount: 88,
-      viewCount: 410,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      tags: ["Playbook"]
-    },
-    {
-      id: "p4",
-      sellerId: "U1",
-      seller: { name: "KONKRED Archive", verified: true, totalSales: 95 },
-      title: "Board Deck Architect",
-      shortDescription: "Narrative structures for Series B+ fundraising.",
-      description: "",
-      type: "protocol",
-      category: "Strategy",
-      pricing: { mode: "one_time", amount: 349, currency: "USD" },
-      delivery: "download",
-      auditScore: 95,
-      rating: 4.9,
-      reviewCount: 42,
-      featured: true,
-      salesCount: 95,
-      viewCount: 480,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      tags: ["Strategy"]
     }
   ];
 
@@ -109,39 +67,37 @@ const Analytics: React.FC<AnalyticsProps> = ({ listings }) => {
 
   // Prepare data for the Bar Chart
   const chartData = activeListings.map(l => ({
-    name: l.title.length > 15 ? l.title.substring(0, 15) + '...' : l.title,
+    name: l.title.length > 12 ? l.title.substring(0, 10) + '...' : l.title,
     fullName: l.title,
     Views: l.viewCount,
     Sales: l.salesCount,
     conversionRate: l.viewCount > 0 ? ((l.salesCount / l.viewCount) * 100).toFixed(1) : '0.0'
   }));
 
-  // Aggregated summaries for active listings
   const totalViews = activeListings.reduce((sum, item) => sum + (item.viewCount || 0), 0);
   const totalSales = activeListings.reduce((sum, item) => sum + (item.salesCount || 0), 0);
   const avgConversion = totalViews > 0 ? ((totalSales / totalViews) * 100).toFixed(1) : '0.0';
 
-  // Custom tooltips matching the dashboard theme
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div className="bg-void-100 border border-white/10 p-5 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.9)] backdrop-blur-md">
-          <p className="text-xs font-mono font-bold text-white uppercase tracking-wider mb-3 pb-1.5 border-b border-white/5">
+        <div className="bg-black border-4 border-black p-5 shadow-[4px_4px_0px_#000] relative z-20">
+          <p className="text-[10px] font-mono font-black text-white uppercase tracking-wider mb-3 pb-2 border-b-2 border-black">
             {data.fullName}
           </p>
-          <div className="space-y-2 text-[11px] font-mono">
+          <div className="space-y-2 text-[10px] font-mono">
             <div className="flex justify-between gap-8 items-center">
-              <span className="text-ghost flex items-center gap-1.5 uppercase"><Eye size={10} className="text-neon-cyan" /> Views</span>
-              <span className="text-neon-cyan font-black">{data.Views.toLocaleString()}</span>
+              <span className="text-zinc-400 flex items-center gap-1.5 uppercase font-bold text-[9px]"><Eye size={12} className="text-signal" /> Views_</span>
+              <span className="text-white font-black">{data.Views.toLocaleString()}</span>
             </div>
             <div className="flex justify-between gap-8 items-center">
-              <span className="text-ghost flex items-center gap-1.5 uppercase"><ShoppingCart size={10} className="text-neon-blue" /> Sales</span>
-              <span className="text-neon-blue font-black">{data.Sales.toLocaleString()}</span>
+              <span className="text-zinc-400 flex items-center gap-1.5 uppercase font-bold text-[9px]"><ShoppingCart size={12} className="text-[#22d3ee]" /> Sales_</span>
+              <span className="text-[#22d3ee] font-black">{data.Sales.toLocaleString()}</span>
             </div>
-            <div className="flex justify-between gap-8 items-center pt-2 border-t border-white/5">
-              <span className="text-ghost flex items-center gap-1.5 uppercase"><Percent size={10} className="text-neon-green" /> Conversion</span>
-              <span className="text-neon-green font-black">{data.conversionRate}%</span>
+            <div className="flex justify-between gap-8 items-center pt-2 border-t-2 border-black">
+              <span className="text-zinc-400 flex items-center gap-1.5 uppercase font-bold text-[9px]"><Percent size={12} className="text-signal" /> Conv_</span>
+              <span className="text-signal font-black">{data.conversionRate}%</span>
             </div>
           </div>
         </div>
@@ -151,144 +107,114 @@ const Analytics: React.FC<AnalyticsProps> = ({ listings }) => {
   };
 
   return (
-    <div className="space-y-10 animate-in fade-in duration-1000">
+    <div className="space-y-10 animate-in fade-in duration-700">
       
-      {/* Dynamic Snapshot Stat Cards */}
+      {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="concrete-card p-6 rounded-3xl bg-black/40 border border-white/5 flex items-center justify-between">
-          <div className="space-y-1">
-            <p className="text-[10px] font-mono text-ghost uppercase tracking-widest">Total_Protocol_Views</p>
-            <p className="text-3xl font-black text-white font-display">{totalViews.toLocaleString()}</p>
+        {[
+          { label: 'Total_Node_Views', val: totalViews.toLocaleString(), icon: Eye, color: 'text-signal' },
+          { label: 'Total_Acquisitions', val: totalSales.toLocaleString(), icon: ShoppingCart, color: 'text-[#22d3ee]' },
+          { label: 'Avg_Conversion_Rate', val: `${avgConversion}%`, icon: TrendingUp, color: 'text-signal' }
+        ].map((stat, i) => (
+          <div key={i} className="bg-void-100 border-4 border-black p-6 flex items-center justify-between shadow-brutalist hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-brutalist-hover transition-all">
+            <div className="space-y-1">
+              <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest font-bold">{stat.label}</p>
+              <p className="text-3xl font-display font-black text-white">{stat.val}</p>
+            </div>
+            <div className={`w-12 h-12 border-4 border-black bg-black flex items-center justify-center ${stat.color} shadow-[2px_2px_0px_#000]`}>
+              <stat.icon size={20} />
+            </div>
           </div>
-          <div className="w-12 h-12 rounded-2xl bg-neon-cyan/5 border border-neon-cyan/15 flex items-center justify-center text-neon-cyan shadow-[0_0_15px_rgba(255,149,0,0.1)]">
-            <Eye size={20} />
-          </div>
-        </div>
-
-        <div className="concrete-card p-6 rounded-3xl bg-black/40 border border-white/5 flex items-center justify-between">
-          <div className="space-y-1">
-            <p className="text-[10px] font-mono text-ghost uppercase tracking-widest">Total_Acquisitions</p>
-            <p className="text-3xl font-black text-white font-display">{totalSales.toLocaleString()}</p>
-          </div>
-          <div className="w-12 h-12 rounded-2xl bg-neon-blue/5 border border-neon-blue/15 flex items-center justify-center text-neon-blue shadow-[0_0_15px_rgba(59,130,246,0.1)]">
-            <ShoppingCart size={20} />
-          </div>
-        </div>
-
-        <div className="concrete-card p-6 rounded-3xl bg-black/40 border border-white/5 flex items-center justify-between">
-          <div className="space-y-1">
-            <p className="text-[10px] font-mono text-ghost uppercase tracking-widest">Avg_Node_Conversion</p>
-            <p className="text-3xl font-black text-white font-display">{avgConversion}%</p>
-          </div>
-          <div className="w-12 h-12 rounded-2xl bg-neon-green/5 border border-neon-green/15 flex items-center justify-center text-neon-green shadow-[0_0_15px_rgba(16,185,129,0.1)]">
-            <TrendingUp size={20} />
-          </div>
-        </div>
+        ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        
-        {/* Performance Graph */}
-        <div className="lg:col-span-8 concrete-card p-10 rounded-[2.5rem] bg-black/40 border border-white/5 flex flex-col justify-between">
-           <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-              <div>
-                 <h3 className="text-lg font-bold text-white uppercase tracking-tight">Active_Protocol_Telemetry</h3>
-                 <p className="text-[10px] text-ghost font-mono uppercase mt-1 tracking-widest">Visualizing client views and acquisition metrics side-by-side</p>
+        {/* Chart Card */}
+        <div className="lg:col-span-8 bg-void-100 border-4 border-black p-8 shadow-brutalist flex flex-col justify-between">
+           <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-10">
+              <div className="space-y-1">
+                 <h3 className="text-xl font-display font-black text-white uppercase tracking-tight">Node_Telemetry_Report</h3>
+                 <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-widest font-bold">Protocol engagement vs acquisition capacity</p>
               </div>
-              <div className="flex gap-4">
-                 <span className="text-[9px] font-mono text-neon-green bg-neon-green/5 border border-neon-green/20 px-3 py-1 rounded-lg uppercase tracking-wider">LIVE_TELEMETRY</span>
+              <div className="bg-black px-4 py-1.5 border-2 border-black shadow-[2px_2px_0px_#D98A2E]">
+                 <span className="text-[9px] font-mono text-signal font-black uppercase tracking-widest animate-pulse">SYSTEM_LIVE_</span>
               </div>
            </header>
 
-           <div className="h-80 w-full relative bg-void-300/20 p-4 rounded-2xl border border-white/[0.02]">
+           <div className="h-96 w-full relative bg-black p-6 border-4 border-black shadow-[4px_4px_0px_#000]">
               <ResponsiveContainer width="100%" height="100%">
-                 <BarChart
-                    data={chartData}
-                    margin={{ top: 20, right: 10, left: -20, bottom: 5 }}
-                 >
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.04)" vertical={false} />
+                 <BarChart data={chartData} margin={{ top: 20, right: 10, left: -20, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.05)" vertical={false} />
                     <XAxis 
                        dataKey="name" 
-                       stroke="rgba(255, 255, 255, 0.4)" 
+                       stroke="#71717a" 
                        fontSize={9} 
-                       fontFamily="var(--font-mono, monospace)"
+                       fontFamily="JetBrains Mono"
                        tickLine={false}
                        axisLine={false}
+                       className="uppercase font-bold"
                     />
                     <YAxis 
-                       stroke="rgba(255, 255, 255, 0.4)" 
+                       stroke="#71717a" 
                        fontSize={9} 
-                       fontFamily="var(--font-mono, monospace)"
+                       fontFamily="JetBrains Mono"
                        tickLine={false}
                        axisLine={false}
+                       className="uppercase font-bold"
                     />
-                    <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.02)' }} />
+                    <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(217,138,46,0.05)' }} />
                     <Legend 
                        verticalAlign="top" 
-                       height={36} 
-                       iconSize={8}
-                       iconType="circle"
+                       height={40} 
+                       iconSize={10}
+                       iconType="rect"
                        wrapperStyle={{ 
-                          fontSize: '9px', 
-                          fontFamily: 'var(--font-mono, monospace)', 
+                          fontSize: '10px', 
+                          fontFamily: 'JetBrains Mono', 
                           textTransform: 'uppercase', 
                           letterSpacing: '0.15em',
-                          color: '#e4e4e7'
+                          fontWeight: '900',
+                          color: '#fff',
+                          paddingBottom: '20px'
                        }} 
                     />
-                    {/* View Count is color #ff9500 (neon-cyan theme) */}
-                    <Bar 
-                       dataKey="Views" 
-                       name="View Telemetry" 
-                       fill="#ff9500" 
-                       radius={[4, 4, 0, 0]} 
-                       maxBarSize={30} 
-                    />
-                    {/* Sales Count is color #3b82f6 (neon-blue theme) */}
-                    <Bar 
-                       dataKey="Sales" 
-                       name="Sales Telemetry" 
-                       fill="#3b82f6" 
-                       radius={[4, 4, 0, 0]} 
-                       maxBarSize={30} 
-                    />
+                    <Bar dataKey="Views" name="Views_" fill="#D98A2E" radius={0} maxBarSize={30} stroke="#000" strokeWidth={2} />
+                    <Bar dataKey="Sales" name="Sales_" fill="#22d3ee" radius={0} maxBarSize={30} stroke="#000" strokeWidth={2} />
                  </BarChart>
               </ResponsiveContainer>
-              <div className="absolute inset-0 pointer-events-none rounded-2xl border border-white/5 opacity-40" />
-           </div>
-
-           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-6 gap-2 font-mono text-[9px] text-ghost uppercase tracking-widest border-t border-white/5 pt-4">
-              <span>ACTIVE LISTINGS: {activeListings.length}</span>
-              <span className="text-[8px] opacity-60">AGGREGATE RATIO OUTPERFORMING HIGH-PERFORMANCE BENCHMARK</span>
            </div>
         </div>
 
-        {/* Secondary Metrics */}
+        {/* Secondary Info */}
         <div className="lg:col-span-4 space-y-8">
-           <div className="concrete-card p-8 rounded-3xl bg-void-100 border border-white/5 flex flex-col justify-between h-[calc(50%-1rem)]">
+           <div className="bg-black border-4 border-black p-8 shadow-brutalist flex flex-col justify-between h-[250px] group hover:translate-x-[-4px] hover:translate-y-[-4px] hover:shadow-brutalist-hover transition-all">
               <div>
-                 <div className="flex justify-between mb-4">
-                    <Target size={20} className="text-neon-blue" />
-                    <ArrowUpRight size={14} className="text-ghost" />
+                 <div className="flex justify-between mb-6">
+                    <div className="w-10 h-10 bg-signal text-black border-2 border-black flex items-center justify-center font-black">
+                      <Target size={20} />
+                    </div>
+                    <ArrowUpRight size={16} className="text-zinc-500" />
                  </div>
-                 <h4 className="text-[10px] font-mono text-ghost uppercase mb-2">Acquisition Goal</h4>
-                 <div className="text-3xl font-black text-white">$15k / $20k</div>
+                 <h4 className="text-[10px] font-mono text-zinc-500 uppercase mb-2 font-bold tracking-widest">Target_Liquidity_Threshold</h4>
+                 <div className="text-4xl font-display font-black text-white">$15K <span className="text-zinc-700 text-xl">/ $20K</span></div>
               </div>
-              <div className="w-full h-1.5 bg-void-300 rounded-full mt-6 overflow-hidden">
-                 <div className="h-full bg-neon-blue w-3/4 animate-pulse" />
+              <div className="w-full h-4 bg-zinc-900 border-2 border-black mt-8">
+                 <div className="h-full bg-signal border-r-2 border-black w-3/4 shadow-[0_0_10px_rgba(217,138,46,0.3)]" />
               </div>
            </div>
 
-           <div className="concrete-card p-8 rounded-3xl bg-void-100 border border-white/5 flex flex-col justify-between h-[calc(50%-1rem)]">
-              <div>
-                 <div className="flex justify-between mb-4">
-                    <Zap size={20} className="text-neon-purple" />
-                    <span className="text-[10px] text-neon-green font-mono">+12.4%</span>
+           <div className="bg-signal border-4 border-black p-8 shadow-brutalist flex flex-col justify-between h-[250px] group hover:translate-x-[-4px] hover:translate-y-[-4px] hover:shadow-brutalist-hover transition-all">
+              <div className="text-black">
+                 <div className="flex justify-between mb-6">
+                    <div className="w-10 h-10 bg-black text-white border-2 border-black flex items-center justify-center font-black">
+                      <Zap size={20} />
+                    </div>
+                    <span className="text-[11px] bg-black text-white px-2 py-0.5 font-mono font-black border border-black shadow-[2px_2px_0px_#000]">+12.4%_</span>
                  </div>
-                 <h4 className="text-[10px] font-mono text-ghost uppercase mb-2">Node Efficiency</h4>
-                 <div className="text-3xl font-black text-white">99.84%</div>
+                 <h4 className="text-[10px] font-mono text-zinc-900 uppercase mb-2 font-bold tracking-widest">Compute_Efficiency_Node</h4>
+                 <div className="text-4xl font-display font-black">99.84%</div>
               </div>
-              <p className="text-[9px] text-ghost leading-relaxed mt-4">Uptime maintained across global CDN clusters.</p>
+              <p className="text-[10px] text-zinc-900 font-mono font-bold leading-relaxed uppercase">Uptime levels crossing global validator clusters. Optimal stability achieved.</p>
            </div>
         </div>
       </div>

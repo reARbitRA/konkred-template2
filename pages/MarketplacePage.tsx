@@ -8,6 +8,7 @@ import { databaseService } from '../services/database.ts';
 import SearchBar from '../components/marketplace/SearchBar.tsx';
 import Filters from '../components/marketplace/Filters.tsx';
 import ListingGrid from '../components/marketplace/ListingGrid.tsx';
+import AppTester from '../components/common/AppTester.tsx';
 import { SlidersHorizontal, ArrowLeft } from 'lucide-react';
 
 interface MarketplacePageProps {
@@ -19,6 +20,7 @@ const MarketplacePage: React.FC<MarketplacePageProps> = ({ onNavigate, onOpenLis
   const [listings, setListings] = useState<Listing[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const [testingListing, setTestingListing] = useState<Listing | null>(null);
 
   // Filter State
   const [searchQuery, setSearchQuery] = useState('');
@@ -122,9 +124,23 @@ const MarketplacePage: React.FC<MarketplacePageProps> = ({ onNavigate, onOpenLis
               listings={listings} 
               isLoading={isLoading} 
               onOpenListing={onOpenListing} 
+              onQuickTest={(listing) => setTestingListing(listing)}
             />
           </div>
         </div>
+
+        {/* AppTester Modal */}
+        {testingListing && (
+          <AppTester 
+            listing={testingListing} 
+            isOpen={!!testingListing} 
+            onClose={() => setTestingListing(null)} 
+            onAcquire={(l) => {
+              setTestingListing(null);
+              onOpenListing(l);
+            }} 
+          />
+        )}
 
         {/* Pricing Matrix Section */}
         <section className="mt-28 pt-20 border-t border-white/5 space-y-12" id="marketplace-pricing-matrix">

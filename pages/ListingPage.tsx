@@ -1,10 +1,11 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Listing, LicenseType, PageView } from '../types.ts';
 import { LICENSE_TYPES } from '../constants.ts';
-import { ArrowLeft, Star, BarChart3, CheckCircle, Shield, FileText, Download, Share2, AlertCircle, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Star, BarChart3, CheckCircle, Shield, FileText, Download, Share2, AlertCircle, ChevronRight, Terminal, Activity, Sliders, Zap } from 'lucide-react';
 import Badge from '../components/common/Badge.tsx';
 import Reviews from '../components/marketplace/Reviews.tsx';
+import AppTester from '../components/common/AppTester.tsx';
 
 interface ListingPageProps {
   listing: Listing;
@@ -15,9 +16,21 @@ interface ListingPageProps {
 const ListingPage: React.FC<ListingPageProps> = ({ listing, onNavigate, onBuy }) => {
   const [selectedLicense, setSelectedLicense] = useState<LicenseType>('personal');
   const [activeTab, setActiveTab] = useState<'details' | 'audit' | 'reviews'>('details');
+  const [isTesterOpen, setIsTesterOpen] = useState(false);
+
+  // Live Estimated Cost Bar Variables
+  const [estMonthlyReqs, setEstMonthlyReqs] = useState<number>(20000);
+  const [estConcurrency, setEstConcurrency] = useState<number>(4);
 
   const licenseConfig = LICENSE_TYPES.find(l => l.id === selectedLicense) || LICENSE_TYPES[0];
   const finalPrice = Math.round(listing.pricing.amount * licenseConfig.multiplier);
+
+  // Dynamic Live Estimated Compute Cost
+  const liveEstimatedComputeCost = useMemo(() => {
+    const base = finalPrice;
+    const variableCompute = (estMonthlyReqs / 1000) * 0.15 + (estConcurrency * 2);
+    return Math.round(base + variableCompute);
+  }, [finalPrice, estMonthlyReqs, estConcurrency]);
 
   const getAuditColor = (score: number) => {
     if (score >= 90) return 'text-neon-green';
@@ -185,7 +198,7 @@ const ListingPage: React.FC<ListingPageProps> = ({ listing, onNavigate, onBuy })
                    </div>
 
                    {/* License Selector */}
-                   <div className="space-y-3 mb-10">
+                   <div className="space-y-3 mb-8">
                       <label className="text-[10px] font-mono font-bold text-ghost uppercase tracking-widest ml-1">Select License</label>
                       {LICENSE_TYPES.map(type => (
                         <div 
@@ -210,8 +223,44 @@ const ListingPage: React.FC<ListingPageProps> = ({ listing, onNavigate, onBuy })
                       ))}
                    </div>
 
+                   {/* Live Estimated Cost Bar */}
+                   <div className="mb-8 p-4 bg-black/60 border border-white/10 rounded-2xl space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-ghost flex items-center gap-1.5">
+                          <Activity size={12} className="text-neon-cyan" /> Estimated Run Cost
+                        </span>
+                        <span className="text-sm font-mono font-black text-neon-cyan">${liveEstimatedComputeCost} / mo</span>
+                      </div>
+
+                      {/* Sliders for variable cost tuning */}
+                      <div className="space-y-2 pt-1 border-t border-white/5">
+                        <div className="flex justify-between text-[9px] font-mono text-ghost">
+                          <span>Volume: {estMonthlyReqs.toLocaleString()} reqs</span>
+                          <span>{estConcurrency} Threads</span>
+                        </div>
+                        <input 
+                          type="range" 
+                          min={5000} 
+                          max={100000} 
+                          step={5000}
+                          value={estMonthlyReqs}
+                          onChange={(e) => setEstMonthlyReqs(Number(e.target.value))}
+                          className="w-full accent-neon-cyan h-1 bg-void-400 rounded-lg cursor-pointer"
+                        />
+                      </div>
+
+                      <div className="h-1.5 bg-white/5 rounded-full overflow-hidden flex">
+                        <div className="h-full bg-neon-cyan" style={{ width: `${(finalPrice / liveEstimatedComputeCost) * 100}%` }} title="License Fee" />
+                        <div className="h-full bg-neon-blue" style={{ width: `${((liveEstimatedComputeCost - finalPrice) / liveEstimatedComputeCost) * 100}%` }} title="Variable Compute" />
+                      </div>
+                      <div className="flex justify-between text-[8px] font-mono text-ghost/60">
+                        <span>License: ${finalPrice}</span>
+                        <span>Variable: +${liveEstimatedComputeCost - finalPrice}</span>
+                      </div>
+                   </div>
+
                    {/* Actions */}
-                   <div className="space-y-4">
+                   <div className="space-y-3">
                      <button 
                        onClick={() => onBuy(listing, selectedLicense)}
                        className="btn-primary w-full py-5 text-xs font-black tracking-[0.2em] flex items-center justify-center gap-3 uppercase shadow-lg shadow-neon-cyan/20"
@@ -219,8 +268,13 @@ const ListingPage: React.FC<ListingPageProps> = ({ listing, onNavigate, onBuy })
                        <Download size={16} />
                        Initialize Uplink
                      </button>
-                     <button className="w-full py-5 text-xs font-bold tracking-[0.2em] uppercase border border-white/10 rounded-xl hover:bg-white/5 transition-all text-white">
-                       Preview Data
+                     
+                     <button 
+                       onClick={() => setIsTesterOpen(true)}
+                       className="w-full py-4 text-xs font-bold tracking-[0.2em] uppercase border border-neon-cyan/30 bg-neon-cyan/10 hover:bg-neon-cyan/20 rounded-xl transition-all text-neon-cyan flex items-center justify-center gap-2"
+                     >
+                       <Terminal size={14} />
+                       Quick Test Runtime
                      </button>
                    </div>
                    
@@ -248,8 +302,18 @@ const ListingPage: React.FC<ListingPageProps> = ({ listing, onNavigate, onBuy })
 
              </div>
           </div>
-
         </div>
+
+        {/* AppTester Modal */}
+        <AppTester 
+          listing={listing} 
+          isOpen={isTesterOpen} 
+          onClose={() => setIsTesterOpen(false)} 
+          onAcquire={() => {
+            setIsTesterOpen(false);
+            onBuy(listing, selectedLicense);
+          }}
+        />
       </div>
     </div>
   );

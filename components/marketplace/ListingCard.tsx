@@ -1,14 +1,15 @@
 import React from 'react';
 import { Listing } from '../../types.ts';
-import { Star, Shield, Download, Zap, Clock, Award } from 'lucide-react';
+import { Star, Shield, Download, Zap, Clock, Award, Terminal, Play, Code, Activity } from 'lucide-react';
 import Badge from '../common/Badge.tsx';
 
 interface ListingCardProps {
   listing: Listing;
   onClick: () => void;
+  onQuickTest?: (e: React.MouseEvent) => void;
 }
 
-const ListingCard: React.FC<ListingCardProps> = ({ listing, onClick }) => {
+const ListingCard: React.FC<ListingCardProps> = ({ listing, onClick, onQuickTest }) => {
   const getPricingDisplay = () => {
     const { pricing } = listing;
     if (pricing.mode === 'one_time') return `$${pricing.amount}`;
@@ -22,14 +23,6 @@ const ListingCard: React.FC<ListingCardProps> = ({ listing, onClick }) => {
     return 'text-neon-orange border-neon-orange/30 bg-neon-orange/5';
   };
 
-  const DeliveryIcon = {
-    download: <Download size={12} />,
-    api_key: <Zap size={12} />,
-    hosted_demo: <Play size={12} />,
-    repo_access: <Code size={12} />,
-    booking: <Clock size={12} />,
-  }[listing.delivery];
-
   // Get access tag based on amount
   const getAccessTag = () => {
     const amount = listing.pricing.amount;
@@ -39,6 +32,7 @@ const ListingCard: React.FC<ListingCardProps> = ({ listing, onClick }) => {
   };
 
   const accessTag = getAccessTag();
+  const estimatedCost = Math.round((listing.pricing.amount || 29) + 12);
 
   return (
     <div 
@@ -61,12 +55,28 @@ const ListingCard: React.FC<ListingCardProps> = ({ listing, onClick }) => {
             {listing.title}
           </h3>
           
-          <p className="text-text-secondary text-xs leading-relaxed mb-6 line-clamp-3 font-light">
+          <p className="text-text-secondary text-xs leading-relaxed mb-4 line-clamp-2 font-light">
             {listing.shortDescription}
           </p>
+
+          {/* Estimated Cost Bar Indicator */}
+          <div className="mb-4 p-2.5 bg-black/40 border border-white/5 rounded-xl space-y-1">
+            <div className="flex justify-between items-center text-[9px] font-mono">
+              <span className="text-ghost uppercase flex items-center gap-1">
+                <Activity size={10} className="text-neon-cyan" /> Est. Compute Cost
+              </span>
+              <span className="text-neon-cyan font-bold">~${estimatedCost}/mo</span>
+            </div>
+            <div className="h-1 bg-white/5 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-neon-cyan/70 group-hover:bg-neon-cyan transition-all duration-300" 
+                style={{ width: `${Math.min(100, Math.max(20, (estimatedCost / 300) * 100))}%` }} 
+              />
+            </div>
+          </div>
         </div>
 
-        <div className="flex items-center justify-between pt-4 border-t border-white/5">
+        <div className="flex items-center justify-between pt-4 border-t border-white/5 gap-2">
           <div className="flex flex-col">
             <span className="text-white font-mono font-bold text-lg">{getPricingDisplay()}</span>
             <span className="text-[9px] text-text-secondary uppercase tracking-wider font-mono">
@@ -74,19 +84,32 @@ const ListingCard: React.FC<ListingCardProps> = ({ listing, onClick }) => {
             </span>
           </div>
 
-          <button 
-            className="px-4 py-2 bg-white hover:bg-neutral-200 text-black text-xs font-mono font-bold uppercase rounded-lg transition-all flex items-center gap-1"
-          >
-            {listing.pricing.amount === 0 ? 'Run App' : 'Get Access'} 
-            <Zap size={10} className="fill-black" />
-          </button>
+          <div className="flex items-center gap-2">
+            {onQuickTest && (
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onQuickTest(e);
+                }}
+                className="px-3 py-2 bg-neon-cyan/10 border border-neon-cyan/30 hover:bg-neon-cyan/20 text-neon-cyan text-xs font-mono font-bold uppercase rounded-lg transition-all flex items-center gap-1.5"
+                title="Quick Test Asset Runtime"
+              >
+                <Terminal size={12} />
+                <span>Quick Test</span>
+              </button>
+            )}
+
+            <button 
+              className="px-3.5 py-2 bg-white hover:bg-neutral-200 text-black text-xs font-mono font-bold uppercase rounded-lg transition-all flex items-center gap-1"
+            >
+              {listing.pricing.amount === 0 ? 'Run App' : 'Get Access'} 
+              <Zap size={10} className="fill-black" />
+            </button>
+          </div>
         </div>
       </div>
     </div>
   );
 };
-
-const Play = (props: any) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>;
-const Code = (props: any) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>;
 
 export default ListingCard;

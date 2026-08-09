@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { PageView } from '../types.ts';
 import { ArrowLeft, Terminal, Image, Cpu, Send, Sparkles, Sliders, Play, RefreshCw, Layers, ShieldCheck } from 'lucide-react';
 import Badge from '../components/common/Badge.tsx';
-import { GoogleGenAI } from '@google/genai';
 
 interface Message {
   role: 'user' | 'assistant' | 'system';
@@ -51,36 +50,43 @@ const PlaygroundsPage: React.FC<{ onNavigate: (page: PageView) => void }> = ({ o
     const startTime = Date.now();
 
     try {
-      // Build the list of text inputs for Gemini 3.5 Flash
-      // Note: we can use process.env.API_KEY which aligns to the Gemini API key!
-      const ai = new GoogleGenAI({ apiKey: (process.env as any).API_KEY || '' });
-      
       const systemInstruction = `You are Llama 3.3 70B driving a high-speed Cerebras/Groq inference node. 
 You must respond with clinical technical precision, zero marketing fluff, and raw markdown code blocks where applicable. 
 Adopt an authoritative, elite software architect developer persona representing the KONKRED platform.`;
 
-      const contents = messages
-        .filter(m => m.role !== 'system')
-        .map(m => ({
-          role: m.role === 'assistant' ? 'model' : 'user',
-          parts: [{ text: m.content }]
-        }));
-      contents.push({ role: 'user', parts: [{ text: userText }] });
+      const requestMessages = [
+        { role: 'system', content: systemInstruction },
+        ...messages
+          .filter(m => m.role !== 'system')
+          .map(m => ({ role: m.role, content: m.content })),
+        { role: 'user', content: userText }
+      ];
 
-      const response = await ai.models.generateContent({
-        model: 'gemini-3.5-flash',
-        contents,
-        config: {
-          systemInstruction,
-          temperature,
-          maxOutputTokens: maxTokens
-        }
+      const response = await fetch('/api/ai/generate', {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          provider: "google",
+          messages: requestMessages,
+          config: {
+            defaultModel: "gemini-3.5-flash",
+            temperature,
+            maxTokens
+          }
+        })
       });
+
+      if (!response.ok) {
+        throw new Error("Uplink handshake failed.");
+      }
 
       const latency = Date.now() - startTime;
       setLatencyMs(latency);
 
-      const replyText = response.text || '';
+      const resultData = await response.json();
+      const replyText = resultData.text || '';
       const replyMsg: Message = {
         role: 'assistant',
         content: replyText,

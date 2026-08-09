@@ -6,6 +6,7 @@ import {
   ChevronRight, Sparkles, Send, DollarSign, Wallet, ArrowUpRight
 } from 'lucide-react';
 import { useToast } from '../contexts/ToastContext.tsx';
+import DOMPurify from 'dompurify';
 
 // ==========================================
 // 1. DATASETS & STATIC MODELS
@@ -580,50 +581,50 @@ export function trimContextPayload(rawQuery) {
 
 export const HeroSection: React.FC<{ onNavigate: (page: any) => void }> = ({ onNavigate }) => {
   return (
-    <section className="relative pt-32 pb-24 px-6 md:px-12 max-w-7xl mx-auto flex flex-col items-center justify-center text-center overflow-hidden border-b border-zinc-900">
-      {/* Decorative clean radial coordinate network */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%__-10%,rgba(34,211,238,0.06),transparent_60%)] pointer-events-none" />
+    <section className="relative pt-32 pb-24 px-6 md:px-12 max-w-7xl mx-auto flex flex-col items-center justify-center text-center overflow-hidden border-b-4 border-black bg-void">
+      {/* Heavy grid pattern background overlay */}
+      <div className="absolute inset-0 bg-grid-pattern opacity-10 pointer-events-none" />
       
       <motion.div
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="space-y-6 max-w-4xl"
+        transition={{ duration: 0.3 }}
+        className="space-y-6 max-w-4xl relative z-10"
       >
         {/* Glow status dot */}
-        <div className="inline-flex items-center gap-2 bg-zinc-900 border border-zinc-800 px-4 py-1.5 rounded-full text-[10px] font-mono tracking-widest text-zinc-400">
-          <span className="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
-          AVAILABLE FOR DIRECT INTEGRATION & CONSULTING
+        <div className="inline-flex items-center gap-2 bg-black border-2 border-zinc-800 px-4 py-1.5 rounded-none text-[10px] font-mono tracking-widest text-signal">
+          <span className="w-2.5 h-2.5 bg-signal rounded-none animate-pulse" />
+          AVAILABLE FOR DIRECT INTEGRATION & CONSULTING_
         </div>
 
-        <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-white leading-[1.05] font-sans">
+        <h1 className="text-4xl md:text-6xl lg:text-7xl font-display font-black uppercase tracking-tight text-white leading-[1.05]">
           Production-ready AI agents <br />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-zinc-200 to-zinc-500">
-            built to solve actual problems.
+          <span className="text-signal">
+            built to solve actual problems_
           </span>
         </h1>
 
-        <p className="text-base md:text-lg text-zinc-400 max-w-2xl mx-auto font-light leading-relaxed">
+        <p className="text-xs md:text-sm text-void-500 max-w-2xl mx-auto font-mono leading-relaxed uppercase">
           Access a curated library of over 50 working developer-centric utilities or secure custom high-end prompt architecture and autonomous pipelines tailored for your system.
         </p>
 
-        <div className="flex flex-col sm:flex-row gap-3 pt-6 justify-center">
+        <div className="flex flex-col sm:flex-row gap-4 pt-6 justify-center">
           <button
             onClick={() => {
               const el = document.getElementById('tool-library');
               if (el) el.scrollIntoView({ behavior: 'smooth' });
             }}
-            className="px-6 py-3.5 bg-white hover:bg-zinc-100 text-black font-bold text-xs font-mono uppercase tracking-widest rounded-xl transition-all shadow-[0_4px_20px_rgba(255,255,255,0.05)]"
+            className="px-6 py-3.5 bg-signal hover:bg-signal-hover text-black font-black text-xs font-mono uppercase tracking-widest rounded-none border-4 border-black shadow-brutalist hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-brutalist-hover transition-all cursor-pointer"
           >
-            View The Tools
+            View The Tools_
           </button>
           <a
             href="https://calendly.com/konkred"
             target="_blank"
             rel="noopener noreferrer"
-            className="px-6 py-3.5 bg-zinc-900 hover:bg-zinc-855 border border-zinc-800 text-white font-bold text-xs font-mono uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-2"
+            className="px-6 py-3.5 bg-void-100 hover:bg-void-200 border-4 border-black text-white font-black text-xs font-mono uppercase tracking-widest rounded-none hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-brutalist transition-all flex items-center justify-center gap-2 cursor-pointer"
           >
-            Book a Custom Design Call <ArrowUpRight size={13} />
+            Book a Custom Design Call_ <ArrowUpRight size={13} />
           </a>
         </div>
       </motion.div>
@@ -655,113 +656,112 @@ export const ToolLibrarySection: React.FC = () => {
   };
 
   return (
-    <section id="tool-library" className="py-24 px-6 md:px-12 max-w-7xl mx-auto border-b border-zinc-900 scroll-mt-20">
+    <section id="tool-library" className="py-24 px-6 md:px-12 max-w-7xl mx-auto border-b-4 border-black scroll-mt-20">
       <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
         <div className="space-y-3">
-          <span className="text-[10px] font-mono tracking-[0.2em] text-cyan-400 uppercase">STOREFRONT CATALOG</span>
-          <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight">Filterable Tool Library</h2>
-          <p className="text-sm text-zinc-400 max-w-lg font-light leading-relaxed">
+          <span className="text-[10px] font-mono tracking-[0.2em] text-signal uppercase">STOREFRONT CATALOG</span>
+          <h2 className="text-3xl md:text-5xl font-display font-black text-white uppercase tracking-tight">Filterable Tool Library</h2>
+          <p className="text-xs text-void-500 max-w-lg font-mono uppercase leading-relaxed">
             Exactly 51 practical, focused tool blueprints engineered without fluff or buzzwords. Explore operational methods instantly.
           </p>
         </div>
 
         {/* Counter indicator */}
-        <div className="bg-zinc-900/40 border border-zinc-800 px-4 py-2 rounded-xl text-center md:text-right font-mono min-w-[120px]">
-          <span className="text-zinc-500 block text-[9px] uppercase tracking-wider">Total Blueprint Nodes</span>
-          <span className="text-lg font-bold text-white">{SYSTEM_TOOLS.length} Active Modules</span>
+        <div className="bg-void-100 border-4 border-black p-4 rounded-none text-center md:text-right font-mono min-w-[150px] shadow-brutalist">
+          <span className="text-void-600 block text-[9px] uppercase tracking-wider font-bold">Total Blueprint Nodes</span>
+          <span className="text-base font-black text-signal">{SYSTEM_TOOLS.length} Active Modules</span>
         </div>
       </div>
 
       {/* Control Bar: Search and Filters */}
-      <div className="flex flex-col lg:flex-row items-center justify-between gap-4 bg-zinc-950 p-3 rounded-2xl border border-zinc-900 mb-8">
+      <div className="flex flex-col lg:flex-row items-center justify-between gap-4 bg-void-200 p-4 rounded-none border-4 border-black mb-10 shadow-brutalist">
         {/* Category triggers */}
-        <div className="flex flex-wrap items-center gap-1.5 w-full lg:w-auto">
+        <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
           {(['all', 'security', 'automation', 'creative'] as const).map(cat => (
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
-              className={`px-4 py-2 rounded-lg text-xs font-mono uppercase tracking-wider transition-all cursor-pointer ${
+              className={`px-4 py-2.5 rounded-none text-xs font-mono uppercase tracking-wider transition-all cursor-pointer border-2 ${
                 activeCategory === cat 
-                  ? 'bg-zinc-900 border border-zinc-800 text-white font-bold' 
-                  : 'text-zinc-400 hover:text-white hover:bg-zinc-900/30'
+                  ? 'bg-signal text-black border-black font-black shadow-[2px_2px_0px_#000]' 
+                  : 'text-void-500 hover:text-white border-transparent bg-transparent hover:bg-void-300'
               }`}
             >
-              {cat === 'all' ? 'All Modules' : cat}
+              {cat === 'all' ? 'All Modules_' : `${cat}_`}
             </button>
           ))}
         </div>
 
         {/* Search input field */}
         <div className="relative w-full lg:w-80">
-          <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500" />
+          <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-void-500" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search matching tools..."
-            className="w-full bg-zinc-900/60 border border-zinc-800 rounded-xl py-2 pl-9 pr-4 text-xs font-mono text-white focus:outline-none focus:border-zinc-700 transition-colors"
+            className="w-full bg-void-100 border-2 border-void-300 rounded-none py-2.5 pl-9 pr-4 text-xs font-mono text-white focus:outline-none focus:border-signal transition-colors"
           />
         </div>
       </div>
 
       {/* Grid Layout of Tools */}
       {filteredTools.length === 0 ? (
-        <div className="py-20 text-center border border-dashed border-zinc-800 rounded-2xl bg-zinc-900/10">
-          <Terminal size={24} className="text-zinc-600 mx-auto mb-3" />
-          <p className="text-xs font-mono text-zinc-500">No active tools match your criteria.</p>
+        <div className="py-20 text-center border-4 border-black bg-void-100 rounded-none">
+          <Terminal size={24} className="text-void-600 mx-auto mb-3" />
+          <p className="text-xs font-mono text-void-550">No active tools match your criteria.</p>
         </div>
       ) : (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredTools.map(tool => (
             <div
               key={tool.id}
-              className="group relative flex flex-col justify-between p-6 bg-zinc-900/30 border border-zinc-900 hover:border-zinc-800 rounded-2xl transition-all duration-300 hover:shadow-2xl overflow-hidden"
+              className="group relative flex flex-col justify-between p-6 bg-void-100 border-4 border-black rounded-none shadow-brutalist hover:translate-x-[-4px] hover:translate-y-[-4px] hover:shadow-brutalist-hover transition-all duration-150 overflow-hidden"
             >
-              {/* Soft decorative glow corner */}
-              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-zinc-800/10 to-transparent pointer-events-none group-hover:from-cyan-400/5 transition-all duration-500" />
+              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-signal/5 to-transparent pointer-events-none" />
 
               <div className="space-y-4">
                 {/* Card Header Tag & Category Indicator */}
                 <div className="flex items-center justify-between">
                   {/* Small tag badge */}
-                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[9px] font-mono tracking-wider uppercase font-bold ${
-                    tool.tag === 'Active' ? 'bg-emerald-950/40 text-emerald-400 border border-emerald-900/30' :
-                    tool.tag === 'Free' ? 'bg-cyan-950/40 text-cyan-400 border border-cyan-900/30' :
-                    'bg-purple-950/40 text-purple-400 border border-purple-905/30'
+                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-none text-[9px] font-mono tracking-wider uppercase font-black border ${
+                    tool.tag === 'Active' ? 'bg-black text-signal border-signal' :
+                    tool.tag === 'Free' ? 'bg-black text-clinical border-void-300' :
+                    'bg-black text-white border-void-300'
                   }`}>
                     {tool.tag}
                   </span>
-                  <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">{tool.category}</span>
+                  <span className="text-[10px] font-mono text-void-500 uppercase tracking-widest font-bold">{tool.category}</span>
                 </div>
 
                 {/* Title */}
-                <h3 className="text-base font-bold text-white tracking-tight group-hover:text-cyan-400 transition-colors">
+                <h3 className="text-sm font-mono font-black text-white uppercase tracking-tight group-hover:text-signal transition-colors">
                   {tool.title}
                 </h3>
 
                 {/* Direct No-Buzzword Explanations */}
-                <div className="space-y-2.5 text-xs">
+                <div className="space-y-3 text-xs pt-2 border-t border-void-300">
                   <div>
-                    <span className="text-zinc-500 font-mono text-[9px] uppercase block mb-0.5">THE PROBLEM</span>
-                    <p className="text-zinc-400 leading-relaxed font-light">{tool.problem}</p>
+                    <span className="text-void-500 font-mono text-[9px] uppercase block mb-0.5 font-bold">THE PROBLEM_</span>
+                    <p className="text-void-500 font-mono leading-relaxed text-[11px]">{tool.problem}</p>
                   </div>
                   <div>
-                    <span className="text-cyan-400/80 font-mono text-[9px] uppercase block mb-0.5">THE SOLUTION</span>
-                    <p className="text-zinc-300 leading-relaxed font-normal">{tool.solution}</p>
+                    <span className="text-signal font-mono text-[9px] uppercase block mb-0.5 font-bold">THE SOLUTION_</span>
+                    <p className="text-clinical font-mono leading-relaxed text-[11px]">{tool.solution}</p>
                   </div>
                 </div>
               </div>
 
               {/* Action tray for code preview / interactive usage */}
-              <div className="flex items-center justify-between pt-5 mt-5 border-t border-zinc-900">
+              <div className="flex items-center justify-between pt-4 mt-5 border-t border-dashed border-void-300">
                 <button
                   onClick={() => setViewSnippetId(viewSnippetId === tool.id ? null : tool.id)}
-                  className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 hover:text-white flex items-center gap-1.5 transition-colors"
+                  className="text-[10px] font-mono uppercase tracking-widest text-[#22d3ee] hover:text-white flex items-center gap-1.5 transition-colors font-bold"
                 >
                   <Terminal size={11} /> 
-                  {viewSnippetId === tool.id ? 'Hide integration code' : 'View integration code'}
+                  {viewSnippetId === tool.id ? 'Hide integration code_' : 'View integration code_'}
                 </button>
-                <span className="text-[9px] font-mono text-zinc-600 uppercase tracking-wider">REF ID: {tool.id}</span>
+                <span className="text-[9px] font-mono text-void-600 uppercase tracking-wider font-bold">REF ID: {tool.id}</span>
               </div>
 
               {/* Collapsible integration code container */}
@@ -773,11 +773,11 @@ export const ToolLibrarySection: React.FC = () => {
                     exit={{ height: 0, opacity: 0 }}
                     className="overflow-hidden mt-3"
                   >
-                    <div className="bg-black/80 rounded-xl p-3 border border-zinc-800 text-[10px] font-mono text-zinc-300 relative">
-                      <pre className="overflow-x-auto whitespace-pre-wrap">{tool.codeSnippet}</pre>
+                    <div className="bg-black rounded-none p-3 border-2 border-black text-[10px] font-mono text-zinc-300 relative">
+                       <pre className="overflow-x-auto whitespace-pre-wrap">{tool.codeSnippet}</pre>
                       <button
                         onClick={() => handleCopyCode(tool.codeSnippet)}
-                        className="absolute right-2 top-2 px-1.5 py-0.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded text-[9px] text-zinc-400 hover:text-white"
+                        className="absolute right-2 top-2 px-1.5 py-0.5 bg-signal hover:bg-signal-hover text-black font-semibold rounded-none border border-black text-[9px]"
                       >
                         Copy
                       </button>
@@ -799,35 +799,35 @@ export const ToolLibrarySection: React.FC = () => {
 
 export const PremiumServicesSection: React.FC = () => {
   return (
-    <section id="services" className="py-24 px-6 md:px-12 max-w-7xl mx-auto border-b border-zinc-900">
+    <section id="services" className="py-24 px-6 md:px-12 max-w-7xl mx-auto border-b-4 border-black bg-void">
       <div className="max-w-3xl mb-16 space-y-3">
-        <span className="text-[10px] font-mono tracking-[0.2em] text-cyan-400 uppercase">HIGH-END ADVISORY FRAMEWORKS</span>
-        <h2 className="text-3xl md:text-5xl font-bold text-white tracking-tight">Structured AI Consulting</h2>
-        <p className="text-base text-zinc-400 font-light leading-relaxed">
+        <span className="text-[10px] font-mono tracking-[0.2em] text-signal uppercase">HIGH-END ADVISORY FRAMEWORKS</span>
+        <h2 className="text-3xl md:text-5xl font-display font-black text-white uppercase tracking-tight">Structured AI Consulting</h2>
+        <p className="text-xs text-void-500 font-mono uppercase leading-relaxed">
           I do not promise magical outcomes or use hype. We look directly at workflows, audit prompt vulnerabilities to protect your data, and write code to automate mundane internal business logic.
         </p>
       </div>
 
       <div className="grid lg:grid-cols-2 gap-12">
         {/* Service columns 1 */}
-        <div className="p-8 md:p-10 rounded-3xl bg-zinc-900/20 border border-zinc-900 flex flex-col justify-between space-y-8">
+        <div className="p-8 md:p-10 rounded-none bg-void-100 border-4 border-black flex flex-col justify-between space-y-8 shadow-brutalist hover:translate-x-[-4px] hover:translate-y-[-4px] hover:shadow-brutalist-hover transition-all duration-150">
           <div className="space-y-6">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-400/20 to-transparent p-[1px] flex items-center justify-center">
-              <Shield size={20} className="text-cyan-400" />
+            <div className="w-12 h-12 rounded-none bg-signal text-black border-2 border-black flex items-center justify-center font-black">
+              <Shield size={20} />
             </div>
             
             <div className="space-y-1.5">
-              <h3 className="text-2xl font-bold text-white tracking-tight">Systematic Prompt Auditing</h3>
-              <p className="text-xs text-cyan-400 font-mono uppercase tracking-widest">PROMPT TELEMETRY & HARDENING</p>
+              <h3 className="text-xl font-mono font-black text-white uppercase tracking-tight">Systematic Prompt Auditing</h3>
+              <p className="text-[9px] text-signal font-mono uppercase tracking-widest font-black">PROMPT TELEMETRY & HARDENING_</p>
             </div>
 
-            <p className="text-zinc-400 text-sm leading-relaxed font-light">
+            <p className="text-void-500 text-xs font-mono leading-relaxed uppercase">
               Secure your system intelligence profiles against injection risks, alignment drift, and data extraction vectors. Utilizing our proprietary structured testing environment, we score prompt parameters for deterministic output safety.
             </p>
           </div>
 
-          <div className="space-y-5 pt-8 border-t border-zinc-900">
-            <h4 className="text-xs font-mono text-zinc-500 uppercase tracking-widest">ENGAGEMENT SEQUENCE:</h4>
+          <div className="space-y-5 pt-8 border-t-2 border-black">
+            <h4 className="text-[9px] font-mono text-void-500 uppercase tracking-widest font-bold">ENGAGEMENT SEQUENCE:</h4>
             <div className="space-y-3">
               {[
                 { step: '1', title: 'Context Mapping', details: 'We analyze your system instructions and highlight vulnerable boundaries.' },
@@ -835,10 +835,10 @@ export const PremiumServicesSection: React.FC = () => {
                 { step: '3', title: 'Defensive Patches', details: 'We output secure defensive prompt variations and regex checks.' }
               ].map(item => (
                 <div key={item.step} className="flex gap-3">
-                  <span className="w-6 h-6 rounded-full bg-zinc-900 text-zinc-400 flex items-center justify-center text-[10px] font-mono border border-zinc-800">{item.step}</span>
+                  <span className="w-6 h-6 rounded-none bg-black text-signal flex items-center justify-center text-[10px] font-mono border border-void-300 font-black">{item.step}</span>
                   <div>
                     <h5 className="text-[11px] font-bold text-white font-mono uppercase">{item.title}</h5>
-                    <p className="text-xs text-zinc-500 font-light">{item.details}</p>
+                    <p className="text-xs text-void-550 font-mono font-light uppercase">{item.details}</p>
                   </div>
                 </div>
               ))}
@@ -847,24 +847,24 @@ export const PremiumServicesSection: React.FC = () => {
         </div>
 
         {/* Service columns 2 */}
-        <div className="p-8 md:p-10 rounded-3xl bg-zinc-900/20 border border-zinc-900 flex flex-col justify-between space-y-8">
+        <div className="p-8 md:p-10 rounded-none bg-void-100 border-4 border-black flex flex-col justify-between space-y-8 shadow-brutalist hover:translate-x-[-4px] hover:translate-y-[-4px] hover:shadow-brutalist-hover transition-all duration-150">
           <div className="space-y-6">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-400/20 to-transparent p-[1px] flex items-center justify-center">
-              <Code size={20} className="text-purple-400" />
+            <div className="w-12 h-12 rounded-none bg-clinical text-black border-2 border-black flex items-center justify-center font-black">
+              <Code size={20} />
             </div>
             
             <div className="space-y-1.5">
-              <h3 className="text-2xl font-bold text-white tracking-tight">Bespoke Agent Workflows</h3>
-              <p className="text-xs text-purple-400 font-mono uppercase tracking-widest">MULTI-MODEL AGENT PIPELINES</p>
+              <h3 className="text-xl font-mono font-black text-white uppercase tracking-tight">Bespoke Agent Workflows</h3>
+              <p className="text-[9px] text-[#22d3ee] font-mono uppercase tracking-widest font-black">MULTI-MODEL AGENT PIPELINES_</p>
             </div>
 
-            <p className="text-zinc-400 text-sm leading-relaxed font-light">
+            <p className="text-void-500 text-xs font-mono leading-relaxed uppercase">
               Orchestrate structured pipeline algorithms connecting LLM models to operational SQL servers, custom data pools, and secure cloud API points. Avoid expensive pre-built platform fees with lean, serverless self-hosted agent chains.
             </p>
           </div>
 
-          <div className="space-y-5 pt-8 border-t border-zinc-900">
-            <h4 className="text-xs font-mono text-zinc-500 uppercase tracking-widest">ENGAGEMENT SEQUENCE:</h4>
+          <div className="space-y-5 pt-8 border-t-2 border-black">
+            <h4 className="text-[9px] font-mono text-void-500 uppercase tracking-widest font-bold">ENGAGEMENT SEQUENCE:</h4>
             <div className="space-y-3">
               {[
                 { step: '1', title: 'Operational Inventory', details: 'We inspect the manual repetitive work paths currently draining developer time.' },
@@ -872,10 +872,10 @@ export const PremiumServicesSection: React.FC = () => {
                 { step: '3', title: 'Production Ship', details: 'We deploy lightweight container endpoints on your secure cloud environment.' }
               ].map(item => (
                 <div key={item.step} className="flex gap-3">
-                  <span className="w-6 h-6 rounded-full bg-zinc-900 text-zinc-400 flex items-center justify-center text-[10px] font-mono border border-zinc-800">{item.step}</span>
+                  <span className="w-6 h-6 rounded-none bg-black text-[#22d3ee] flex items-center justify-center text-[10px] font-mono border border-void-300 font-black">{item.step}</span>
                   <div>
                     <h5 className="text-[11px] font-bold text-white font-mono uppercase">{item.title}</h5>
-                    <p className="text-xs text-zinc-500 font-light">{item.details}</p>
+                    <p className="text-xs text-void-550 font-mono font-light uppercase">{item.details}</p>
                   </div>
                 </div>
               ))}
@@ -960,15 +960,15 @@ export const DynamicBlogSection: React.FC = () => {
   };
 
   return (
-    <section id="blog" className="py-24 px-6 md:px-12 max-w-7xl mx-auto border-b border-zinc-900 scroll-mt-20">
+    <section id="blog" className="py-24 px-6 md:px-12 max-w-7xl mx-auto border-b border-void-300 scroll-mt-20">
       <div className="flex flex-col lg:flex-row gap-12">
         
         {/* Blog Selector Sidebar (35%) */}
         <div className="w-full lg:w-[35%] space-y-6">
           <div className="space-y-3 text-left">
-            <span className="text-[10px] font-mono tracking-[0.2em] text-cyan-400 uppercase">TECHNICAL INTELLIGENCE HANDBOOKS</span>
+            <span className="text-[10px] font-mono tracking-[0.2em] text-signal uppercase">TECHNICAL INTELLIGENCE HANDBOOKS</span>
             <h2 className="text-3xl font-bold text-white tracking-tight">Blog System</h2>
-            <p className="text-xs text-zinc-400 leading-relaxed font-light">
+            <p className="text-xs text-void-500 leading-relaxed font-light">
               We ingest and host raw HTML blog chapters. Try pasting your own HTML or uploading a post below to test our premium, leakage-free typography wrapper!
             </p>
           </div>
@@ -976,7 +976,7 @@ export const DynamicBlogSection: React.FC = () => {
           {/* Action to trigger custom mock upload/paste panel */}
           <button
             onClick={() => setIsAddingCustom(!isAddingCustom)}
-            className="w-full py-3.5 bg-zinc-900 hover:bg-zinc-855 border border-zinc-800 text-white font-bold text-xs font-mono uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-2 "
+            className="w-full py-3.5 bg-void-100 hover:bg-void-200 border border-void-300 text-white font-bold text-xs font-mono uppercase tracking-widest rounded-none transition-all flex items-center justify-center gap-2 "
           >
             <Upload size={13} />
             {isAddingCustom ? 'Cancel post submission' : 'Publish custom HTML document'}
@@ -984,7 +984,7 @@ export const DynamicBlogSection: React.FC = () => {
 
           {/* List existing preseeded and uploaded blogs */}
           <div className="space-y-3 pt-2 text-left">
-            <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest block pl-1">ARTICLES CURRENTLY MOUNTED</span>
+            <span className="text-[10px] font-mono text-void-500 uppercase tracking-widest block pl-1">ARTICLES CURRENTLY MOUNTED</span>
             
             <div className="space-y-2">
               {blogs.map(b => (
@@ -994,18 +994,18 @@ export const DynamicBlogSection: React.FC = () => {
                     setSelectedBlogId(b.id);
                     setIsAddingCustom(false);
                   }}
-                  className={`w-full p-4 rounded-xl transition-all text-left border ${
+                  className={`w-full p-4 rounded-none transition-all text-left border ${
                     selectedBlogId === b.id && !isAddingCustom
-                      ? 'bg-zinc-900/60 border-zinc-800 text-white/95' 
-                      : 'bg-transparent border-transparent text-zinc-400 hover:text-white hover:bg-zinc-900/20'
+                      ? 'bg-void-200 border-void-300 text-white/95' 
+                      : 'bg-transparent border-transparent text-void-500 hover:text-white hover:bg-void-100'
                   }`}
                 >
                   <div className="flex items-center justify-between gap-2 mb-1">
-                    <span className="text-[9px] font-mono text-cyan-400/80 uppercase">{b.date}</span>
-                    <span className="text-[9px] font-mono text-zinc-500">{b.readTime}</span>
+                    <span className="text-[9px] font-mono text-signal uppercase">{b.date}</span>
+                    <span className="text-[9px] font-mono text-void-500">{b.readTime}</span>
                   </div>
                   <h4 className="text-xs font-bold leading-snug tracking-tight mb-1 truncate">{b.title}</h4>
-                  <p className="text-[11px] text-zinc-500 line-clamp-2 font-light leading-normal">{b.summary}</p>
+                  <p className="text-[11px] text-void-500 line-clamp-2 font-light leading-normal">{b.summary}</p>
                 </button>
               ))}
             </div>
@@ -1013,10 +1013,10 @@ export const DynamicBlogSection: React.FC = () => {
         </div>
 
         {/* Dynamic HTML Document Canvas Viewer / Ingestion Panel (65%) */}
-        <div className="w-full lg:w-[65%] min-h-[500px] border border-zinc-900 rounded-2xl bg-zinc-900/10 p-6 md:p-10 relative overflow-hidden">
+        <div className="w-full lg:w-[65%] min-h-[500px] border border-void-300 rounded-none bg-void-100 p-6 md:p-10 relative overflow-hidden">
           
           {/* Subtle overlay lines giving a developer terminal context */}
-          <div className="absolute top-4 right-4 text-[9px] font-mono text-zinc-600 select-none uppercase tracking-widest">
+          <div className="absolute top-4 right-4 text-[9px] font-mono text-void-600 select-none uppercase tracking-widest">
             HTML COMPILER CANV_INTEGRATED
           </div>
 
@@ -1030,19 +1030,19 @@ export const DynamicBlogSection: React.FC = () => {
                 exit={{ opacity: 0, y: -10 }}
                 className="space-y-6 text-left"
               >
-                <div className="border-b border-zinc-900 pb-4">
+                <div className="border-b border-void-300 pb-4">
                   <h3 className="text-lg font-bold text-white tracking-tight flex items-center gap-2">
-                    <Terminal size={16} className="text-cyan-400" />
+                    <Terminal size={16} className="text-signal" />
                     Mount custom HTML document node
                   </h3>
-                  <p className="text-xs text-zinc-500 mt-1 font-light">
+                  <p className="text-xs text-void-500 mt-1 font-light">
                     Upload a raw <code>.html</code> file or paste direct elements below to inspect how typography models render your styles securely.
                   </p>
                 </div>
 
                 <form onSubmit={handleCreateCustomBlog} className="space-y-4">
                   {/* File drop and select manual option */}
-                  <div className="bg-zinc-950 p-6 rounded-xl border border-zinc-900/60 text-center ">
+                  <div className="bg-[#030712] p-6 rounded-none border border-void-300 text-center ">
                     <input
                       type="file"
                       ref={fileInputRef}
@@ -1050,13 +1050,13 @@ export const DynamicBlogSection: React.FC = () => {
                       accept=".html"
                       className="hidden"
                     />
-                    <Upload size={22} className="text-zinc-500 mx-auto mb-2" />
-                    <p className="text-xs font-mono text-zinc-400 mb-1">Drag and drop your blog.html here</p>
-                    <p className="text-[10px] text-zinc-600 mb-3">Only HTML document formats permitted</p>
+                    <Upload size={22} className="text-void-550 mx-auto mb-2" />
+                    <p className="text-xs font-mono text-void-500 mb-1">Drag and drop your blog.html here</p>
+                    <p className="text-[10px] text-void-600 mb-3">Only HTML document formats permitted</p>
                     <button
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
-                      className="px-4 py-1.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white rounded-lg text-xs font-mono transition-colors"
+                      className="px-4 py-1.5 bg-void-200 hover:bg-void-300 border border-void-300 text-clinical rounded-none text-xs font-mono transition-colors"
                     >
                       Browse Files
                     </button>
@@ -1065,40 +1065,40 @@ export const DynamicBlogSection: React.FC = () => {
                   {/* Manual forms */}
                   <div className="space-y-3 text-xs">
                     <div>
-                      <label className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider block mb-1">Article Title</label>
+                      <label className="text-[10px] font-mono text-void-500 uppercase tracking-wider block mb-1">Article Title</label>
                       <input
                         type="text"
                         value={customTitle}
                         onChange={(e) => setCustomTitle(e.target.value)}
                         placeholder="e.g. Prompt Leakage Patterns Analysed"
-                        className="w-full bg-zinc-950 border border-zinc-900 rounded-xl p-3 text-white focus:outline-none focus:border-zinc-700 font-mono text-xs"
+                        className="w-full bg-[#030712] border border-void-300 rounded-none p-3 text-white focus:outline-none focus:border-signal font-mono text-xs"
                       />
                     </div>
                     <div>
-                      <label className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider block mb-1">Abstract Summary (Skim preview)</label>
+                      <label className="text-[10px] font-mono text-void-500 uppercase tracking-wider block mb-1">Abstract Summary (Skim preview)</label>
                       <input
                         type="text"
                         value={customSummary}
                         onChange={(e) => setCustomSummary(e.target.value)}
                         placeholder="e.g., A breakdown of semantic alignment telemetry findings under high payload stress models."
-                        className="w-full bg-zinc-950 border border-zinc-900 rounded-xl p-3 text-white focus:outline-none focus:border-zinc-700 font-mono text-xs"
+                        className="w-full bg-[#030712] border border-void-300 rounded-none p-3 text-white focus:outline-none focus:border-signal font-mono text-xs"
                       />
                     </div>
                     <div>
-                      <label className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider block mb-1">Raw HTML Content Chunk</label>
+                      <label className="text-[10px] font-mono text-void-500 uppercase tracking-wider block mb-1">Raw HTML Content Chunk</label>
                       <textarea
                         value={customHtml}
                         onChange={(e) => setCustomHtml(e.target.value)}
                         placeholder="<article>\n  <h1>Heading</h1>\n  <p>Your raw text paragraphs...</p>\n  <pre><code>someCode();</code></pre>\n</article>"
                         rows={8}
-                        className="w-full bg-zinc-950 border border-zinc-900 rounded-xl p-3 text-white focus:outline-none focus:border-zinc-700 font-mono text-xs focus:ring-1 focus:ring-zinc-800 focus:outline-none resize-none"
+                        className="w-full bg-[#030712] border border-void-300 rounded-none p-3 text-white focus:outline-none focus:border-signal font-mono text-xs focus:ring-1 focus:ring-void-300 focus:outline-none resize-none"
                       />
                     </div>
                   </div>
 
                   <button
                     type="submit"
-                    className="w-full py-3 bg-white hover:bg-zinc-100 text-black font-bold text-xs font-mono uppercase tracking-widest rounded-xl transition-all"
+                    className="w-full py-3 bg-white hover:bg-clinical text-black font-bold text-xs font-mono uppercase tracking-widest rounded-none transition-all"
                   >
                     Mount and Render Blog Post Document
                   </button>
@@ -1113,13 +1113,13 @@ export const DynamicBlogSection: React.FC = () => {
                 className="text-left"
               >
                 {/* Meta details */}
-                <div className="border-b border-zinc-900 pb-6 mb-8">
-                  <div className="flex flex-wrap items-center gap-2 mb-2 text-[10px] font-mono text-zinc-500 uppercase tracking-widest">
+                <div className="border-b border-void-300 pb-6 mb-8">
+                  <div className="flex flex-wrap items-center gap-2 mb-2 text-[10px] font-mono text-void-500 uppercase tracking-widest">
                     <span>{selectedBlog.date}</span>
                     <span>•</span>
                     <span>By {selectedBlog.author}</span>
                     <span>•</span>
-                    <span className="text-cyan-400">{selectedBlog.readTime}</span>
+                    <span className="text-signal">{selectedBlog.readTime}</span>
                   </div>
                   <h1 className="text-2xl md:text-3.5xl font-bold text-white tracking-tight leading-snug">
                     {selectedBlog.title}
@@ -1128,8 +1128,8 @@ export const DynamicBlogSection: React.FC = () => {
 
                 {/* THE CORE HTML INGESTION SANCTUARY BOX (No-Leak styled elements) */}
                 <div 
-                  className="custom-rendered-html max-w-none text-zinc-300 font-sans text-sm md:text-base leading-relaxed space-y-5"
-                  dangerouslySetInnerHTML={{ __html: selectedBlog.rawHtml }}
+                  className="custom-rendered-html max-w-none text-clinical font-sans text-sm md:text-base leading-relaxed space-y-5"
+                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(selectedBlog.rawHtml) }}
                 />
               </motion.div>
             )}
@@ -1147,51 +1147,51 @@ export const DynamicBlogSection: React.FC = () => {
           margin-bottom: 0.5rem !important;
         }
         .custom-rendered-html h1 { font-size: 1.5rem !important; }
-        .custom-rendered-html h2 { font-size: 1.25rem !important; border-bottom: 1px solid #18181b; padding-bottom: 0.25rem; }
+        .custom-rendered-html h2 { font-size: 1.25rem !important; border-bottom: 1px solid #1A212B; padding-bottom: 0.25rem; }
         .custom-rendered-html h3 { font-size: 1.125rem !important; }
         .custom-rendered-html p {
-          color: #a1a1aa !important;
+          color: #9AA0A8 !important;
           margin-bottom: 1rem !important;
         }
         .custom-rendered-html p.lead {
           font-size: 1.1rem !important;
-          color: #d4d4d8 !important;
+          color: #D7D9DD !important;
           font-weight: 300 !important;
         }
         .custom-rendered-html blockquote {
-          border-left: 2px solid #22d3ee !important;
+          border-left: 2px solid #D98A2E !important;
           padding-left: 1rem !important;
-          color: #d4d4d8 !important;
+          color: #D7D9DD !important;
           font-style: italic !important;
           margin: 1.5rem 0 !important;
         }
         .custom-rendered-html ul, .custom-rendered-html ol {
           padding-left: 1.5rem !important;
           margin-bottom: 1rem !important;
-          color: #a1a1aa !important;
+          color: #9AA0A8 !important;
           list-style-type: unset !important;
         }
         .custom-rendered-html li {
           margin-bottom: 0.5rem !important;
         }
         .custom-rendered-html pre {
-          background-color: #09090b !important;
-          border: 1px solid #18181b !important;
+          background-color: #030712 !important;
+          border: 1px solid #1A212B !important;
           padding: 1rem !important;
-          border-radius: 0.75rem !important;
+          border-radius: 0px !important;
           overflow-x: auto !important;
           margin: 1.5rem 0 !important;
         }
         .custom-rendered-html code {
-          font-family: 'JetBrains Mono', 'Fira Code', monospace !important;
+          font-family: 'IBM Plex Mono', 'Fira Code', monospace !important;
           font-size: 0.85em !important;
-          color: #22d3ee !important;
-          background-color: rgba(34,211,238,0.05) !important;
+          color: #D98A2E !important;
+          background-color: rgba(217,138,46,0.05) !important;
           padding: 0.15em 0.3em !important;
-          border-radius: 0.25rem !important;
+          border-radius: 0px !important;
         }
         .custom-rendered-html pre code {
-          color: #f4f4f5 !important;
+          color: #D7D9DD !important;
           background-color: transparent !important;
           padding: 0 !important;
           display: block !important;

@@ -4,6 +4,7 @@ import { Listing, LicenseType, PageView } from '../types.ts';
 import { LICENSE_TYPES } from '../constants.ts';
 import { Shield, CreditCard, Lock, ChevronRight, Check, Zap, Coins, Copy, Loader2, RefreshCw, ArrowLeft } from 'lucide-react';
 import Badge from '../components/common/Badge.tsx';
+import AcquisitionSuccessModal from '../components/common/AcquisitionSuccessModal.tsx';
 
 interface CheckoutPageProps {
     listing: Listing;
@@ -15,6 +16,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ listing, onNavigate, onConf
     const [license, setLicense] = useState<LicenseType>('personal');
     const [paymentStep, setPaymentStep] = useState<'selection' | 'processing' | 'confirmed'>('selection');
     const [selectedCrypto, setSelectedCrypto] = useState('USDT');
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
     
     const selectedLicense = LICENSE_TYPES.find(l => l.id === license)!;
     const subtotal = listing.pricing.amount * selectedLicense.multiplier;
@@ -34,7 +36,8 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ listing, onNavigate, onConf
         // Simulate block confirmation
         setTimeout(() => {
             setPaymentStep('confirmed');
-        }, 4000);
+            setShowSuccessModal(true);
+        }, 3000);
     };
 
     const handleFinalize = () => {
@@ -56,6 +59,16 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ listing, onNavigate, onConf
                         ACCESS ENCLAVE
                     </button>
                 </div>
+
+                <AcquisitionSuccessModal 
+                    listing={listing} 
+                    isOpen={showSuccessModal} 
+                    onClose={() => setShowSuccessModal(false)} 
+                    onViewEnclave={() => {
+                        setShowSuccessModal(false);
+                        handleFinalize();
+                    }} 
+                />
             </div>
         );
     }

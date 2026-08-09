@@ -9,10 +9,11 @@ interface ListingGridProps {
   listings: Listing[];
   isLoading: boolean;
   onOpenListing: (listing: Listing) => void;
+  onQuickTest?: (listing: Listing) => void;
   viewMode?: 'grid' | 'list';
 }
 
-const ListingGrid: React.FC<ListingGridProps> = ({ listings, isLoading, onOpenListing, viewMode = 'grid' }) => {
+const ListingGrid: React.FC<ListingGridProps> = ({ listings, isLoading, onOpenListing, onQuickTest, viewMode = 'grid' }) => {
   if (isLoading) {
     return (
       <div className="py-32 flex flex-col items-center justify-center space-y-6">
@@ -52,6 +53,7 @@ const ListingGrid: React.FC<ListingGridProps> = ({ listings, isLoading, onOpenLi
           key={listing.id} 
           listing={listing} 
           onClick={() => onOpenListing(listing)} 
+          onQuickTest={onQuickTest ? () => onQuickTest(listing) : undefined}
         />
       ))}
     </div>
