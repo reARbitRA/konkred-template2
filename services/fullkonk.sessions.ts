@@ -1,0 +1,120 @@
+// services/fullkonk.sessions.ts
+
+import { db } from './firebase';
+import {
+  collection,
+  addDoc,
+  updateDoc,
+  getDocs,
+  getDoc,
+  doc,
+  query,
+  where,
+  orderBy,
+  limit,
+  serverTimestamp,
+  Timestamp,
+} from 'firebase/firestore';
+import { FKMessage, GeneratedFile, BuildMode } from '../types';
+
+export interface FKSession {
+  id:         string;
+  userId:     string;
+  title:      string;
+  mode:       BuildMode;
+  provider:   string;
+  model:      string;
+  messages:   FKMessage[];
+  files:      GeneratedFile[];
+  createdAt:  number;
+  updatedAt:  number;
+  tokenCount: number;
+  stage:      string;
+}
+
+export interface FKSessionCreate {
+  userId:   string;
+  title:    string;
+  mode:     BuildMode;
+  provider: string;
+  model:    string;
+}
+
+// Create new session
+export async function createSession(data: FKSessionCreate): Promise<string> {
+  const ref = await addDoc(collection(db, 'fk_sessions'), {
+    ...data,
+    messages:   [],
+    files:      [],
+    tokenCount: 0,
+    stage:      'idle',
+    createdAt:  serverTimestamp(),
+    updatedAt:  serverTimestamp(),
+  });
+  return ref.id;
+}
+
+// Update session with messages and files
+export async function updateSession(
+  sessionId: string,
+  data: Partial<Pick<FKSession, 'messages' | 'files' | 'stage' | 'tokenCount' | 'title'>>
+): Promise<void> {
+  await updateDoc(doc(db, 'fk_sessions', sessionId), {
+    ...data,
+    updatedAt: serverTimestamp(),
+  });
+}
+
+// Get sessions for a user
+export async function getUserSessions(userId: string, count = 20): Promise<FKSession[]> {
+  const q = query(
+    collection(db, 'fk_sessions'),
+    where('userId', '==', userId),
+    orderBy('updatedAt', 'desc'),
+    limit(count),
+  );
+  const snap = await getDocs(q);
+  return snap.docs.map(d => {
+    const data = d.data();
+    return {
+      id:         d.id,
+      userId:     data.userId,
+      title:      data.title,
+      mode:       data.mode,
+      provider:   data.provider,
+      model:      data.model,
+      messages:   data.messages ?? [],
+      files:      data.files ?? [],
+      tokenCount: data.tokenCount ?? 0,
+      stage:      data.stage ?? 'idle',
+      createdAt:  (data.createdAt as Timestamp)?.toMillis?.() ?? 0,
+      updatedAt:  (data.updatedAt as Timestamp)?.toMillis?.() ?? 0,
+    } satisfies FKSession;
+  });
+}
+
+// Get single session
+export async function getSession(sessionId: string): Promise<FKSession | null> {
+  const snap = await getDoc(doc(db, 'fk_sessions', sessionId));
+  if (!snap.exists()) return null;
+  const data = snap.data();
+  return {
+    id:         snap.id,
+    userId:     data.userId,
+    title:      data.title,
+    mode:       data.mode,
+    provider:   data.provider,
+    model:      data.model,
+    messages:   data.messages ?? [],
+    files:      data.files ?? [],
+    tokenCount: data.tokenCount ?? 0,
+    stage:      data.stage ?? 'idle',
+    createdAt:  (data.createdAt as Timestamp)?.toMillis?.() ?? 0,
+    updatedAt:  (data.updatedAt as Timestamp)?.toMillis?.() ?? 0,
+  };
+}
+
+// Generate title from first user message
+export function generateSessionTitle(prompt: string): string {
+  return prompt.length > 60 ? prompt.slice(0, 57) + '...' : prompt;
+}

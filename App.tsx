@@ -26,6 +26,7 @@ import LandingPage from './pages/LandingPage.tsx';
 import MarketplacePage from './pages/MarketplacePage.tsx';
 import ListingWizard from './pages/ListingWizard.tsx';
 import ForgePage from './pages/ForgePage.tsx';
+import FullKonkPage from './pages/FullKonkPage.tsx';
 import PlaygroundsPage from './pages/PlaygroundsPage.tsx';
 import IntelReportPage from './pages/IntelReportPage.tsx';
 import WalletPage from './pages/WalletPage.tsx';
@@ -39,6 +40,7 @@ import ConsultingPage from './pages/ConsultingPage.tsx';
 import DocumentationPage from './pages/DocumentationPage.tsx';
 import CareerPage from './pages/CareerPage.tsx';
 import ResourcesPage from './pages/ResourcesPage.tsx';
+import KToolsPage from './pages/KToolsPage.tsx';
 import PricingPage from './pages/PricingPage.tsx';
 import CheckoutPage from './pages/CheckoutPage.tsx';
 import ListingPage from './pages/ListingPage.tsx';
@@ -188,7 +190,7 @@ const App: React.FC = () => {
             <CommandPalette isOpen={isCmdOpen} onClose={() => setIsCmdOpen(false)} onNavigate={navigate} />
 
             <main className="flex-1 min-h-screen relative w-full overflow-y-auto custom-scrollbar">
-                {!['enter', 'join_network', 'verify_email'].includes(currentPage) && (
+                {!['enter', 'join_network', 'verify_email', 'landing'].includes(currentPage) && (
                     <Navbar 
                         onNavigate={navigate} 
                         currentPage={currentPage}
@@ -198,10 +200,11 @@ const App: React.FC = () => {
                     />
                 )}
 
-                <div className="animate-in fade-in duration-500 pt-20 md:pt-24 min-h-[calc(100vh-100px)]">
+                <div className={`animate-in fade-in duration-500 ${currentPage === 'landing' ? '' : 'pt-20 md:pt-24 min-h-[calc(100vh-100px)]'}`}>
                     {currentPage === 'landing' && <LandingPage onNavigate={navigate} />}
                     {currentPage === 'marketplace' && <MarketplacePage onNavigate={navigate} onOpenListing={(l) => { setSelectedListing(l); navigate('listing_detail'); }} />}
                     {currentPage === 'listing_detail' && selectedListing && <ListingPage listing={selectedListing} onNavigate={navigate} onBuy={handleBuyRequest} />}
+                    {currentPage === 'fullkonk' && <FullKonkPage />}
                     {currentPage === 'forge_audit' && <ForgePage onNavigate={navigate} />}
                     {currentPage === 'forge' && <ForgePage onNavigate={navigate} />}
                     {currentPage === 'playgrounds' && <PlaygroundsPage onNavigate={navigate} />}
@@ -220,6 +223,7 @@ const App: React.FC = () => {
                     {currentPage === 'advisory' && <ConsultingPage onNavigate={navigate} />}
                     {currentPage === 'documentation' && <DocumentationPage onNavigate={navigate} />}
                     {currentPage === 'resources' && <ResourcesPage onNavigate={navigate} />}
+                    {currentPage === 'ktools' && <KToolsPage onNavigate={navigate} />}
                     {currentPage === 'pricing' && <PricingPage onNavigate={navigate} />}
                     {currentPage === 'seller_dashboard' && <SellerDashboard listings={allListings.filter(l => l.sellerId === auth.user?.id || l.sellerId === 'U1')} onNavigate={navigate} onNewListing={() => navigate('wizard')} />}
                     {currentPage === 'wizard' && <ListingWizard onComplete={handleDeployProtocol} onCancel={() => navigate('seller_dashboard')} />}

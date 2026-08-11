@@ -11,6 +11,9 @@ import { getFirestore as getAdminFirestore } from "firebase-admin/firestore";
 import firebaseConfig from "./firebase-applet-config.json";
 import { db as sqlDb } from "./src/db/index.ts";
 import { users as sqlUsers } from "./src/db/schema.ts";
+import { getSortedProviders, markRateLimited, isRateLimited, SYSTEM_PROMPTS, PROVIDERS } from './services/fullkonk';
+import { logUsage, getUserUsageSummary, getRecentEvents } from './services/fullkonk.analytics';
+import { exportToGitHub } from './services/fullkonk.github';
 
 dotenv.config();
 
@@ -331,6 +334,256 @@ async function startServer() {
     } catch (error: any) {
       console.error("AI Proxy Error:", error);
       res.status(500).json({ error: error.message });
+    }
+  });
+
+  // ─── fullKONK_> ROUTES ──────────────────────────────────────────
+
+  // GET /api/fullkonk/providers
+  app.get('/api/fullkonk/providers', (_req, res) => {
+    const list = PROVIDERS.map(p => ({
+      id:     p.id,
+      name:   p.name,
+      models: p.models,
+      hasKey: !!process.env[p.envKey],
+    }));
+    res.json({ providers: list });
+  });
+
+  // POST /api/fullkonk/generate  (SSE streaming)
+  app.post('/api/fullkonk/generate', async (req, res) => {
+    const { prompt, mode = 'fullstack', provider: preferredProvider, model, temperature = 0.4, maxTokens = 8192, systemPrompt } = req.body;
+
+    if (!prompt?.trim()) {
+      return res.status(400).json({ error: 'prompt required' });
+    }
+
+    res.setHeader('Content-Type',  'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection',    'keep-alive');
+    res.setHeader('X-Accel-Buffering', 'no');
+    res.flushHeaders();
+
+    const send = (chunk: object) => {
+      if (!res.writableEnded) res.write(`data: ${JSON.stringify(chunk)}\n\n`);
+    };
+
+    // ── streaming fetch helper ───────────────────────────────────
+    async function streamStage(
+      task: string,
+      messages: { role: string; content: string }[],
+      onChunk: (text: string) => void,
+    ): Promise<string> {
+      const providers = preferredProvider
+        ? [PROVIDERS.find(p => p.id === preferredProvider)!, ...getSortedProviders(task).filter(p => p.id !== preferredProvider)]
+        : getSortedProviders(task);
+
+      for (const prov of providers) {
+        if (!prov) continue;
+        const apiKey = process.env[prov.envKey];
+        if (!apiKey) continue;
+        if (isRateLimited(prov.id)) continue;
+
+        const selectedModel = model && prov.models.some(m => m.id === model)
+          ? model
+          : prov.models[0].id;
+
+        send({ type: 'provider', provider: prov.name, model: selectedModel });
+
+        try {
+          const response = await fetch(`${prov.baseUrl}/chat/completions`, {
+            method:  'POST',
+            headers: {
+              'Authorization': `Bearer ${apiKey}`,
+              'Content-Type':  'application/json',
+              'HTTP-Referer':  'https://konkred.xyz',
+              'X-Title':       'fullKONK_>',
+            },
+            body: JSON.stringify({
+              model: selectedModel,
+              messages,
+              temperature,
+              max_tokens: maxTokens,
+              stream: true,
+            }),
+            signal: req.socket.destroyed ? AbortSignal.abort() : undefined,
+          });
+
+          if (response.status === 429) {
+            markRateLimited(prov.id);
+            send({ type: 'failover', from: prov.name });
+            continue;
+          }
+
+          if (!response.ok) {
+            const err = await response.text();
+            throw new Error(`${response.status}: ${err}`);
+          }
+
+          const reader = response.body!.getReader();
+          const decoder = new TextDecoder();
+          let full = '';
+
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            const lines = decoder.decode(value).split('\n');
+            for (const line of lines) {
+              if (!line.startsWith('data: ')) continue;
+              const raw = line.slice(6).trim();
+              if (raw === '[DONE]') continue;
+              try {
+                const parsed = JSON.parse(raw);
+                const text = parsed.choices?.[0]?.delta?.content ?? '';
+                if (text) { full += text; onChunk(text); }
+              } catch {}
+            }
+          }
+
+          return full;
+
+        } catch (err: any) {
+          if (err?.message?.includes('429')) markRateLimited(prov.id);
+          send({ type: 'failover', from: prov.name, error: err?.message });
+          continue;
+        }
+      }
+
+      throw new Error('All providers exhausted.');
+    }
+
+    try {
+      // ── REVIEW mode ─────────────────────────────────────────────
+      if (mode === 'review') {
+        send({ type: 'stage', stage: 'review' });
+        let out = '';
+        await streamStage('verify',
+          [
+            { role: 'system', content: systemPrompt || SYSTEM_PROMPTS.verify },
+            { role: 'user',   content: prompt },
+          ],
+          chunk => { out += chunk; send({ type: 'delta', content: chunk }); },
+        );
+        send({ type: 'done' });
+        return;
+      }
+
+      // ── STAGE 1: ARCHITECT ───────────────────────────────────────
+      send({ type: 'stage', stage: 'architect' });
+      let architecture = '';
+      await streamStage('architect',
+        [
+          { role: 'system', content: systemPrompt || SYSTEM_PROMPTS.architect },
+          { role: 'user',   content: `Design the complete architecture for: ${prompt}` },
+        ],
+        chunk => { architecture += chunk; send({ type: 'delta', content: chunk }); },
+      );
+
+      if (res.writableEnded) return;
+
+      // ── STAGE 2: BUILD ───────────────────────────────────────────
+      if (mode === 'frontend' || mode === 'fullstack') {
+        send({ type: 'stage', stage: 'frontend' });
+        let frontend = '';
+        await streamStage('frontend',
+          [
+            { role: 'system', content: SYSTEM_PROMPTS.frontend },
+            { role: 'user',   content: `Architecture:\n${architecture}\n\nImplement the complete frontend.` },
+          ],
+          chunk => { frontend += chunk; send({ type: 'delta', content: chunk }); },
+        );
+
+        if (mode === 'fullstack' && !res.writableEnded) {
+          send({ type: 'stage', stage: 'backend' });
+          let backend = '';
+          await streamStage('backend',
+            [
+              { role: 'system', content: SYSTEM_PROMPTS.backend },
+              { role: 'user',   content: `Architecture:\n${architecture}\n\nFrontend done. Implement the complete backend.` },
+            ],
+            chunk => { backend += chunk; send({ type: 'delta', content: chunk }); },
+          );
+
+          if (!res.writableEnded) {
+            send({ type: 'stage', stage: 'verify' });
+            let verified = '';
+            await streamStage('verify',
+              [
+                { role: 'system', content: SYSTEM_PROMPTS.verify },
+                { role: 'user',   content: `Architecture:\n${architecture}\n\nFrontend:\n${frontend}\n\nBackend:\n${backend}\n\nVerify and fix integration.` },
+              ],
+              chunk => { verified += chunk; send({ type: 'delta', content: chunk }); },
+            );
+          }
+        }
+      } else if (mode === 'backend') {
+        send({ type: 'stage', stage: 'backend' });
+        await streamStage('backend',
+          [
+            { role: 'system', content: SYSTEM_PROMPTS.backend },
+            { role: 'user',   content: `Architecture:\n${architecture}\n\nImplement the complete backend.` },
+          ],
+          chunk => send({ type: 'delta', content: chunk }),
+        );
+      }
+
+      send({ type: 'done' });
+
+    } catch (err: any) {
+      send({ type: 'error', error: err?.message ?? 'Pipeline failed' });
+    } finally {
+      if (!res.writableEnded) res.end();
+    }
+  });
+
+  // GET /api/fullkonk/sessions/:userId
+  app.get('/api/fullkonk/sessions/:userId', async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const count = Math.min(Number(req.query.count) || 20, 50);
+      res.json({ message: 'Fetch sessions client-side via firebase SDK', userId, count });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // POST /api/fullkonk/usage
+  app.post('/api/fullkonk/usage', async (req, res) => {
+    try {
+      const { userId, provider, model, mode, stage, tokens, durationMs, success } = req.body;
+      if (!userId || !provider) return res.status(400).json({ error: 'userId and provider required' });
+      await logUsage({ userId, provider, model, mode, stage, tokens: tokens ?? 0, durationMs: durationMs ?? 0, success: success ?? true });
+      res.json({ ok: true });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // GET /api/fullkonk/analytics/:userId
+  app.get('/api/fullkonk/analytics/:userId', async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const days = Math.min(Number(req.query.days) || 30, 90);
+      const [summary, recent] = await Promise.all([
+        getUserUsageSummary(userId, days),
+        getRecentEvents(userId, 10),
+      ]);
+      res.json({ summary, recent });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // POST /api/fullkonk/github/export
+  app.post('/api/fullkonk/github/export', async (req, res) => {
+    try {
+      const { files, token, owner, repo, branch = 'fullkonk-output', message = 'Generated by fullKONK_>' } = req.body;
+      if (!files?.length) return res.status(400).json({ error: 'files required' });
+      if (!token || !owner || !repo) return res.status(400).json({ error: 'token, owner, repo required' });
+      const result = await exportToGitHub(files, { token, owner, repo, branch, message });
+      res.json(result);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
     }
   });
 

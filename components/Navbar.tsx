@@ -43,7 +43,7 @@ const Navbar: React.FC<NavbarProps> = ({
   const dashboardNavItems = [
     { label: 'Playgrounds', page: 'playgrounds' as PageView },
     { label: 'Intel Report', page: 'intel_report' as PageView },
-    { label: 'The Forge', page: 'forge' as PageView },
+    { label: 'fullKONK_>', page: 'fullkonk' as PageView },
     { label: 'Network', page: 'network' as PageView },
   ];
 
@@ -53,6 +53,7 @@ const Navbar: React.FC<NavbarProps> = ({
       case 'marketplace': return 'PROTOCOLS';
       case 'playgrounds': return 'PLAYGROUNDS';
       case 'intel_report': return 'INTEL REPORT';
+      case 'fullkonk': return 'fullKONK_>';
       case 'forge_audit':
       case 'forge': return 'THE FORGE';
       case 'wallet': return 'NODE LEDGER';
@@ -123,7 +124,21 @@ const Navbar: React.FC<NavbarProps> = ({
           )}
 
           {/* Private Public Menu Links (Desktop) */}
-          <div className="hidden md:flex items-center gap-6 lg:gap-8 ml-auto px-6">
+          <div className="hidden md:flex items-center gap-4 lg:gap-6 ml-auto px-4">
+            {/* REDAEYE Direct Nav Entry */}
+            <button
+              onClick={() => onNavigate('redaeye')}
+              className={`relative flex items-center gap-2 px-3 py-1.5 text-[10px] font-mono uppercase tracking-widest font-black border-2 transition-all duration-200 group/redaeye ${
+                currentPage === 'redaeye'
+                  ? 'bg-[#FF003C] text-white border-[#FF003C] shadow-[0_0_15px_rgba(255,0,60,0.6)]'
+                  : 'bg-black text-[#FF003C] border-[#FF003C]/80 hover:bg-[#FF003C] hover:text-white hover:shadow-[0_0_12px_rgba(255,0,60,0.5)]'
+              }`}
+            >
+              <Shield size={12} className="shrink-0 animate-pulse text-[#FF003C] group-hover/redaeye:text-white" />
+              <span>REDAEYE</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-[#f5279c] animate-ping" />
+            </button>
+
             {(user ? dashboardNavItems : publicNavItems).map((item) => {
               const isActive = currentPage === item.page;
               return (
@@ -287,7 +302,7 @@ const Navbar: React.FC<NavbarProps> = ({
                       <DrawerLink icon={Home} label="Base System Home" onClick={() => { onNavigate('landing'); setIsOpen(false); }} active={currentPage === 'landing'} />
                       <DrawerLink icon={Terminal} label="Playgrounds Shell" onClick={() => { onNavigate('playgrounds'); setIsOpen(false); }} active={currentPage === 'playgrounds'} />
                       <DrawerLink icon={Cpu} label="System Intel Analytics" onClick={() => { onNavigate('intel_report'); setIsOpen(false); }} active={currentPage === 'intel_report'} />
-                      <DrawerLink icon={Hammer} label="The Forge Compiler" onClick={() => { onNavigate('forge'); setIsOpen(false); }} active={currentPage === 'forge'} />
+                      <DrawerLink icon={Hammer} label="fullKONK_> Compiler" onClick={() => { onNavigate('fullkonk'); setIsOpen(false); }} active={currentPage === 'fullkonk'} />
                     </div>
 
                     <div className="space-y-1">

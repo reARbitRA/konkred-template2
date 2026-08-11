@@ -129,7 +129,7 @@ export const EnterpriseArmory: React.FC = () => {
                       </div>
                       <h4 className="text-xs font-mono font-bold text-white uppercase tracking-widest">Input_Payload</h4>
                     </div>
-                    <Badge variant="ghost" className="font-mono text-[9px]">JSON / TEXT</Badge>
+                    <Badge variant="gray" className="font-mono text-[9px]">JSON / TEXT</Badge>
                   </div>
 
                   <textarea
@@ -215,7 +215,7 @@ export const EnterpriseArmory: React.FC = () => {
                               <div key={key} className="space-y-4">
                                 <div className="flex items-center justify-between">
                                   <h5 className="text-[10px] font-mono text-neon-cyan font-bold uppercase tracking-widest">{key}</h5>
-                                  <Badge variant="ghost">{value.length} items</Badge>
+                                  <Badge variant="gray">{value.length} items</Badge>
                                 </div>
                                 <div className="grid grid-cols-1 gap-3">
                                   {value.map((item, idx) => (

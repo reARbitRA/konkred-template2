@@ -7,12 +7,63 @@ export type PageView =
     | 'network' | 'advisory' | 'documentation' | 'career' | 'resources' 
     | 'pricing' | 'enter' | 'join_network' | 'account' | 'checkout'
     | 'usage_metrics' | 'affiliate' | 'admin' | 'dispute' | 'style_guide'
-    | 'verify_email' | 'playgrounds' | 'intel_report' | 'forge' | 'contact';
+    | 'verify_email' | 'playgrounds' | 'intel_report' | 'forge' | 'contact' | 'ktools' | 'redaeye' | 'fullkonk';
 
 export type AIProviderID = 
   | 'openai' | 'anthropic' | 'google' | 'openrouter' | 'groq' 
   | 'xai' | 'deepseek' | 'mistral' | 'qwen' | 'cerebras' 
   | 'sambanova' | 'together' | 'fireworks' | 'perplexity' | 'cohere';
+
+// ─── fullKONK_> TYPES ────────────────────────────────────────────
+
+export type ProviderID = 'groq' | 'deepseek' | 'cerebras' | 'sambanova' | 'openrouter';
+
+export type BuildMode = 'fullstack' | 'frontend' | 'backend' | 'review';
+
+export type PipelineStage =
+  | 'idle'
+  | 'architect'
+  | 'frontend'
+  | 'backend'
+  | 'verify'
+  | 'review'
+  | 'done'
+  | 'error';
+
+export interface FKMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  stage?: PipelineStage;
+  timestamp: number;
+}
+
+export interface GeneratedFile {
+  path: string;
+  content: string;
+  language: string;
+}
+
+export interface GenerateRequest {
+  prompt: string;
+  mode: BuildMode;
+  provider?: ProviderID;
+  model?: string;
+  temperature?: number;
+  maxTokens?: number;
+  systemPrompt?: string;
+}
+
+export interface StreamChunk {
+  type: 'stage' | 'delta' | 'provider' | 'failover' | 'file' | 'done' | 'error';
+  stage?: PipelineStage;
+  content?: string;
+  provider?: string;
+  model?: string;
+  from?: string;
+  error?: string;
+  file?: GeneratedFile;
+}
 
 export interface AIProviderConfig {
   primaryProvider: AIProviderID;

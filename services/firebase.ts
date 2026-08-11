@@ -1,7 +1,7 @@
 
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from 'firebase/firestore';
+import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, memoryLocalCache } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
 import firebaseConfig from '../firebase-applet-config.json';
@@ -14,13 +14,14 @@ export const auth = getAuth(app);
 
 // Initialize Cloud Firestore with settings for better connectivity in restricted environments and target database ID
 const firestoreDbId = (firebaseConfig as any).firestoreDatabaseId;
+const isBrowser = typeof window !== 'undefined';
+const cacheConfig = isBrowser 
+  ? { localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }) }
+  : { localCache: memoryLocalCache() };
+
 export const db = firestoreDbId 
-  ? initializeFirestore(app, {
-      localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
-    }, firestoreDbId)
-  : initializeFirestore(app, {
-      localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
-    });
+  ? initializeFirestore(app, cacheConfig, firestoreDbId)
+  : initializeFirestore(app, cacheConfig);
 
 // Initialize Cloud Storage and get a reference to the service
 export const storage = getStorage(app);
