@@ -652,8 +652,8 @@ async function startServer() {
   app.get(["/redaeye", "/redaeye.html"], (req, res) => {
     const prodFile = path.join(process.cwd(), "dist", "redaeye.html");
     const devFile = path.join(process.cwd(), "public", "redaeye.html");
-    const rootFile = path.join(process.cwd(), "redaeye.html");
-    if (process.env.NODE_ENV === "production" && path.extname(prodFile)) {
+    
+    if (process.env.NODE_ENV === "production") {
       return res.sendFile(prodFile);
     }
     return res.sendFile(devFile);
