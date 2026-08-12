@@ -13,6 +13,12 @@ export default defineConfig(({ mode }) => {
         alias: {
           '@': path.resolve(__dirname, '.'),
         }
+      },
+      build: {
+        rollupOptions: {
+          // Force Vite/Rollup to treat react-is as an external dependency resolution target
+          external: ['react-is']
+        }
       }
     };
 });
