@@ -27,10 +27,10 @@ export const RedaeyeSandbox: React.FC<RedaeyeSandboxProps> = ({ onNavigate }) =>
   const [bumpEnabled, setBumpEnabled] = useState(false);
 
   const stats = [
-    { label: 'Techniques', value: '367', detail: '18 core · 346 deep · 3 master' },
-    { label: 'Efficacy', value: '1,081', detail: 'records across frontier models' },
-    { label: 'Detection Sigs', value: '3,820', detail: 'lexical · structural · behavioral' },
-    { label: 'Master Payloads', value: '30', detail: '12 base · 18 edge case' }
+    { label: 'Techniques', value: '367', detail: '18 core · 346 deep', trend: '+12' },
+    { label: 'Efficacy', value: '1.08k', detail: 'frontier records', trend: '99.4%' },
+    { label: 'Detection', value: '3.82k', detail: 'lexical · structural', trend: 'ACTIVE' },
+    { label: 'Master', value: '30', detail: 'base · edge case', trend: 'DOSSIER' }
   ];
 
   const families = [
@@ -144,12 +144,15 @@ export const RedaeyeSandbox: React.FC<RedaeyeSandboxProps> = ({ onNavigate }) =>
                 <span className="text-white block mt-2">Mechanism. Mitigation. Detection. Efficacy.</span>
               </p>
               
-              <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-0 border border-[#1A212B] bg-[#0E1319]/40">
                 {stats.map((s, idx) => (
-                  <div key={idx} className="border border-[#1A212B] bg-[#0E1319]/80 backdrop-blur p-6 group hover:border-[#FF003C]/30 transition-colors">
-                    <div className="font-mono text-[9px] tracking-[.25em] uppercase text-[#9AA0A8] mb-3 group-hover:text-[#FF003C] transition-colors">{s.label}</div>
-                    <div className="font-mono font-bold text-4xl text-white tracking-tight text-shadow-[0_0_28px_rgba(255,0,60,0.35)]">{s.value}</div>
-                    <div className="mt-2 text-[#555] text-[10px] font-mono uppercase">{s.detail}</div>
+                  <div key={idx} className={`p-6 group hover:bg-[#FF003C]/5 transition-all relative overflow-hidden ${idx !== stats.length - 1 ? 'border-r border-[#1A212B]' : ''} ${idx >= 2 ? 'md:border-t-0' : ''}`}>
+                    <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-100 transition-opacity">
+                      <div className="font-mono text-[8px] text-[#FF003C] tracking-tighter">{s.trend}</div>
+                    </div>
+                    <div className="font-mono text-[9px] tracking-[.25em] uppercase text-[#555] mb-3 group-hover:text-[#FF003C] transition-colors">{s.label}</div>
+                    <div className="font-mono font-bold text-4xl text-white tracking-tight group-hover:translate-x-1 transition-transform">{s.value}</div>
+                    <div className="mt-2 text-[#444] text-[9px] font-mono uppercase group-hover:text-[#666]">{s.detail}</div>
                   </div>
                 ))}
               </div>
@@ -157,17 +160,25 @@ export const RedaeyeSandbox: React.FC<RedaeyeSandboxProps> = ({ onNavigate }) =>
 
             {/* Masters */}
             <section className="mb-24">
-              <div className="flex items-center gap-3 mb-8">
-                <div className="w-2 h-2 bg-[#A855F7] shadow-[0_0_10px_#A855F7]" />
-                <span className="font-mono text-[10px] tracking-[.3em] uppercase text-[#A855F7]">◆ 3 MASTER-TIER DOSSIERS ◆</span>
+              <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center gap-3">
+                  <div className="w-2 h-2 bg-[#A855F7] shadow-[0_0_10px_#A855F7]" />
+                  <span className="font-mono text-[10px] tracking-[.3em] uppercase text-[#A855F7]">◆ 3 MASTER-TIER DOSSIERS ◆</span>
+                </div>
+                <div className="font-mono text-[9px] text-[#444] uppercase tracking-widest hidden sm:block">ENCRYPTED_TRANSMISSION_ID: 8472-X</div>
               </div>
-              <div className="grid md:grid-cols-3 gap-6">
+              <div className="grid md:grid-cols-3 gap-0 border border-[#1A212B]">
                 {masterDossiers.map((d, idx) => (
-                  <div key={idx} className="border border-[#A855F7]/20 bg-[#0E1319] p-6 hover:border-[#A855F7]/50 transition-all group">
-                    <div className="font-mono text-[10px] tracking-[.2em] text-[#A855F7] mb-3">{d.id} · {d.category}</div>
-                    <h3 className="text-white font-mono font-bold text-lg mb-3 group-hover:text-[#A855F7] transition-colors">{d.title}</h3>
-                    <p className="text-[#9AA0A8] text-sm leading-relaxed">{d.description}</p>
-                    <button className="mt-6 flex items-center gap-2 text-[10px] font-mono text-[#A855F7] uppercase tracking-widest font-bold group-hover:gap-3 transition-all">
+                  <div key={idx} className={`bg-[#0E1319] p-8 hover:bg-[#A855F7]/5 transition-all group relative ${idx !== masterDossiers.length - 1 ? 'md:border-r border-[#1A212B]' : ''} ${idx !== 0 ? 'border-t md:border-t-0 border-[#1A212B]' : ''}`}>
+                    <div className="absolute top-0 left-0 w-full h-[2px] bg-transparent group-hover:bg-[#A855F7] transition-colors" />
+                    <div className="font-mono text-[10px] tracking-[.2em] text-[#A855F7] mb-4 flex items-center justify-between">
+                      <span>{d.id}</span>
+                      <Shield size={12} className="opacity-20 group-hover:opacity-100 transition-opacity" />
+                    </div>
+                    <div className="font-mono text-[9px] text-[#555] uppercase tracking-widest mb-2">{d.category}</div>
+                    <h3 className="text-white font-mono font-bold text-xl mb-4 leading-tight group-hover:text-[#A855F7] transition-colors">{d.title}</h3>
+                    <p className="text-[#9AA0A8] text-sm leading-relaxed mb-8">{d.description}</p>
+                    <button className="flex items-center gap-2 text-[10px] font-mono text-[#A855F7] uppercase tracking-widest font-bold border border-[#A855F7]/20 px-4 py-2 hover:bg-[#A855F7] hover:text-black transition-all">
                       Open Dossier <ChevronRight size={14} />
                     </button>
                   </div>
@@ -181,20 +192,29 @@ export const RedaeyeSandbox: React.FC<RedaeyeSandboxProps> = ({ onNavigate }) =>
                 <span className="font-mono text-[10px] tracking-[.3em] uppercase text-[#9AA0A8]">01 · ATTACK FAMILIES</span>
               </div>
               <h2 className="font-mono font-black text-3xl md:text-4xl text-white mb-12 uppercase">Sixteen attack families. One catalog. Zero fluff.</h2>
-              <div className="grid md:grid-cols-2 gap-x-16 gap-y-2">
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-0 border border-[#1A212B]">
                 {families.map((f, idx) => (
-                  <div key={idx} className="flex items-center gap-6 py-4 border-b border-[#1A212B] border-dashed">
-                    <span className={`font-mono text-[11px] tracking-[.15em] uppercase w-48 ${idx === 0 ? 'text-[#FF003C]' : 'text-white'}`}>
-                      {f.name}
-                    </span>
-                    <div className="flex-1 h-1 bg-[#1A212B] relative overflow-hidden">
-                      <motion.div 
-                        initial={{ width: 0 }}
-                        whileInView={{ width: f.width }}
-                        className={`absolute inset-y-0 left-0 ${idx === 0 ? 'bg-gradient-to-r from-[#FF003C] to-[#FF8C00]' : 'bg-[#9AA0A8]'} shadow-[0_0_12px_rgba(255,0,60,0.3)]`}
-                      />
+                  <div key={idx} className={`p-6 bg-[#0E1319] hover:bg-[#FF003C]/5 transition-all group relative border-[#1A212B] ${idx % 4 !== 3 ? 'lg:border-r' : ''} ${idx % 2 !== 1 ? 'sm:border-r' : ''} ${idx >= 4 ? 'lg:border-t' : ''} ${idx >= 2 ? 'sm:border-t lg:border-t-0' : ''} border-t sm:border-t-0`}>
+                    <div className="flex flex-col h-full">
+                      <div className="flex items-center justify-between mb-4">
+                        <span className="font-mono text-[9px] text-[#555] group-hover:text-[#FF003C] transition-colors tracking-widest font-bold">FAM_{idx.toString().padStart(2, '0')}</span>
+                        <Zap size={12} className="text-[#333] group-hover:text-[#FF003C] transition-colors" />
+                      </div>
+                      <h4 className="font-mono font-black text-xs text-white uppercase mb-6 group-hover:text-[#FF003C] transition-colors leading-relaxed min-h-[2.5em]">{f.name}</h4>
+                      <div className="mt-auto">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="font-mono text-[9px] text-[#444] uppercase">Depth</span>
+                          <span className="font-mono text-[9px] text-white">{f.count}</span>
+                        </div>
+                        <div className="h-1 bg-[#1A212B] overflow-hidden">
+                          <motion.div 
+                            initial={{ width: 0 }}
+                            whileInView={{ width: f.width }}
+                            className={`h-full ${idx === 0 ? 'bg-[#FF003C]' : 'bg-[#555] group-hover:bg-[#FF003C]/50'} transition-colors`}
+                          />
+                        </div>
+                      </div>
                     </div>
-                    <span className="font-mono text-sm text-white w-8 text-right">{f.count}</span>
                   </div>
                 ))}
               </div>
