@@ -380,9 +380,54 @@ async function startServer() {
 
       for (const prov of providers) {
         if (!prov) continue;
-        const apiKey = process.env[prov.envKey];
+        const apiKey = process.env[prov.envKey] || (prov.id === 'google' ? (process.env.GEMINI_API_KEY || process.env.API_KEY) : undefined);
         if (!apiKey) continue;
         if (isRateLimited(prov.id)) continue;
+
+        if (prov.id === 'google') {
+          const selectedModel = (model && prov.models.some(m => m.id === model))
+            ? model
+            : 'gemini-2.5-flash';
+
+          send({ type: 'provider', provider: 'Google Gemini', model: selectedModel });
+
+          try {
+            const ai = new GoogleGenAI({
+              apiKey,
+              httpOptions: { headers: { 'User-Agent': 'aistudio-build' } }
+            });
+
+            const systemInstruction = messages.find(m => m.role === 'system')?.content;
+            const userMessages = messages.filter(m => m.role !== 'system');
+
+            const streamResult = await ai.models.generateContentStream({
+              model: selectedModel,
+              contents: userMessages.map(m => ({
+                role: m.role === 'assistant' ? 'model' : 'user',
+                parts: [{ text: m.content }]
+              })),
+              config: {
+                systemInstruction: systemInstruction || undefined,
+                temperature,
+                maxOutputTokens: maxTokens,
+              }
+            });
+
+            let full = '';
+            for await (const chunk of streamResult as any) {
+              const text = chunk.text || '';
+              if (text) {
+                full += text;
+                onChunk(text);
+              }
+            }
+            return full;
+          } catch (err: any) {
+            console.error('Gemini fullKONK stream error:', err);
+            send({ type: 'failover', from: 'Google Gemini', error: err?.message });
+            continue;
+          }
+        }
 
         const selectedModel = model && prov.models.some(m => m.id === model)
           ? model
@@ -541,7 +586,23 @@ async function startServer() {
     try {
       const { userId } = req.params;
       const count = Math.min(Number(req.query.count) || 20, 50);
-      res.json({ message: 'Fetch sessions client-side via firebase SDK', userId, count });
+      
+      const snap = await adminDb
+        .collection('fk_sessions')
+        .where('userId', '==', userId)
+        .limit(count)
+        .get();
+
+      const sessions = snap.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })).sort((a: any, b: any) => {
+        const timeA = a.updatedAt?.toMillis ? a.updatedAt.toMillis() : new Date(a.updatedAt || 0).getTime();
+        const timeB = b.updatedAt?.toMillis ? b.updatedAt.toMillis() : new Date(b.updatedAt || 0).getTime();
+        return timeB - timeA;
+      });
+
+      res.json({ sessions, userId });
     } catch (err: any) {
       res.status(500).json({ error: err.message });
     }
@@ -585,6 +646,17 @@ async function startServer() {
     } catch (err: any) {
       res.status(500).json({ error: err.message });
     }
+  });
+
+  // Serve REDAEYE sales checkout page
+  app.get(["/redaeye", "/redaeye.html"], (req, res) => {
+    const prodFile = path.join(process.cwd(), "dist", "redaeye.html");
+    const devFile = path.join(process.cwd(), "public", "redaeye.html");
+    const rootFile = path.join(process.cwd(), "redaeye.html");
+    if (process.env.NODE_ENV === "production" && path.extname(prodFile)) {
+      return res.sendFile(prodFile);
+    }
+    return res.sendFile(devFile);
   });
 
   // Vite middleware for development

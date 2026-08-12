@@ -88,7 +88,7 @@ const WaitlistModal: React.FC<WaitlistModalProps> = ({ onClose }) => {
                     required 
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="architect@entity.com"
+                    placeholder="ari@konkred.xyz"
                     className="w-full bg-void-200 border border-white/10 rounded-xl pl-12 pr-4 py-4 text-sm text-white focus:border-neon-purple outline-none transition-all font-mono placeholder:text-ghost/30"
                   />
                 </div>

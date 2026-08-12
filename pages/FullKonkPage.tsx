@@ -60,13 +60,27 @@ const SUGGESTIONS = [
 
 function extractFiles(content: string): GeneratedFile[] {
   const files: GeneratedFile[] = [];
+  const pathCounts: Record<string, number> = {};
   const re = /```(\w+)?\s*(?:\/\/\s*([\w/.\-]+))?\n([\s\S]*?)```/g;
   let m: RegExpExecArray | null;
   while ((m = re.exec(content)) !== null) {
-    const lang    = m[1] || 'text';
-    const path    = m[2] || `output.${lang}`;
-    const code    = m[3].trim();
-    if (code.length > 30) files.push({ path, content: code, language: lang });
+    const lang = m[1] || 'text';
+    let path   = m[2] || `output.${lang}`;
+    const code = m[3].trim();
+    if (code.length > 30) {
+      if (pathCounts[path]) {
+        pathCounts[path]++;
+        const extIndex = path.lastIndexOf('.');
+        if (extIndex > 0) {
+          path = `${path.substring(0, extIndex)}_${pathCounts[path]}${path.substring(extIndex)}`;
+        } else {
+          path = `${path}_${pathCounts[path]}`;
+        }
+      } else {
+        pathCounts[path] = 1;
+      }
+      files.push({ path, content: code, language: lang });
+    }
   }
   return files;
 }
@@ -353,13 +367,13 @@ function CodeOutput({ files, activeFile, onSelectFile, streaming }: CodeOutputPr
         borderBottom: '1px solid #111',
         flexShrink:    0,
       }}>
-        {files.map(f => {
+        {files.map((f, idx) => {
           const lang  = f.language.toLowerCase();
           const color = LANG_COLORS[lang] || '#555';
           const isActive = f.path === activeFile;
           return (
             <button
-              key={f.path}
+              key={`${f.path}-${idx}`}
               onClick={() => onSelectFile(f.path)}
               title={f.path}
               style={{
@@ -797,8 +811,8 @@ export default function FullKonkPage() {
   const [files,         setFiles]         = useState<GeneratedFile[]>([]);
   const [streaming,     setStreaming]      = useState(false);
   const [activeFile,    setActiveFile]    = useState<string | null>(null);
-  const [provider,      setProvider]      = useState('groq');
-  const [model,         setModel]         = useState('llama-3.3-70b-versatile');
+  const [provider,      setProvider]      = useState('google');
+  const [model,         setModel]         = useState('gemini-2.5-flash');
   const [temperature,   setTemperature]   = useState(0.4);
   const [maxTokens,     setMaxTokens]     = useState(8192);
   const [systemPrompt,  setSystemPrompt]  = useState('');

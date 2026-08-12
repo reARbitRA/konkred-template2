@@ -15,7 +15,7 @@ class PaymentService {
    * Initializes a transaction intent with the NowPayments gateway.
    * In production, this calls a cloud function to generate a real payment link.
    */
-  async createPaymentIntent(amount: number, currency: 'USD' | 'USDT' | 'ETH', listingId: string): Promise<PaymentIntent> {
+  async createPaymentIntent(amount: number, currency: 'USDT', listingId: string): Promise<PaymentIntent> {
     // API Route: POST /api/payments/create
     const response = await fetch('/api/payments/create', {
         method: 'POST',

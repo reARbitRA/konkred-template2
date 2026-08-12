@@ -112,4 +112,4 @@ const ListingCard: React.FC<ListingCardProps> = ({ listing, onClick, onQuickTest
   );
 };
 
-export default ListingCard;
+export default React.memo(ListingCard);

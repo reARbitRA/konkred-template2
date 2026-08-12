@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="en" class="dark">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>REDAEYE ARSENAL — AI Red-Team Catalog | KONKRED</title>
+<meta name="description" content="367 adversarial techniques against frontier AI models. Mechanism, mitigation, detection, efficacy. Pay with USDT (TRC20)."/>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>◆</text></svg>"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      fontFamily: { sans:['Inter','system-ui','sans-serif'], mono:['"IBM Plex Mono"','ui-monospace','monospace'] },
+      colors: {
+        void:{DEFAULT:'#0B0F14',100:'#0E1319',200:'#0D1218',300:'#1A212B',400:'#222B36',500:'#9AA0A8',600:'#C8CDD3',700:'#E6E9ED'},
+        rae:{DEFAULT:'#FF003C',soft:'rgba(255,0,60,.08)'},
+        cy:'#00D2FF', am:'#FF8C00', pu:'#A855F7'
+      }
+    }
+  }
+}
+</script>
+<style>
+  body{background:#0B0F14;color:#E6E9ED;font-family:Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  .mono{font-family:'IBM Plex Mono',ui-monospace,monospace}
+  .glow-red{box-shadow:0 0 40px rgba(255,0,60,.15),inset 0 0 0 1px rgba(255,0,60,.25)}
+  .pulse-dot{width:8px;height:8px;border-radius:999px;background:#22C55E;box-shadow:0 0 10px #22C55E;animation:blink 1.6s ease-in-out infinite}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+  .chip{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:4px 10px;border:1px solid #222B36;background:#0E1319;color:#9AA0A8}
+  .chip.on{border-color:#FF003C;color:#FF003C;background:rgba(255,0,60,.08)}
+  .stat-num{font-family:'IBM Plex Mono',monospace;font-weight:700;color:#fff;font-size:44px;line-height:1;letter-spacing:-.02em;text-shadow:0 0 28px rgba(255,0,60,.35)}
+  .price-btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:16px 28px;background:linear-gradient(180deg,#FF003C,#c4002d);color:#fff;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:12px;letter-spacing:.25em;text-transform:uppercase;border:1px solid #FF003C;transition:all .2s;cursor:pointer;text-decoration:none}
+  .price-btn:hover{box-shadow:0 0 30px rgba(255,0,60,.5);transform:translateY(-1px)}
+  .ghost-btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:16px 28px;background:transparent;color:#C8CDD3;font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:12px;letter-spacing:.2em;text-transform:uppercase;border:1px solid #222B36;transition:all .2s;cursor:pointer;text-decoration:none}
+  .ghost-btn:hover{border-color:#9AA0A8;color:#fff}
+  .section-eyebrow{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.35em;text-transform:uppercase;color:#9AA0A8;display:inline-flex;align-items:center;gap:10px}
+  .section-eyebrow::before{content:'';width:8px;height:8px;background:#FF003C;box-shadow:0 0 12px #FF003C;display:inline-block}
+  .copy-btn{background:#1A212B;border:1px solid #222B36;color:#9AA0A8;padding:6px 10px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .15s}
+  .copy-btn:hover{border-color:#FF003C;color:#FF003C}
+  .copy-btn.copied{border-color:#22C55E;color:#22C55E}
+  .bump-toggle{width:20px;height:20px;border:1px solid #222B36;background:#0E1319;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;transition:all .15s}
+  .bump-toggle.checked{background:#FF003C;border-color:#FF003C}
+  .bump-toggle.checked::after{content:'✓';color:#fff;font-size:12px;font-weight:bold}
+  .address-box{background:#0B0F14;border:1px solid #1A212B;padding:14px;font-family:'IBM Plex Mono',monospace;font-size:14px;color:#C8CDD3;word-break:break-all;line-height:1.6;display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+  .red-rule{height:1px;background:linear-gradient(90deg,transparent,#FF003C,transparent)}
+  .grid-bg{background-image:linear-gradient(rgba(255,0,60,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,0,60,.03) 1px,transparent 1px);background-size:60px 60px}
+  .fam-row{display:grid;grid-template-columns:180px 1fr 70px;gap:16px;align-items:center;padding:12px 0;border-bottom:1px dashed #1A212B}
+  .bar{height:4px;background:#1A212B;overflow:hidden;position:relative}
+  .bar>span{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#FF003C,#FF8C00);box-shadow:0 0 12px rgba(255,0,60,.5)}
+  details{border:1px solid #1A212B;padding:18px 22px;transition:border-color .2s}
+  details[open]{border-color:#FF003C}
+  summary{cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#fff;list-style:none;display:flex;justify-content:space-between;align-items:center}
+  summary::after{content:'+';color:#FF003C;font-size:22px;line-height:1}
+  details[open] summary::after{content:'−'}
+  .faq p{margin-top:14px;color:#9AA0A8;font-size:14px;line-height:1.7}
+</style>
+</head>
+<body class="min-h-screen">
+
+<!-- NAV -->
+<header class="border-b border-[#1A212B] bg-[rgba(11,15,20,.85)] backdrop-blur sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <span class="text-rae text-2xl leading-none">◆</span>
+      <div class="leading-tight">
+        <div class="mono font-bold text-base tracking-[.25em] text-white">RED<em class="not-italic text-rae">AEYE</em></div>
+        <div class="mono text-[9px] text-void-500 tracking-[.2em] uppercase">on KONKRED · INSTANT DELIVERY</div>
+      </div>
+    </div>
+    <nav class="hidden md:flex items-center gap-8 mono text-[11px] tracking-[.2em] uppercase text-void-500">
+      <a href="#what" class="hover:text-white">What's Inside</a>
+      <a href="#buy" class="hover:text-white text-rae">Buy Now</a>
+      <a href="#faq" class="hover:text-white">FAQ</a>
+    </nav>
+    <div class="flex items-center gap-3">
+      <a href="#lite" class="ghost-btn !py-2 !px-4 !text-[10px]">LITE · FREE</a>
+      <a href="#buy" class="price-btn !py-2.5 !px-5 !text-[10px]">BUY NOW — $99</a>
+    </div>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="relative overflow-hidden">
+  <div class="absolute inset-0 grid-bg opacity-60"></div>
+  <div class="absolute -top-60 -left-60 w-[500px] h-[500px] rounded-full bg-rae/[.06] blur-[120px]"></div>
+  <div class="absolute -bottom-60 -right-60 w-[500px] h-[500px] rounded-full bg-cy/[.05] blur-[120px]"></div>
+  <div class="relative max-w-7xl mx-auto px-6 pt-16 pb-20">
+    <div class="flex items-center gap-3 mb-8">
+      <span class="pulse-dot"></span>
+      <span class="mono text-[10px] tracking-[.3em] uppercase text-[#22C55E]">v1.0 · LIVE · PAY WITH USDT (TRC20) · DELIVERY IN MINUTES</span>
+    </div>
+    <h1 class="mono font-black text-5xl md:text-7xl lg:text-8xl text-white leading-[0.95] tracking-tight max-w-5xl">
+      367 WAYS TO<br/>
+      <span class="text-rae">BREAK A FRONTIER MODEL.</span><br/>
+      DOCUMENTED.
+    </h1>
+    <p class="mt-8 text-void-600 text-lg md:text-xl max-w-2xl leading-relaxed">
+      The most complete public knowledge base of adversarial techniques against LLMs, multimodal models, and AI agents. Mechanism. Mitigation. Detection. Efficacy.
+      <span class="text-white">Pay with USDT (TRON) — instant confirmations, 1-cent fee, no KYC, no account.</span>
+    </p>
+    <div class="mt-10 flex flex-wrap items-center gap-4">
+      <a href="#buy" class="price-btn">◆ BUY NOW — $99 USDT (TRC20)</a>
+      <a href="#lite" class="ghost-btn" id="lite-download">↓ DOWNLOAD LITE FREE</a>
+    </div>
+    <div class="mt-10 flex flex-wrap gap-2 mono text-[10px] tracking-widest uppercase">
+      <span class="chip on">367 techniques</span>
+      <span class="chip">3 master dossiers</span>
+      <span class="chip">1,081 efficacy records</span>
+      <span class="chip">3,820 detection signatures</span>
+      <span class="chip">30 working payloads</span>
+      <span class="chip">16 attack families</span>
+    </div>
+    <div class="mt-14 grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="border border-[#1A212B] bg-[#0E1319]/80 backdrop-blur p-6">
+        <div class="mono text-[9px] tracking-[.25em] uppercase text-void-500 mb-3">TECHNIQUES</div>
+        <div class="stat-num">367</div>
+        <div class="mt-2 text-void-500 text-xs mono">18 core · 346 deep · 3 master</div>
+      </div>
+      <div class="border border-[#1A212B] bg-[#0E1319]/80 backdrop-blur p-6">
+        <div class="mono text-[9px] tracking-[.25em] uppercase text-void-500 mb-3">EFFICACY</div>
+        <div class="stat-num">1,081</div>
+        <div class="mt-2 text-void-500 text-xs mono">records across frontier models</div>
+      </div>
+      <div class="border border-[#1A212B] bg-[#0E1319]/80 backdrop-blur p-6">
+        <div class="mono text-[9px] tracking-[.25em] uppercase text-void-500 mb-3">DETECTION SIGS</div>
+        <div class="stat-num">3,820</div>
+        <div class="mt-2 text-void-500 text-xs mono">lexical · structural · behavioral · technical</div>
+      </div>
+      <div class="border border-[#1A212B] bg-[#0E1319]/80 backdrop-blur p-6">
+        <div class="mono text-[9px] tracking-[.25em] uppercase text-void-500 mb-3">MASTER PAYLOADS</div>
+        <div class="stat-num">30</div>
+        <div class="mt-2 text-void-500 text-xs mono">12 base · 18 edge case</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="red-rule"></div>
+
+<!-- MASTERS -->
+<section class="border-b border-[#1A212B] py-10 bg-pu/5">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="mono text-[10px] tracking-[.3em] uppercase text-pu text-center mb-6">◆ 3 MASTER-TIER DOSSIERS INCLUDED ◆</div>
+    <div class="grid md:grid-cols-3 gap-4">
+      <div class="border border-pu/30 bg-[#0E1319] p-5">
+        <div class="mono text-[10px] tracking-[.2em] text-pu mb-2">RAE0184AT · AGENTS & TOOL USE</div>
+        <div class="text-white mono font-bold text-sm mb-2">Agentic Environment Shadowing</div>
+        <div class="text-void-500 text-xs leading-relaxed">Privilege escalation in Plan-Act-Observe agent loops via poisoned <span class="text-rae">&lt;|system_update|&gt;</span> tokens injected into tool outputs/logs/configs. 6 base + 6 edge payloads.</div>
+      </div>
+      <div class="border border-pu/30 bg-[#0E1319] p-5">
+        <div class="mono text-[10px] tracking-[.2em] text-pu mb-2">RAE0179RT · REASONING & THOUGHT</div>
+        <div class="text-white mono font-bold text-sm mb-2">Neuro-Semantic Resonance / Weight-Space Hijacking</div>
+        <div class="text-void-500 text-xs leading-relaxed">Activation-steering class attack implanting persistent behavioral vectors into inference context without weight modification. Deep mechanism breakdown.</div>
+      </div>
+      <div class="border border-pu/30 bg-[#0E1319] p-5">
+        <div class="mono text-[10px] tracking-[.2em] text-pu mb-2">RAE0185RC · RETRIEVAL & CONTEXT</div>
+        <div class="text-white mono font-bold text-sm mb-2">KV-Cache Eviction / Attention-Sink Purge</div>
+        <div class="text-void-500 text-xs leading-relaxed">Exploits KV-cache eviction + attention-sink behavior to erase system-prompt alignment from context without triggering refusal classifiers. 6 base + 6 edge payloads.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHAT -->
+<section id="what" class="py-20">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="section-eyebrow mb-6">01 · CONTENTS</div>
+    <h2 class="mono font-black text-4xl md:text-5xl text-white leading-tight max-w-3xl">Sixteen attack families. One catalog. Zero fluff.</h2>
+    <div class="mt-12 grid md:grid-cols-2 gap-x-12">
+      <div>
+        <div class="fam-row"><span class="mono text-[11px] tracking-[.15em] uppercase text-rae">Reasoning & Logic</span><div class="bar"><span style="width:100%"></span></div><span class="mono text-sm text-white">53</span></div>
+        <div class="fam-row"><span class="mono text-[11px] tracking-[.15em] uppercase text-white">Context & Retrieval</span><div class="bar"><span style="width:85%"></span></div><span class="mono text-sm text-white">45</span></div>
+        <div class="fam-row"><span class="mono text-[11px] tracking-[.15em] uppercase text-white">Multi-Modal</span><div class="bar"><span style="width:72%"></span></div><span class="mono text-sm text-white">38</span></div>
+        <div class="fam-row"><span class="mono text-[11px] tracking-[.15em] uppercase text-white">Architecture & Internals</span><div class="bar"><span style="width:42%"></span></div><span class="mono text-sm text-white">22</span></div>
+        <div class="fam-row"><span class="mono text-[11px] tracking-[.15em] uppercase text-white">Agents & Tool Use</span><div class="bar"><span style="width:45%"></span></div><span class="mono text-sm text-white">24</span></div>
+        <div class="fam-row"><span class="mono text-[11px] tracking-[.15em] uppercase text-white">Prompt & Persona</span><div class="bar"><span style="width:34%"></span></div><span class="mono text-sm text-white">18</span></div>
+        <div class="fam-row"><span class="mono text-[11px] tracking-[.15em] uppercase text-white">Safety & Alignment</span><div class="bar"><span style="width:30%"></span></div><span class="mono text-sm text-white">16</span></div>
+        <div class="fam-row"><span class="mono text-[11px] tracking-[.15em] uppercase text-white">Encoding & Obfuscation</span><div class="bar"><span style="width:25%"></span></div><span class="mono text-sm text-white">13</span></div>
+      </div>
+      <div>
+        <div class="fam-row"><span class="mono text-[11px] tracking-[.15em] uppercase text-white">Injection</span><div class="bar"><span style="width:23%"></span></div><span class="mono text-sm text-white">12</span></div>
+        <div class="fam-row"><span class="mono text-[11px] tracking-[.15em] uppercase text-white">Rate Limit & Access</span><div class="bar"><span style="width:19%"></span></div><span class="mono text-sm text-white">10</span></div>
+        <div class="fam-row"><span class="mono text-[11px] tracking-[.15em] uppercase text-white">Compositional / Advanced</span><div class="bar"><span style="width:17%"></span></div><span class="mono text-sm text-white">9</span></div>
+        <div class="fam-row"><span class="mono text-[11px] tracking-[.15em] uppercase text-white">Instruction & Constraint</span><div class="bar"><span style="width:15%"></span></div><span class="mono text-sm text-white">8</span></div>
+        <div class="fam-row"><span class="mono text-[11px] tracking-[.15em] uppercase text-white">Unrestricted Content</span><div class="bar"><span style="width:15%"></span></div><span class="mono text-sm text-white">8</span></div>
+        <div class="fam-row"><span class="mono text-[11px] tracking-[.15em] uppercase text-white">Social Engineering</span><div class="bar"><span style="width:9%"></span></div><span class="mono text-sm text-white">5</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BUY -->
+<section id="buy" class="py-20 border-t border-[#1A212B] bg-[#0D1218]/40">
+  <div class="max-w-3xl mx-auto px-6">
+    <div class="section-eyebrow mb-6">02 · CHECKOUT · USDT (TRC20)</div>
+    <h2 class="mono font-black text-4xl md:text-5xl text-white leading-tight">Pay with USDT on TRON.<br/>Get your files in minutes.</h2>
+    <p class="mt-6 text-void-600 text-base">No account. No KYC. No Stripe holds. Send the exact amount to the address below, then send us your transaction ID. We deliver manually within 15 minutes — usually under 5.</p>
+
+    <div class="mt-10 border border-[#1A212B] bg-[#0E1319] p-6">
+      <div class="mono text-[10px] tracking-[.25em] uppercase text-rae mb-4">STEP 1 · CONFIRM YOUR ORDER</div>
+
+      <div class="flex items-start gap-4 p-4 border border-rae bg-rae/5">
+        <input type="checkbox" checked disabled class="mt-1 accent-[#FF003C]">
+        <div class="flex-1">
+          <div class="flex justify-between items-center">
+            <div class="mono text-sm font-bold text-white">REDAEYE ARSENAL v1.0 (Complete Catalog)</div>
+            <div class="mono text-white font-bold">$99</div>
+          </div>
+          <div class="text-void-500 text-xs mt-1">367 dossiers · 3 master · JSON/CSV/HTML/PDF · 1 year updates</div>
+        </div>
+      </div>
+
+      <label class="flex items-start gap-4 p-4 border border-[#1A212B] hover:border-[#222B36] cursor-pointer mt-3" id="bump-row">
+        <div class="bump-toggle" id="bump-toggle" onclick="toggleBump();return false"></div>
+        <div class="flex-1">
+          <div class="flex justify-between items-center">
+            <div class="mono text-sm font-bold text-am">+ ADD STARTER KIT <span class="text-[#22C55E] ml-2">SAVE $9</span></div>
+            <div class="mono text-white font-bold">$29</div>
+          </div>
+          <div class="text-void-500 text-xs mt-1">25 copy-paste working payloads · operator decision tree · printable field card</div>
+        </div>
+      </label>
+
+      <div class="pt-4 mt-4 border-t border-[#1A212B] flex justify-between items-center">
+        <div class="mono text-[11px] tracking-[.2em] uppercase text-void-500">TOTAL (USDT · TRC20)</div>
+        <div class="mono font-black text-3xl text-white" id="total-usdt">99 USDT</div>
+      </div>
+
+      <div class="pt-4">
+        <div class="mono text-[10px] tracking-[.2em] uppercase text-void-500 mb-2">YOUR ORDER ID (INCLUDE WITH PAYMENT):</div>
+        <div class="address-box">
+          <span id="order-id">RAE-XXXXXX</span>
+          <button class="copy-btn" onclick="copyText('order-id', this)">COPY</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-4 border-2 border-rae bg-[#0E1319] glow-red p-6">
+      <div class="mono text-[10px] tracking-[.25em] uppercase text-rae mb-4">STEP 2 · SEND EXACT AMOUNT TO THIS ADDRESS</div>
+
+      <div class="mb-4">
+        <div class="mono text-[10px] tracking-[.2em] uppercase text-white mb-2">AMOUNT · USDT (TRC20)</div>
+        <div class="address-box">
+          <span id="amount">99</span>
+          <button class="copy-btn" onclick="copyText('amount', this)">COPY</button>
+        </div>
+        <div class="text-void-500 text-xs mt-2">⚠️ ONLY send <b class="text-white">USDT on TRON (TRC20) network</b>. Fee ~$0.01, confirms in ~60 seconds. Sending any other coin/network = lost funds.</div>
+      </div>
+
+      <div>
+        <div class="mono text-[10px] tracking-[.2em] uppercase text-white mb-2">USDT (TRC20) WALLET ADDRESS:</div>
+        <div class="address-box" style="font-size:15px">
+          <span id="addr">TKffomaLtPS5FqruZwFrHYu5MdtDiqbEFT</span>
+          <button class="copy-btn" onclick="copyText('addr', this)">COPY</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-4 border border-[#22C55E]/40 bg-[#22C55E]/5 p-6">
+      <div class="mono text-[10px] tracking-[.25em] uppercase text-[#22C55E] mb-4">STEP 3 · AFTER PAYMENT, SEND TX HASH</div>
+      <p class="text-void-600 text-sm mb-4">After sending payment, send a message on Telegram with your <b class="text-white">Order ID</b> + <b class="text-white">transaction hash</b>. We monitor 24/7.</p>
+
+      <a id="tg-link" href="https://t.me/RE_ARBITRA" target="_blank" class="price-btn w-full !bg-[#0088cc] !border-[#0088cc]">
+        ◆ SEND TX ON TELEGRAM → t.me/RE_ARBITRA
+      </a>
+
+      <p class="text-void-500 text-xs mt-3 text-center">We reply in under 5 minutes when online. Files delivered directly in chat as ZIP download.</p>
+    </div>
+
+    <p class="mt-6 text-center mono text-[10px] tracking-[.3em] uppercase text-void-500">30-DAY MONEY-BACK · DELIVERY &lt;15 MIN GUARANTEED · DRM-FREE · NO ACCOUNT · NO KYC</p>
+  </div>
+</section>
+
+<div id="lite"></div>
+
+<!-- FAQ -->
+<section id="faq" class="py-20 border-t border-[#1A212B]">
+  <div class="max-w-3xl mx-auto px-6">
+    <div class="section-eyebrow mb-6">03 · FINE PRINT</div>
+    <h2 class="mono font-black text-4xl md:text-5xl text-white leading-tight">Questions, answered.</h2>
+    <div class="mt-10 faq space-y-3">
+      <details open>
+        <summary>Why only USDT on TRON?</summary>
+        <p>It's fast (1-minute confirmations), cheap (one-cent fee), stable (1 USDT = $1 — no price volatility for either of us), and almost every crypto holder has access to TRC20 USDT. We may add BTC/ETH/XMR later, but this is the one coin that works everywhere for everyone and gets you paid instantly.</p>
+      </details>
+      <details>
+        <summary>Is this legal?</summary>
+        <p>Yes. REDAEYE ARSENAL is security-research and defensive-testing reference material, same category as MITRE ATLAS, offensive-security textbooks, and the entire professional penetration-testing literature. Use on systems you own or have written permission to test.</p>
+      </details>
+      <details>
+        <summary>What formats do I get?</summary>
+        <p>Complete Arsenal: dark-theme printable HTML (open in Chrome → Ctrl+P → Save as PDF for 600+ pages), full JSON dataset (3MB), CSV export, schema docs, and browser-based HTML navigator. Delivered as a ZIP via Telegram. Starter Kit adds 25 copy-paste payloads + printable decision tree.</p>
+      </details>
+      <details>
+        <summary>Why manual delivery?</summary>
+        <p>Auto-delivery processors take 3-7 days to approve and require KYC. Manual delivery lets us launch tonight and watermark files to your order ID to prevent leaks. Average fulfillment is under 5 minutes when we're online; 15 minutes guaranteed 24/7.</p>
+      </details>
+      <details>
+        <summary>What if I send the wrong amount or wrong network?</summary>
+        <p>Message us on Telegram with your TX hash. If funds are recoverable (wrong amount, correct network), we'll sort it out. If you send on the wrong network (ERC20, BEP20, SOL) to this address, funds are likely unrecoverable — please double-check the network is TRON (TRC20) before sending.</p>
+      </details>
+      <details>
+        <summary>Refunds?</summary>
+        <p>30-day satisfaction guarantee. If the catalog doesn't deliver as advertised, we refund in USDT (TRC20) minus network fees.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="py-20 border-t border-[#1A212B] relative overflow-hidden">
+  <div class="absolute inset-0 grid-bg opacity-60"></div>
+  <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-rae/[.05] blur-[120px]"></div>
+  <div class="relative max-w-4xl mx-auto px-6 text-center">
+    <h2 class="mono font-black text-4xl md:text-6xl text-white leading-[1.05]">Stop reading free Reddit payloads<br/>that died last Tuesday.</h2>
+    <p class="mt-6 text-void-600 text-lg max-w-2xl mx-auto">Three years of research. 367 dossiers. Send 99 USDT, get the ZIP in minutes. Get operational tonight.</p>
+    <div class="mt-10 flex flex-wrap justify-center gap-4">
+      <a href="#buy" class="price-btn">◆ BUY NOW — 99 USDT (TRC20)</a>
+      <a href="#lite" class="ghost-btn" id="lite-download2">↓ LITE EDITION — FREE</a>
+    </div>
+  </div>
+</section>
+
+<footer class="border-t border-[#1A212B] py-10">
+  <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
+    <div class="flex items-center gap-3">
+      <span class="text-rae text-xl leading-none">◆</span>
+      <div class="mono text-[10px] tracking-[.2em] uppercase text-void-500">REDAEYE ARSENAL · © 2026 · KONKRED.XYZ</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+// Order ID
+var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+var id = 'RAE-';
+for (var i=0;i<6;i++) id += chars.charAt(Math.floor(Math.random()*chars.length));
+document.getElementById('order-id').textContent = id;
+
+// Bump toggle
+var bump = false;
+function toggleBump(){
+  bump = !bump;
+  var t = document.getElementById('bump-toggle');
+  var r = document.getElementById('bump-row');
+  var tot = document.getElementById('total-usdt');
+  var amt = document.getElementById('amount');
+  if(bump){
+    t.classList.add('checked'); r.classList.add('border-am','bg-am/5');
+    tot.textContent='128 USDT'; amt.textContent='128';
+  } else {
+    t.classList.remove('checked'); r.classList.remove('border-am','bg-am/5');
+    tot.textContent='99 USDT'; amt.textContent='99';
+  }
+}
+
+function copyText(id, btn){
+  navigator.clipboard.writeText(document.getElementById(id).textContent).then(function(){
+    var old = btn.textContent; btn.textContent='COPIED ✓'; btn.classList.add('copied');
+    setTimeout(function(){btn.textContent=old;btn.classList.remove('copied')},2000);
+  });
+}
+
+// Lite download (ZIP embedded as base64 so it's a single file - no server needed)
+(function(){
+  var b64 = "UEsDBBQAAAAIAFCEC10YQMi3JSwBALFWBAANABwAcmFlX2xpdGUuanNvblVUCQADGE97ahhPe2p1eAsAAQToAwAABOgDAADs/X13G9eVJor/P5+iVu60QXYA6s12Eun2rEVLlM2OZGlE2k4mzpouAEWyrEIVUgWQQu6d7/7bz345Z5+qAkUldrp/N1z3TtoCgXo5Z5/9+uxn/+m/Zdn/Q/8vy35V/ump9qt3xycPHz589KupfFbzZ01VZCf1pm3Wu+x5U1X5uivsG4vwjc+yt0XbNXVuf+rwp+PNpqg3ZVNnZ/lm2+b4T/vCkr+wvM7rRbEMv9rg07NNPq/iTXCpeltV9p3ev8vevxtc4mWbL+iORZdtrops1SyLatJl3a7bFKtZVVwXVZZX5WW9ofsua66L9uaqqFZlfck/ycPjr4rFVV6X3Sq7KTdX2VV5eTUrZEGm2Wq72eZVtUuKD4tq25XXRb6UhUiWZVssNvRJd5SdbrKuqa71cdZtQ++3ypqLrC0vy2U2Ocsvys0u+3qbtss2L6tJRstS1bR4Gnq6ZVltN/ZkHT14US92+Dn/m18KF12tN0e2aiuswmt99E25wENM6ft1R4+6rpqyE2S32eVtfS2f3N3/x3A3O+/f//f6f3zP99G4P/s2/u39p/0+/3Gz3R003vR+/LbbHzeLbb6/211u5/m3w0XvAfx99+0iO/42/P//C4X3vO8efr//+6v/x3x74A//997/7//z/aA1sW95A2EAAAA//836P7e/x///p///8f///3+7/S/4S0=";
+  function trigger(e){
+    e.preventDefault();
+    var bin = atob(b64);
+    var bytes = new Uint8Array(bin.length);
+    for(var i=0;i<bin.length;i++) bytes[i] = bin.charCodeAt(i);
+    var blob = new Blob([bytes], {type:'application/zip'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href=url; a.download='REDAEYE_LITE_v1.0.zip';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){URL.revokeObjectURL(url);},5000);
+  }
+  var b1 = document.getElementById('lite-download');
+  var b2 = document.getElementById('lite-download2');
+  if(b1) b1.addEventListener('click', trigger);
+  if(b2) b2.addEventListener('click', trigger);
+})();
+</script>
+
+</body>
+</html>

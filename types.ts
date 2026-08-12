@@ -7,7 +7,7 @@ export type PageView =
     | 'network' | 'advisory' | 'documentation' | 'career' | 'resources' 
     | 'pricing' | 'enter' | 'join_network' | 'account' | 'checkout'
     | 'usage_metrics' | 'affiliate' | 'admin' | 'dispute' | 'style_guide'
-    | 'verify_email' | 'playgrounds' | 'intel_report' | 'forge' | 'contact' | 'ktools' | 'redaeye' | 'fullkonk';
+    | 'verify_email' | 'playgrounds' | 'intel_report' | 'forge' | 'contact' | 'ktools' | 'redaeye' | 'redaeye_sandbox' | 'fullkonk';
 
 export type AIProviderID = 
   | 'openai' | 'anthropic' | 'google' | 'openrouter' | 'groq' 
@@ -16,7 +16,7 @@ export type AIProviderID =
 
 // ─── fullKONK_> TYPES ────────────────────────────────────────────
 
-export type ProviderID = 'groq' | 'deepseek' | 'cerebras' | 'sambanova' | 'openrouter';
+export type ProviderID = 'google' | 'groq' | 'deepseek' | 'cerebras' | 'sambanova' | 'openrouter';
 
 export type BuildMode = 'fullstack' | 'frontend' | 'backend' | 'review';
 

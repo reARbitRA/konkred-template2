@@ -5,6 +5,8 @@ import { LICENSE_TYPES } from '../constants.ts';
 import { Shield, CreditCard, Lock, ChevronRight, Check, Zap, Coins, Copy, Loader2, RefreshCw, ArrowLeft } from 'lucide-react';
 import Badge from '../components/common/Badge.tsx';
 import AcquisitionSuccessModal from '../components/common/AcquisitionSuccessModal.tsx';
+import { useAuth } from '../contexts/AuthContext.tsx';
+import { databaseService } from '../services/database.ts';
 
 interface CheckoutPageProps {
     listing: Listing;
@@ -13,6 +15,7 @@ interface CheckoutPageProps {
 }
 
 const CheckoutPage: React.FC<CheckoutPageProps> = ({ listing, onNavigate, onConfirmed }) => {
+    const { user } = useAuth();
     const [license, setLicense] = useState<LicenseType>('personal');
     const [paymentStep, setPaymentStep] = useState<'selection' | 'processing' | 'confirmed'>('selection');
     const [selectedCrypto, setSelectedCrypto] = useState('USDT');
@@ -24,20 +27,25 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ listing, onNavigate, onConf
     const total = subtotal + tax;
 
     const cryptoAssets = [
-        { id: 'USDT', name: 'Tether (ERC20)', address: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e' },
-        { id: 'BTC', name: 'Bitcoin', address: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh' },
-        { id: 'ETH', name: 'Ethereum', address: '0x123f681646d4a755815f9cb19e1acc8565a0c2ac' },
+        { id: 'USDT', name: 'Tether (TRC20)', address: 'TYK8pYm7cZ5U86oRExZ6vNTnNYmHnnyTYK' },
     ];
 
     const currentCrypto = cryptoAssets.find(c => c.id === selectedCrypto)!;
 
-    const handlePayment = () => {
+    const handlePayment = async () => {
         setPaymentStep('processing');
-        // Simulate block confirmation
-        setTimeout(() => {
-            setPaymentStep('confirmed');
-            setShowSuccessModal(true);
-        }, 3000);
+        try {
+            if (user) {
+                await databaseService.purchaseAsset(user.id, listing);
+            }
+        } catch (err) {
+            console.error("Purchase logging error:", err);
+        } finally {
+            setTimeout(() => {
+                setPaymentStep('confirmed');
+                setShowSuccessModal(true);
+            }, 2500);
+        }
     };
 
     const handleFinalize = () => {

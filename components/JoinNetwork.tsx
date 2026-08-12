@@ -79,7 +79,7 @@ const JoinNetwork: React.FC<JoinNetworkProps> = ({ onNavigate, onComplete }) => 
                 type="text" 
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Ari Miyanji"
+                placeholder="Ari Eshghi"
                 className="w-full bg-void-200 concrete-card px-4 py-4 text-sm text-white placeholder-ghost outline-none transition-all rounded-xl font-mono"
                 required
               />
@@ -91,7 +91,7 @@ const JoinNetwork: React.FC<JoinNetworkProps> = ({ onNavigate, onComplete }) => 
                 type="email" 
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="executive@konkred.xyz"
+                placeholder="ari@konkred.xyz"
                 className="w-full bg-void-200 concrete-card px-4 py-4 text-sm text-white placeholder-ghost outline-none transition-all rounded-xl font-mono"
                 required
               />

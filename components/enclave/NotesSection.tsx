@@ -35,7 +35,7 @@ const NotesSection: React.FC = () => {
                             <h3 className="text-base font-bold text-white mb-2">{note.title}</h3>
                             <p className="text-sm text-ghost-light font-light flex-1 line-clamp-3">{note.content}</p>
                             <p className="text-[10px] text-ghost font-mono mt-4 pt-4 border-t border-white/5">
-                                Created: {new Date(note.createdAt.seconds * 1000).toLocaleDateString()}
+                                Created: {note.createdAt?.seconds ? new Date(note.createdAt.seconds * 1000).toLocaleDateString() : 'Recently'}
                             </p>
                         </div>
                     ))}

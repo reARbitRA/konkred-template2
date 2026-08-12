@@ -57,7 +57,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose, onSuccess }) => {
             <label className="text-[10px] font-mono text-ghost uppercase tracking-widest ml-1">Identity Designation</label>
             <input 
               type="email" required value={email} onChange={e => setEmail(e.target.value)}
-              placeholder="architect@uplink.io"
+              placeholder="ari@konkred.xyz"
               className="w-full bg-void-200 border border-white/10 rounded-xl px-5 py-4 text-sm text-white focus:border-neon-cyan outline-none transition-all font-mono"
             />
           </div>

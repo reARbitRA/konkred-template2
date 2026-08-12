@@ -47,11 +47,11 @@ const SignupModal: React.FC<SignupModalProps> = ({ onClose, onSuccess }) => {
             <div className="space-y-6 animate-in slide-in-from-right-4">
               <div className="space-y-2">
                 <label className="text-[9px] font-mono text-ghost uppercase tracking-widest ml-1">Architect_Name</label>
-                <input placeholder="Ari Miyanji" className="w-full bg-void-200 border border-white/5 rounded-xl px-5 py-4 text-white focus:border-neon-purple outline-none font-mono" />
+                <input placeholder="Ari Eshghi" className="w-full bg-void-200 border border-white/5 rounded-xl px-5 py-4 text-white focus:border-neon-purple outline-none font-mono" />
               </div>
               <div className="space-y-2">
                 <label className="text-[9px] font-mono text-ghost uppercase tracking-widest ml-1">Email_Registry</label>
-                <input type="email" placeholder="executive@uplink.io" className="w-full bg-void-200 border border-white/5 rounded-xl px-5 py-4 text-white focus:border-neon-purple outline-none font-mono" />
+                <input type="email" placeholder="ari@konkred.xyz" className="w-full bg-void-200 border border-white/5 rounded-xl px-5 py-4 text-white focus:border-neon-purple outline-none font-mono" />
               </div>
             </div>
           )}

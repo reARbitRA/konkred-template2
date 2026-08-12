@@ -67,30 +67,59 @@ export async function updateSession(
 
 // Get sessions for a user
 export async function getUserSessions(userId: string, count = 20): Promise<FKSession[]> {
-  const q = query(
-    collection(db, 'fk_sessions'),
-    where('userId', '==', userId),
-    orderBy('updatedAt', 'desc'),
-    limit(count),
-  );
-  const snap = await getDocs(q);
-  return snap.docs.map(d => {
-    const data = d.data();
-    return {
-      id:         d.id,
-      userId:     data.userId,
-      title:      data.title,
-      mode:       data.mode,
-      provider:   data.provider,
-      model:      data.model,
-      messages:   data.messages ?? [],
-      files:      data.files ?? [],
-      tokenCount: data.tokenCount ?? 0,
-      stage:      data.stage ?? 'idle',
-      createdAt:  (data.createdAt as Timestamp)?.toMillis?.() ?? 0,
-      updatedAt:  (data.updatedAt as Timestamp)?.toMillis?.() ?? 0,
-    } satisfies FKSession;
-  });
+  try {
+    const q = query(
+      collection(db, 'fk_sessions'),
+      where('userId', '==', userId),
+      orderBy('updatedAt', 'desc'),
+      limit(count),
+    );
+    const snap = await getDocs(q);
+    return snap.docs.map(d => {
+      const data = d.data();
+      return {
+        id:         d.id,
+        userId:     data.userId,
+        title:      data.title,
+        mode:       data.mode,
+        provider:   data.provider,
+        model:      data.model,
+        messages:   data.messages ?? [],
+        files:      data.files ?? [],
+        tokenCount: data.tokenCount ?? 0,
+        stage:      data.stage ?? 'idle',
+        createdAt:  (data.createdAt as Timestamp)?.toMillis?.() ?? 0,
+        updatedAt:  (data.updatedAt as Timestamp)?.toMillis?.() ?? 0,
+      } satisfies FKSession;
+    });
+  } catch (err) {
+    // Fallback if composite index on userId + updatedAt is missing
+    const fallbackQ = query(
+      collection(db, 'fk_sessions'),
+      where('userId', '==', userId),
+      limit(count * 2),
+    );
+    const snap = await getDocs(fallbackQ);
+    const list = snap.docs.map(d => {
+      const data = d.data();
+      return {
+        id:         d.id,
+        userId:     data.userId,
+        title:      data.title,
+        mode:       data.mode,
+        provider:   data.provider,
+        model:      data.model,
+        messages:   data.messages ?? [],
+        files:      data.files ?? [],
+        tokenCount: data.tokenCount ?? 0,
+        stage:      data.stage ?? 'idle',
+        createdAt:  (data.createdAt as Timestamp)?.toMillis?.() ?? 0,
+        updatedAt:  (data.updatedAt as Timestamp)?.toMillis?.() ?? 0,
+      } satisfies FKSession;
+    });
+    list.sort((a, b) => b.updatedAt - a.updatedAt);
+    return list.slice(0, count);
+  }
 }
 
 // Get single session

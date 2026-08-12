@@ -47,17 +47,33 @@ export async function logUsage(data: Omit<UsageEvent, 'id' | 'createdAt'>): Prom
 // Get usage summary for a user over N days
 export async function getUserUsageSummary(userId: string, days = 30): Promise<UsageSummary> {
   const since = Date.now() - days * 24 * 60 * 60 * 1000;
+  let events: Omit<UsageEvent, 'id'>[] = [];
 
-  const q = query(
-    collection(db, 'fk_usage'),
-    where('userId', '==', userId),
-    where('createdAt', '>=', Timestamp.fromMillis(since)),
-    orderBy('createdAt', 'desc'),
-    limit(1000),
-  );
-
-  const snap = await getDocs(q);
-  const events = snap.docs.map(d => d.data() as Omit<UsageEvent, 'id'>);
+  try {
+    const q = query(
+      collection(db, 'fk_usage'),
+      where('userId', '==', userId),
+      where('createdAt', '>=', Timestamp.fromMillis(since)),
+      orderBy('createdAt', 'desc'),
+      limit(1000),
+    );
+    const snap = await getDocs(q);
+    events = snap.docs.map(d => d.data() as Omit<UsageEvent, 'id'>);
+  } catch (err) {
+    // Fallback if composite index is missing
+    const fallbackQ = query(
+      collection(db, 'fk_usage'),
+      where('userId', '==', userId),
+      limit(1000),
+    );
+    const snap = await getDocs(fallbackQ);
+    events = snap.docs
+      .map(d => d.data() as Omit<UsageEvent, 'id'>)
+      .filter(e => {
+        const ms = (e.createdAt as any)?.toMillis?.() ?? 0;
+        return ms >= since;
+      });
+  }
 
   const summary: UsageSummary = {
     totalGenerations: events.length,
@@ -91,16 +107,33 @@ export async function getUserUsageSummary(userId: string, days = 30): Promise<Us
 
 // Get recent events
 export async function getRecentEvents(userId: string, count = 10): Promise<UsageEvent[]> {
-  const q = query(
-    collection(db, 'fk_usage'),
-    where('userId', '==', userId),
-    orderBy('createdAt', 'desc'),
-    limit(count),
-  );
-  const snap = await getDocs(q);
-  return snap.docs.map(d => ({
-    id:         d.id,
-    ...(d.data() as Omit<UsageEvent, 'id'>),
-    createdAt: (d.data().createdAt as Timestamp)?.toMillis?.() ?? 0,
-  }));
+  try {
+    const q = query(
+      collection(db, 'fk_usage'),
+      where('userId', '==', userId),
+      orderBy('createdAt', 'desc'),
+      limit(count),
+    );
+    const snap = await getDocs(q);
+    return snap.docs.map(d => ({
+      id:         d.id,
+      ...(d.data() as Omit<UsageEvent, 'id'>),
+      createdAt: (d.data().createdAt as Timestamp)?.toMillis?.() ?? 0,
+    }));
+  } catch (err) {
+    // Fallback if composite index is missing
+    const fallbackQ = query(
+      collection(db, 'fk_usage'),
+      where('userId', '==', userId),
+      limit(count * 2),
+    );
+    const snap = await getDocs(fallbackQ);
+    const list = snap.docs.map(d => ({
+      id:         d.id,
+      ...(d.data() as Omit<UsageEvent, 'id'>),
+      createdAt: (d.data().createdAt as Timestamp)?.toMillis?.() ?? 0,
+    }));
+    list.sort((a, b) => b.createdAt - a.createdAt);
+    return list.slice(0, count);
+  }
 }

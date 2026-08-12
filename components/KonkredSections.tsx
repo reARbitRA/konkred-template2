@@ -640,7 +640,42 @@ export const ToolLibrarySection: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<'all' | 'security' | 'automation' | 'creative'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [viewSnippetId, setViewSnippetId] = useState<string | null>(null);
+  const [testingTool, setTestingTool] = useState<ToolItem | null>(null);
+  const [testInput, setTestInput] = useState('');
+  const [testResult, setTestResult] = useState<string | null>(null);
+  const [isTesting, setIsTesting] = useState(false);
   const { showToast } = useToast();
+
+  const handleRunLiveTool = async () => {
+    if (!testingTool) return;
+    setIsTesting(true);
+    setTestResult(null);
+    try {
+      const res = await fetch('/api/ai/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          provider: 'google',
+          messages: [
+            {
+              role: 'user',
+              content: `Tool Module: ${testingTool.title}\nCategory: ${testingTool.category}\nProblem Baseline: ${testingTool.problem}\nSolution Mechanism: ${testingTool.solution}\nUser Query/Payload: ${testInput || testingTool.problem}\n\nExecute this tool live and return a structured analysis, operational recommendations, and actionable code result.`
+            }
+          ],
+          config: { defaultModel: 'gemini-2.5-flash' }
+        })
+      });
+      if (!res.ok) throw new Error('Tool execution service unavailable.');
+      const data = await res.json();
+      setTestResult(data.text || 'Execution complete.');
+      showToast(`${testingTool.title} live run finished successfully!`, 'success');
+    } catch (err: any) {
+      setTestResult(`Execution Error: ${err.message || 'Failed to reach AI service'}`);
+      showToast('Tool execution failed', 'error');
+    } finally {
+      setIsTesting(false);
+    }
+  };
 
   const filteredTools = SYSTEM_TOOLS.filter(tool => {
     const matchesCategory = activeCategory === 'all' || tool.category === activeCategory;
@@ -753,15 +788,25 @@ export const ToolLibrarySection: React.FC = () => {
               </div>
 
               {/* Action tray for code preview / interactive usage */}
-              <div className="flex items-center justify-between pt-4 mt-5 border-t border-dashed border-void-300">
+              <div className="flex items-center justify-between pt-4 mt-5 border-t border-dashed border-void-300 gap-2">
                 <button
                   onClick={() => setViewSnippetId(viewSnippetId === tool.id ? null : tool.id)}
                   className="text-[10px] font-mono uppercase tracking-widest text-[#22d3ee] hover:text-white flex items-center gap-1.5 transition-colors font-bold"
                 >
                   <Terminal size={11} /> 
-                  {viewSnippetId === tool.id ? 'Hide integration code_' : 'View integration code_'}
+                  {viewSnippetId === tool.id ? 'Hide code_' : 'Code_'}
                 </button>
-                <span className="text-[9px] font-mono text-void-600 uppercase tracking-wider font-bold">REF ID: {tool.id}</span>
+                <button
+                  onClick={() => {
+                    setTestingTool(tool);
+                    setTestInput(tool.problem);
+                    setTestResult(null);
+                  }}
+                  className="px-2.5 py-1 bg-signal hover:bg-signal-hover text-black font-mono text-[10px] font-black uppercase tracking-wider border border-black shadow-[2px_2px_0px_#000] hover:shadow-none transition-all cursor-pointer flex items-center gap-1"
+                >
+                  <Sparkles size={11} />
+                  <span>Run Live Test_</span>
+                </button>
               </div>
 
               {/* Collapsible integration code container */}
@@ -789,6 +834,75 @@ export const ToolLibrarySection: React.FC = () => {
           ))}
         </div>
       )}
+
+      {/* Interactive Live Tool Runner Modal */}
+      <AnimatePresence>
+        {testingTool && (
+          <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 sm:p-6">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-void-100 border-4 border-black w-full max-w-3xl rounded-none shadow-brutalist p-6 space-y-6 max-h-[90vh] overflow-y-auto"
+            >
+              <div className="flex items-center justify-between border-b-2 border-void-300 pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-signal text-black font-black font-mono text-xs uppercase">
+                    LIVE MODULE RUNNER
+                  </div>
+                  <div>
+                    <h3 className="text-base font-mono font-black text-white uppercase">{testingTool.title}</h3>
+                    <span className="text-[10px] font-mono text-signal uppercase tracking-wider font-bold">Category: {testingTool.category}</span>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setTestingTool(null)}
+                  className="px-3 py-1 bg-void-300 hover:bg-void-400 text-white font-mono text-xs uppercase border border-black font-bold cursor-pointer"
+                >
+                  ✕ CLOSE
+                </button>
+              </div>
+
+              <div className="space-y-4 font-mono text-xs">
+                <div>
+                  <label className="text-void-500 block mb-1 font-bold uppercase text-[10px]">Test Scenario / Input Query:</label>
+                  <textarea
+                    value={testInput}
+                    onChange={(e) => setTestInput(e.target.value)}
+                    rows={4}
+                    className="w-full bg-black border-2 border-void-300 p-3 text-white focus:outline-none focus:border-signal text-xs leading-relaxed"
+                    placeholder="Enter test payload..."
+                  />
+                </div>
+
+                <button
+                  onClick={handleRunLiveTool}
+                  disabled={isTesting}
+                  className="w-full py-3 bg-signal hover:bg-signal-hover text-black font-black text-xs uppercase tracking-widest border-2 border-black shadow-brutalist hover:shadow-none transition-all cursor-pointer flex items-center justify-center gap-2"
+                >
+                  <Sparkles size={14} className={isTesting ? 'animate-spin' : ''} />
+                  <span>{isTesting ? 'EXECUTING LIVE AGENT PIPELINE...' : 'EXECUTE TOOL VIA GEMINI_'}</span>
+                </button>
+
+                {testResult && (
+                  <div className="mt-4 p-4 bg-black border-2 border-signal/40 text-xs font-mono space-y-2">
+                    <div className="flex items-center justify-between border-b border-void-300 pb-2">
+                      <span className="text-signal font-bold uppercase text-[10px]">● GEMINI NEURAL EXECUTION RESULT:</span>
+                      <button
+                        onClick={() => handleCopyCode(testResult)}
+                        className="text-[9px] text-void-500 hover:text-white uppercase font-bold"
+                      >
+                        Copy Result
+                      </button>
+                    </div>
+                    <pre className="whitespace-pre-wrap text-clinical leading-relaxed overflow-x-auto max-h-80">{testResult}</pre>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </section>
   );
 };
@@ -1270,7 +1384,7 @@ export const ContactSection: React.FC = () => {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@company.com"
+                placeholder="ari@konkred.xyz"
                 className="w-full bg-zinc-950 border border-zinc-900 rounded-xl p-3.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-700 font-mono transition-colors"
               />
             </div>
@@ -1311,7 +1425,7 @@ export const ContactSection: React.FC = () => {
             </div>
             <div className="text-left">
               <span className="text-[11px] font-bold text-white block uppercase tracking-wide">Stablecoin Audited Payments</span>
-              <p className="text-[9px] text-zinc-500 tracking-wide font-light">Settlements received globally via USDT / USDC over Tron & Ether networks.</p>
+              <p className="text-[9px] text-zinc-500 tracking-wide font-light">Settlements received globally via USDT over Tron networks.</p>
             </div>
           </div>
           <div className="flex items-center gap-1.5 bg-emerald-950/20 border border-emerald-900/30 px-3 py-1 rounded-full text-[9px] font-mono text-emerald-400 font-bold uppercase tracking-widest">

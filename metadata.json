@@ -4,14 +4,14 @@
   "description": "The enterprise-grade ecosystem for Structural AI Capital. Verified protocols, autonomous agents, and deterministic frameworks.",
   "author": {
     "name": "KONKRED Systems",
-    "email": "hello@konkred.xyz",
+    "email": "ari@konkred.xyz",
     "url": "https://konkred.xyz"
   },
   "tech_stack": {
     "frontend": "React 18",
     "backend": "Firebase Firestore / Cloud Functions",
     "ai": "Unified AI Provider Gateway (Gemini 3 Pro + External)",
-    "payments": "NowPayments / Stripe"
+    "payments": "USDT (TRC-20)"
   },
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]

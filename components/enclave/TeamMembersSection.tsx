@@ -52,7 +52,7 @@ const TeamMembersSection: React.FC = () => {
                                         </td>
                                         <td className="px-6 py-4 text-ghost uppercase tracking-widest">{member.role}</td>
                                         <td className="px-6 py-4 text-ghost">
-                                            {new Date(member.createdAt.seconds * 1000).toLocaleDateString()}
+                                            {member.createdAt?.seconds ? new Date(member.createdAt.seconds * 1000).toLocaleDateString() : 'Recently'}
                                         </td>
                                     </tr>
                                 ))}

@@ -977,7 +977,7 @@ const BlogHub: React.FC<{ onNavigate: (page: PageView) => void }> = ({ onNavigat
                         required
                         value={emailInput}
                         onChange={(e) => setEmailInput(e.target.value)}
-                        placeholder="operator@nexus.xyz" 
+                        placeholder="ari@konkred.xyz" 
                         className="w-full bg-[#111] border-2 border-neutral-800 rounded-none px-4 py-3 text-xs text-white focus:outline-none focus:border-neon-cyan focus:shadow-[2px_2px_0px_#ccff00] transition-all font-mono tracking-wider placeholder:text-neutral-700" 
                       />
                       <button 

@@ -49,7 +49,7 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({ onClose }) => {
                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-ghost" size={16} />
                    <input 
                      type="email" required value={email} onChange={e => setEmail(e.target.value)}
-                     placeholder="architect@uplink.io"
+                     placeholder="ari@konkred.xyz"
                      className="w-full bg-void-200 border border-white/10 rounded-xl pl-12 pr-5 py-4 text-sm text-white focus:border-neon-cyan outline-none transition-all font-mono"
                    />
                 </div>

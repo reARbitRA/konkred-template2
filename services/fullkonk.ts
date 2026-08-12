@@ -13,6 +13,17 @@ export interface ProviderDef {
 
 export const PROVIDERS: ProviderDef[] = [
   {
+    id: 'google',
+    name: 'Google Gemini',
+    baseUrl: 'https://generativelanguage.googleapis.com/v1beta',
+    envKey: 'GEMINI_API_KEY',
+    priority: { architect: 1, frontend: 1, backend: 1, verify: 1 },
+    models: [
+      { id: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash' },
+      { id: 'gemini-2.5-pro',   label: 'Gemini 2.5 Pro' },
+    ],
+  },
+  {
     id: 'groq',
     name: 'Groq',
     baseUrl: 'https://api.groq.com/openai/v1',

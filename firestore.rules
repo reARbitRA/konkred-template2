@@ -60,9 +60,9 @@ service cloud.firestore {
     // and featured drops.
     match /protocols/{protocolId} {
       allow get, list: if true;
-      // Allow incrementing viewCount publicly to support platform telemetry
-      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewCount']);
-      allow create, delete: if false; // Reserved for administrative nodes
+      allow create: if isSignedIn();
+      allow update: if (isSignedIn() && resource.data.sellerId == request.auth.uid) || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewCount']);
+      allow delete: if isSignedIn() && resource.data.sellerId == request.auth.uid;
     }
 
     // Audits: Users can create audits and read their own results
@@ -84,6 +84,23 @@ service cloud.firestore {
       match /{allPaths=**} {
         allow read, write, delete, list: if request.auth != null && request.auth.uid == userId;
       }
+    }
+
+    // fullKONK AI Studio Sessions
+    match /fk_sessions/{sessionId} {
+      allow read, write, delete: if isSignedIn() && (
+        resource == null || resource.data.userId == request.auth.uid
+      ) && (
+        request.resource == null || request.resource.data.userId == request.auth.uid
+      );
+    }
+
+    // fullKONK AI Usage Telemetry
+    match /fk_usage/{usageId} {
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow read: if isSignedIn() && (
+        resource == null || resource.data.userId == request.auth.uid
+      );
     }
   }
 }

@@ -5,9 +5,9 @@ import Badge from '../common/Badge.tsx';
 
 const Payouts: React.FC = () => {
   const payouts = [
-    { id: 'PO-8429', amount: 1240.50, status: 'Completed', date: 'Nov 01, 2024', method: 'USDT (ERC20)' },
-    { id: 'PO-8530', amount: 840.00, status: 'Processing', date: 'Nov 15, 2024', method: 'Bitcoin' },
-    { id: 'PO-8612', amount: 2150.25, status: 'Scheduled', date: 'Dec 01, 2024', method: 'Wire Transfer' },
+    { id: 'PO-8429', amount: 1240.50, status: 'Completed', date: 'Nov 01, 2024', method: 'USDT (TRC20)' },
+    { id: 'PO-8530', amount: 840.00, status: 'Processing', date: 'Nov 15, 2024', method: 'USDT (TRC20)' },
+    { id: 'PO-8612', amount: 2150.25, status: 'Scheduled', date: 'Dec 01, 2024', method: 'USDT (TRC20)' },
   ];
 
   return (

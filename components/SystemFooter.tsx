@@ -94,12 +94,10 @@ const SystemFooter: React.FC<SystemFooterProps> = ({ data, counts }) => {
               COMPLIANT_SETTLEMENT
             </h5>
             <p className="text-[9px] text-void-600 leading-relaxed uppercase">
-              Web3 secure routing integration. Automatically settling code licenses via custom fiat pipelines and instant USDC/USDT node uplinks.
+              Web3 secure routing integration. Automatically settling code licenses via instant USDT node uplinks.
             </p>
             <div className="flex flex-wrap gap-1.5 pt-1.5">
-              <span className="px-2 py-0.5 bg-void-100 border-2 border-black text-[8px] text-void-500 rounded-none font-bold">USDC_READY</span>
               <span className="px-2 py-0.5 bg-void-100 border-2 border-black text-[8px] text-void-500 rounded-none font-bold">USDT_READY</span>
-              <span className="px-2 py-0.5 bg-void-100 border-2 border-black text-[8px] text-void-500 rounded-none font-bold">FIAT_STRIPE</span>
             </div>
           </div>
 

@@ -268,7 +268,7 @@ const Navbar: React.FC<NavbarProps> = ({
                     </div>
                     <div className="bg-black/60 p-2 rounded-lg border border-zinc-900">
                       <span className="text-zinc-500 block text-[7px] uppercase tracking-wider mb-0.5">LEDGER</span>
-                      <span className="text-white font-bold">{user.balance.crypto.toFixed(3)} ETH</span>
+                      <span className="text-white font-bold">{user.balance.crypto.toFixed(2)} USDT</span>
                     </div>
                   </div>
                 </div>

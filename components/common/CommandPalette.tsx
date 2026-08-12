@@ -16,6 +16,9 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, onNavi
   const { user, logout } = useAuth();
 
   const allCommands = [
+    { id: 'fullkonk', label: 'fullKONK_> AI Compiler', icon: Shield, group: 'Navigation', action: () => onNavigate('fullkonk'), requiresAuth: false },
+    { id: 'redaeye', label: 'REDAEYE Adversarial Red Teaming', icon: Shield, group: 'Navigation', action: () => onNavigate('redaeye'), requiresAuth: false },
+    { id: 'ktools', label: 'K-Tools Enterprise Suite', icon: Shield, group: 'Navigation', action: () => onNavigate('ktools'), requiresAuth: false },
     { id: 'marketplace', label: 'Go to Marketplace', icon: ShoppingBag, group: 'Navigation', action: () => onNavigate('marketplace'), requiresAuth: false },
     { id: 'forge', label: 'Open The Forge', icon: Shield, group: 'Navigation', action: () => onNavigate('forge_audit'), requiresAuth: false },
     { id: 'docs', label: 'Documentation', icon: FileText, group: 'Resources', action: () => onNavigate('documentation'), requiresAuth: false },

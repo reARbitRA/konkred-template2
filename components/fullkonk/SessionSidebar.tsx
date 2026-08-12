@@ -40,7 +40,7 @@ export default function SessionSidebar({ userId, activeSessionId, onSelect, onNe
       .then(setSessions)
       .catch(() => setSessions([]))
       .finally(() => setLoading(false));
-  }, [userId]);
+  }, [userId, activeSessionId]);
 
   return (
     <div style={{

@@ -43,8 +43,6 @@ export const ForgeTerminal: React.FC<ForgeTerminalProps> = ({ product, onClose, 
       await sleep(1000);
       addLog('SELECT SETTLEMENT CURRENCY:', 'warn');
       addLog('1. USDT (TRC-20)', 'info');
-      addLog('2. BTC (Native)', 'info');
-      addLog('3. ETH (ERC-20)', 'info');
       setStep('selection');
     };
     sequence();
@@ -64,14 +62,8 @@ export const ForgeTerminal: React.FC<ForgeTerminalProps> = ({ product, onClose, 
       if (cmd === '1' || cmd === 'usdt') {
         setCurrency('usdt');
         await proceedToDeposit('usdt');
-      } else if (cmd === '2' || cmd === 'btc') {
-        setCurrency('btc');
-        await proceedToDeposit('btc');
-      } else if (cmd === '3' || cmd === 'eth') {
-        setCurrency('eth');
-        await proceedToDeposit('eth');
       } else {
-        addLog('Invalid selection. Choose 1, 2, or 3.', 'error');
+        addLog('Invalid selection. Choose 1 (USDT).', 'error');
       }
     } else if (step === 'deposit') {
       if (cmd === 'confirm' || cmd === 'pay') {
@@ -82,14 +74,12 @@ export const ForgeTerminal: React.FC<ForgeTerminalProps> = ({ product, onClose, 
     }
   };
 
-  const proceedToDeposit = async (coin: 'usdt' | 'btc' | 'eth') => {
+  const proceedToDeposit = async (coin: 'usdt') => {
     setStep('deposit');
     addLog(`Currency locked: ${coin.toUpperCase()}`, 'success');
     await sleep(500);
     const addrMap = {
       usdt: 'TYK8pYm7cZ5U86oRExZ6vNTnNYmHnnyTYK',
-      btc: 'bc1qdq7fpxrtn78v9m7kyymmsmdluhvsnnt46rre7l',
-      eth: '0xc94770007dd3a98114002341d4a13b41d2f8bdfc'
     };
     addLog(`DESTINATION_ADDRESS: ${addrMap[coin]}`, 'warn');
     addLog('GENERATE QR_OVERLAY...', 'info');
@@ -215,7 +205,7 @@ export const ForgeTerminal: React.FC<ForgeTerminalProps> = ({ product, onClose, 
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder={step === 'selection' ? "Enter number (1-3)..." : step === 'deposit' ? "Type 'confirm' to complete..." : "System processing..."}
+          placeholder={step === 'selection' ? "Enter '1' for USDT..." : step === 'deposit' ? "Type 'confirm' to complete..." : "System processing..."}
           disabled={step === 'initializing' || step === 'confirming' || step === 'success'}
           className="flex-1 bg-transparent border-none outline-none text-white placeholder-zinc-800 text-sm font-mono"
           autoFocus

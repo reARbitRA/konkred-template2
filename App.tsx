@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { PageView, Protocol, Listing, LicenseType } from './types.ts';
 import { APP_DATA } from './data.ts';
 
@@ -20,37 +20,42 @@ import UserMenu from './components/auth/UserMenu.tsx';
 import CommandPalette from './components/common/CommandPalette.tsx'; 
 import SystemHUD from './components/layout/SystemHUD.tsx'; 
 import SystemFooter from './components/SystemFooter.tsx';
+import Loader from './components/common/Loader.tsx';
 
-// Pages
+// Eager Page for instant load
 import LandingPage from './pages/LandingPage.tsx';
-import MarketplacePage from './pages/MarketplacePage.tsx';
-import ListingWizard from './pages/ListingWizard.tsx';
-import ForgePage from './pages/ForgePage.tsx';
-import FullKonkPage from './pages/FullKonkPage.tsx';
-import PlaygroundsPage from './pages/PlaygroundsPage.tsx';
-import IntelReportPage from './pages/IntelReportPage.tsx';
-import WalletPage from './pages/WalletPage.tsx';
-import SellerDashboard from './pages/SellerDashboard.tsx';
-import BuyerDashboard from './pages/BuyerDashboard.tsx';
-import AccountPage from './pages/AccountPage.tsx';
-import AcademyPage from './pages/AcademyPage.tsx';
-import BlogHub from './pages/BlogHub.tsx';
-import ForumPage from './pages/ForumPage.tsx';
-import ConsultingPage from './pages/ConsultingPage.tsx';
-import DocumentationPage from './pages/DocumentationPage.tsx';
-import CareerPage from './pages/CareerPage.tsx';
-import ResourcesPage from './pages/ResourcesPage.tsx';
-import KToolsPage from './pages/KToolsPage.tsx';
-import PricingPage from './pages/PricingPage.tsx';
-import CheckoutPage from './pages/CheckoutPage.tsx';
-import ListingPage from './pages/ListingPage.tsx';
-import UsageDashboard from './pages/UsageDashboard.tsx';
-import AffiliatePage from './pages/AffiliatePage.tsx';
-import AdminPage from './pages/AdminPage.tsx';
-import DisputePage from './pages/DisputePage.tsx';
-import StyleGuide from './pages/StyleGuide.tsx';
-import VerifyEmailPage from './pages/VerifyEmailPage.tsx';
-import ContactPage from './pages/ContactPage.tsx';
+
+// Code-split pages for optimized bundle size & TTI
+const MarketplacePage = lazy(() => import('./pages/MarketplacePage.tsx'));
+const ListingWizard = lazy(() => import('./pages/ListingWizard.tsx'));
+const ForgePage = lazy(() => import('./pages/ForgePage.tsx'));
+const FullKonkPage = lazy(() => import('./pages/FullKonkPage.tsx'));
+const PlaygroundsPage = lazy(() => import('./pages/PlaygroundsPage.tsx'));
+const IntelReportPage = lazy(() => import('./pages/IntelReportPage.tsx'));
+const WalletPage = lazy(() => import('./pages/WalletPage.tsx'));
+const SellerDashboard = lazy(() => import('./pages/SellerDashboard.tsx'));
+const BuyerDashboard = lazy(() => import('./pages/BuyerDashboard.tsx'));
+const AccountPage = lazy(() => import('./pages/AccountPage.tsx'));
+const AcademyPage = lazy(() => import('./pages/AcademyPage.tsx'));
+const BlogHub = lazy(() => import('./pages/BlogHub.tsx'));
+const ForumPage = lazy(() => import('./pages/ForumPage.tsx'));
+const ConsultingPage = lazy(() => import('./pages/ConsultingPage.tsx'));
+const DocumentationPage = lazy(() => import('./pages/DocumentationPage.tsx'));
+const CareerPage = lazy(() => import('./pages/CareerPage.tsx'));
+const ResourcesPage = lazy(() => import('./pages/ResourcesPage.tsx'));
+const KToolsPage = lazy(() => import('./pages/KToolsPage.tsx'));
+const PricingPage = lazy(() => import('./pages/PricingPage.tsx'));
+const CheckoutPage = lazy(() => import('./pages/CheckoutPage.tsx'));
+const ListingPage = lazy(() => import('./pages/ListingPage.tsx'));
+const UsageDashboard = lazy(() => import('./pages/UsageDashboard.tsx'));
+const AffiliatePage = lazy(() => import('./pages/AffiliatePage.tsx'));
+const AdminPage = lazy(() => import('./pages/AdminPage.tsx'));
+const DisputePage = lazy(() => import('./pages/DisputePage.tsx'));
+const StyleGuide = lazy(() => import('./pages/StyleGuide.tsx'));
+const VerifyEmailPage = lazy(() => import('./pages/VerifyEmailPage.tsx'));
+const ContactPage = lazy(() => import('./pages/ContactPage.tsx'));
+const RedaeyePage = lazy(() => import('./pages/RedaeyePage.tsx'));
+const RedaeyeSandbox = lazy(() => import('./pages/RedaeyeSandbox.tsx'));
 
 import { 
     ShoppingBag, Hammer, Wallet, Database, BookOpen, MessageSquare, ChevronRight, Globe, Home, Terminal, Cpu, ShieldAlert
@@ -113,6 +118,16 @@ const App: React.FC = () => {
         }
         syncLibrary();
     }, [user]);
+
+    useEffect(() => {
+        const handleMessage = (event: MessageEvent) => {
+            if (event.data === 'back_to_base') {
+                navigate('landing');
+            }
+        };
+        window.addEventListener('message', handleMessage);
+        return () => window.removeEventListener('message', handleMessage);
+    }, [navigate]);
 
     const handleBuyRequest = (item: Listing | Protocol) => {
         if (!auth.user) {
@@ -190,7 +205,7 @@ const App: React.FC = () => {
             <CommandPalette isOpen={isCmdOpen} onClose={() => setIsCmdOpen(false)} onNavigate={navigate} />
 
             <main className="flex-1 min-h-screen relative w-full overflow-y-auto custom-scrollbar">
-                {!['enter', 'join_network', 'verify_email', 'landing'].includes(currentPage) && (
+                {!['enter', 'join_network', 'verify_email', 'landing', 'redaeye', 'redaeye_sandbox'].includes(currentPage) && (
                     <Navbar 
                         onNavigate={navigate} 
                         currentPage={currentPage}
@@ -200,41 +215,49 @@ const App: React.FC = () => {
                     />
                 )}
 
-                <div className={`animate-in fade-in duration-500 ${currentPage === 'landing' ? '' : 'pt-20 md:pt-24 min-h-[calc(100vh-100px)]'}`}>
-                    {currentPage === 'landing' && <LandingPage onNavigate={navigate} />}
-                    {currentPage === 'marketplace' && <MarketplacePage onNavigate={navigate} onOpenListing={(l) => { setSelectedListing(l); navigate('listing_detail'); }} />}
-                    {currentPage === 'listing_detail' && selectedListing && <ListingPage listing={selectedListing} onNavigate={navigate} onBuy={handleBuyRequest} />}
-                    {currentPage === 'fullkonk' && <FullKonkPage />}
-                    {currentPage === 'forge_audit' && <ForgePage onNavigate={navigate} />}
-                    {currentPage === 'forge' && <ForgePage onNavigate={navigate} />}
-                    {currentPage === 'playgrounds' && <PlaygroundsPage onNavigate={navigate} />}
-                    {currentPage === 'intel_report' && <IntelReportPage onNavigate={navigate} />}
-                    {currentPage === 'wallet' && <WalletPage onNavigate={navigate} />}
-                    {currentPage === 'usage' && <BuyerDashboard onNavigate={navigate} library={userLibrary} />}
-                    {currentPage === 'account' && <AccountPage user={auth.user} onNavigate={navigate} />}
-                    {currentPage === 'checkout' && selectedListing && <CheckoutPage listing={selectedListing} onNavigate={navigate} onConfirmed={handleConfirmedPurchase} />}
-                    {currentPage === 'enter' && <EnterGate onEnter={() => navigate('marketplace')} onBack={() => navigate('landing')} onVerificationNeeded={(email) => { setEmailForVerification(email); navigate('verify_email'); }} />}
-                    {currentPage === 'join_network' && <JoinNetwork onNavigate={navigate} onComplete={(email) => { setEmailForVerification(email); navigate('verify_email'); }} />}
-                    {currentPage === 'verify_email' && <VerifyEmailPage email={emailForVerification!} onNavigateLogin={() => navigate('enter')} />}
-                    {currentPage === 'contact' && <ContactPage onNavigate={navigate} />}
-                    {currentPage === 'academy' && <AcademyPage onNavigate={navigate} />}
-                    {currentPage === 'intel' && <BlogHub onNavigate={navigate} />}
-                    {currentPage === 'network' && <ForumPage onNavigate={navigate} />}
-                    {currentPage === 'advisory' && <ConsultingPage onNavigate={navigate} />}
-                    {currentPage === 'documentation' && <DocumentationPage onNavigate={navigate} />}
-                    {currentPage === 'resources' && <ResourcesPage onNavigate={navigate} />}
-                    {currentPage === 'ktools' && <KToolsPage onNavigate={navigate} />}
-                    {currentPage === 'pricing' && <PricingPage onNavigate={navigate} />}
-                    {currentPage === 'seller_dashboard' && <SellerDashboard listings={allListings.filter(l => l.sellerId === auth.user?.id || l.sellerId === 'U1')} onNavigate={navigate} onNewListing={() => navigate('wizard')} />}
-                    {currentPage === 'wizard' && <ListingWizard onComplete={handleDeployProtocol} onCancel={() => navigate('seller_dashboard')} />}
-                    {currentPage === 'usage_metrics' && <UsageDashboard />}
-                    {currentPage === 'affiliate' && <AffiliatePage />}
-                    {currentPage === 'admin' && <AdminPage />}
-                    {currentPage === 'dispute' && <DisputePage />}
-                    {currentPage === 'style_guide' && <StyleGuide />}
+                <div className={`animate-in fade-in duration-500 ${['landing', 'redaeye', 'redaeye_sandbox'].includes(currentPage) ? '' : 'pt-20 md:pt-24 min-h-[calc(100vh-100px)]'}`}>
+                    <Suspense fallback={
+                        <div className="py-32 flex flex-col items-center justify-center space-y-4">
+                            <Loader size={36} label="Initializing Module..." />
+                        </div>
+                    }>
+                        {currentPage === 'landing' && <LandingPage onNavigate={navigate} />}
+                        {currentPage === 'marketplace' && <MarketplacePage onNavigate={navigate} onOpenListing={(l) => { setSelectedListing(l); navigate('listing_detail'); }} />}
+                        {currentPage === 'listing_detail' && selectedListing && <ListingPage listing={selectedListing} onNavigate={navigate} onBuy={handleBuyRequest} />}
+                        {currentPage === 'fullkonk' && <FullKonkPage />}
+                        {currentPage === 'redaeye' && <RedaeyeSandbox onNavigate={navigate} />}
+                        {currentPage === 'redaeye_sandbox' && <RedaeyeSandbox onNavigate={navigate} />}
+                        {currentPage === 'forge_audit' && <ForgePage onNavigate={navigate} />}
+                        {currentPage === 'forge' && <ForgePage onNavigate={navigate} />}
+                        {currentPage === 'playgrounds' && <PlaygroundsPage onNavigate={navigate} />}
+                        {currentPage === 'intel_report' && <IntelReportPage onNavigate={navigate} />}
+                        {currentPage === 'wallet' && <WalletPage onNavigate={navigate} />}
+                        {currentPage === 'usage' && <BuyerDashboard onNavigate={navigate} library={userLibrary} />}
+                        {currentPage === 'account' && <AccountPage user={auth.user} onNavigate={navigate} />}
+                        {currentPage === 'checkout' && selectedListing && <CheckoutPage listing={selectedListing} onNavigate={navigate} onConfirmed={handleConfirmedPurchase} />}
+                        {currentPage === 'enter' && <EnterGate onEnter={() => navigate('marketplace')} onBack={() => navigate('landing')} onVerificationNeeded={(email) => { setEmailForVerification(email); navigate('verify_email'); }} />}
+                        {currentPage === 'join_network' && <JoinNetwork onNavigate={navigate} onComplete={(email) => { setEmailForVerification(email); navigate('verify_email'); }} />}
+                        {currentPage === 'verify_email' && <VerifyEmailPage email={emailForVerification!} onNavigateLogin={() => navigate('enter')} />}
+                        {currentPage === 'contact' && <ContactPage onNavigate={navigate} />}
+                        {currentPage === 'academy' && <AcademyPage onNavigate={navigate} />}
+                        {currentPage === 'intel' && <BlogHub onNavigate={navigate} />}
+                        {currentPage === 'network' && <ForumPage onNavigate={navigate} />}
+                        {currentPage === 'advisory' && <ConsultingPage onNavigate={navigate} />}
+                        {currentPage === 'documentation' && <DocumentationPage onNavigate={navigate} />}
+                        {currentPage === 'resources' && <ResourcesPage onNavigate={navigate} />}
+                        {currentPage === 'ktools' && <KToolsPage onNavigate={navigate} />}
+                        {currentPage === 'pricing' && <PricingPage onNavigate={navigate} />}
+                        {currentPage === 'seller_dashboard' && <SellerDashboard listings={allListings.filter(l => l.sellerId === auth.user?.id || l.sellerId === 'U1')} onNavigate={navigate} onNewListing={() => navigate('wizard')} />}
+                        {currentPage === 'wizard' && <ListingWizard onComplete={handleDeployProtocol} onCancel={() => navigate('seller_dashboard')} />}
+                        {currentPage === 'usage_metrics' && <UsageDashboard />}
+                        {currentPage === 'affiliate' && <AffiliatePage />}
+                        {currentPage === 'admin' && <AdminPage />}
+                        {currentPage === 'dispute' && <DisputePage />}
+                        {currentPage === 'style_guide' && <StyleGuide />}
+                    </Suspense>
                 </div>
 
-                {!['enter', 'join_network', 'checkout', 'wizard', 'verify_email'].includes(currentPage) && (
+                {!['enter', 'join_network', 'checkout', 'wizard', 'verify_email', 'redaeye', 'redaeye_sandbox'].includes(currentPage) && (
                     <SystemFooter 
                         data={APP_DATA.footer} 
                         counts={{ 

@@ -285,7 +285,7 @@ const WalletPage: React.FC<{ onNavigate: (page: PageView) => void }> = ({ onNavi
                   value={withdrawAddress}
                   onChange={e => setWithdrawAddress(e.target.value)}
                   className="w-full bg-[#111] border border-white/10 px-4 py-3 rounded-xl text-xs text-white font-mono placeholder:text-zinc-700 outline-none focus:border-neon-cyan transition-all"
-                  placeholder="e.g. 0x8a92bC76d8b... (ERC-20/Solana Address)"
+                  placeholder="e.g. TYK8pYm7cZ5U86oRExZ6vNTnNYmHnnyTYK (Tron Address)"
                 />
               </div>
 

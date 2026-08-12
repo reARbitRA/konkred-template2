@@ -66,7 +66,7 @@ const ContactPage: React.FC<ContactPageProps> = ({ onNavigate }) => {
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
                   <Mail size={16} className="text-accent-cyan" />
-                  <span className="text-sm font-mono text-white">ops@konkred.xyz</span>
+                  <span className="text-sm font-mono text-white">ari@konkred.xyz</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <MessageSquare size={16} className="text-accent-cyan" />
@@ -86,15 +86,12 @@ const ContactPage: React.FC<ContactPageProps> = ({ onNavigate }) => {
                 </h3>
               </div>
               <p className="text-sm text-text-secondary">
-                We accept global payments via Crypto (USDT, USDC, BTC) and select stable fiat networks. Settlements are automated over decentralized networks.
+                We accept global payments via Crypto (USDT on Tron) and select stable fiat networks. Settlements are automated over decentralized networks.
               </p>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-2">
                 {[
-                  { name: 'USDT', network: 'TRC20 / ERC20' },
-                  { name: 'USDC', network: 'Arbitrum / SOL' },
-                  { name: 'BTC', network: 'Native Network' },
-                  { name: 'FIAT', network: 'ACH / SWIFT' },
+                  { name: 'USDT', network: 'TRC20' },
                 ].map((token) => (
                   <div key={token.name} className="bg-surface-2/60 border border-white/5 rounded-xl p-3 text-center">
                     <span className="block text-xs font-mono font-bold text-white">{token.name}</span>
@@ -156,7 +153,7 @@ const ContactPage: React.FC<ContactPageProps> = ({ onNavigate }) => {
                         required
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        placeholder="operator@nexus.com"
+                        placeholder="ari@konkred.xyz"
                         className="w-full bg-surface-2 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-accent-cyan focus:ring-1 focus:ring-accent-cyan/10 transition-all font-mono"
                       />
                     </div>

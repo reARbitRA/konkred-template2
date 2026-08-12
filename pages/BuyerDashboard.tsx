@@ -151,10 +151,24 @@ const BuyerDashboard: React.FC<EnclavePageProps> = ({ onNavigate, library = [] }
                         </div>
                         
                         <div className="mt-6 pt-6 border-t border-white/5 flex gap-2">
-                           <button className="flex-1 bg-white/5 hover:bg-white/10 text-white py-2.5 rounded-xl text-[9px] font-mono uppercase tracking-widest transition-all flex items-center justify-center gap-1.5">
+                           <button 
+                             onClick={() => {
+                               const blob = new Blob([JSON.stringify(listing, null, 2)], { type: 'application/json' });
+                               const url = URL.createObjectURL(blob);
+                               const a = document.createElement('a');
+                               a.href = url;
+                               a.download = `${listing.title.toLowerCase().replace(/[^a-z0-9]/g, '_')}_protocol.json`;
+                               a.click();
+                               URL.revokeObjectURL(url);
+                             }}
+                             className="flex-1 bg-white/5 hover:bg-white/10 text-white py-2.5 rounded-xl text-[9px] font-mono uppercase tracking-widest transition-all flex items-center justify-center gap-1.5"
+                           >
                              <Download size={12} /> DOWNLOAD
                            </button>
-                           <button className="flex-1 bg-neon-cyan text-black py-2.5 rounded-xl text-[9px] font-mono font-black uppercase tracking-widest transition-all flex items-center justify-center gap-1.5">
+                           <button 
+                             onClick={() => onNavigate('fullkonk')}
+                             className="flex-1 bg-neon-cyan text-black py-2.5 rounded-xl text-[9px] font-mono font-black uppercase tracking-widest transition-all flex items-center justify-center gap-1.5"
+                           >
                              <ExternalLink size={12} /> DEPLOY
                            </button>
                         </div>
