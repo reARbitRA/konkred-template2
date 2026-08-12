@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { PageView } from '../types.ts';
+import { getPathForPage } from '../utils/routes.ts';
 import { 
   ArrowRight, ChevronUp, Terminal, Shield, Scale, Wrench, Zap, 
   ExternalLink, Sparkles, Check, Activity 
@@ -279,47 +280,65 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
         <nav className="flex items-center gap-3 md:gap-6 text-xs md:text-sm font-mono uppercase font-bold">
           <button 
             onClick={() => scrollToSection('products')} 
-            className="text-zinc-400 hover:text-amber-500 transition-colors hidden sm:inline-block"
+            className="text-zinc-400 hover:text-amber-500 transition-colors hidden sm:inline-block cursor-pointer"
           >
             Products
           </button>
-          <button 
-            onClick={() => onNavigate('ktools')} 
+          <a 
+            href={getPathForPage('ktools')}
+            onClick={(e) => {
+              if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
+                e.preventDefault();
+                onNavigate('ktools');
+              }
+            }}
             className="text-zinc-400 hover:text-amber-500 transition-colors"
           >
             Tools
-          </button>
+          </a>
           <button 
             onClick={() => scrollToSection('services')} 
-            className="text-zinc-400 hover:text-amber-500 transition-colors hidden md:inline-block"
+            className="text-zinc-400 hover:text-amber-500 transition-colors hidden md:inline-block cursor-pointer"
           >
             Advisory
           </button>
           <button 
             onClick={() => scrollToSection('blog')} 
-            className="text-zinc-400 hover:text-amber-500 transition-colors hidden md:inline-block"
+            className="text-zinc-400 hover:text-amber-500 transition-colors hidden md:inline-block cursor-pointer"
           >
             Intel
           </button>
           <button 
             onClick={() => scrollToSection('contact')} 
-            className="text-zinc-400 hover:text-amber-500 transition-colors hidden lg:inline-block"
+            className="text-zinc-400 hover:text-amber-500 transition-colors hidden lg:inline-block cursor-pointer"
           >
             Contact
           </button>
-          <button 
-            onClick={() => onNavigate('documentation')} 
+          <a 
+            href={getPathForPage('documentation')}
+            onClick={(e) => {
+              if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
+                e.preventDefault();
+                onNavigate('documentation');
+              }
+            }}
             className="text-zinc-400 hover:text-amber-500 transition-colors hidden sm:inline-block"
           >
             Docs
-          </button>
-          <button 
-            onClick={() => onNavigate('marketplace')} 
+          </a>
+          <a 
+            href={getPathForPage('marketplace')}
+            onClick={(e) => {
+              if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
+                e.preventDefault();
+                onNavigate('marketplace');
+              }
+            }}
             className="bg-amber-500 text-black font-black px-4 py-2 border-2 border-black shadow-[2px_2px_0px_0px_#000000] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all flex items-center gap-1.5"
           >
             <span>Launch App</span>
             <ArrowRight size={14} />
-          </button>
+          </a>
         </nav>
       </header>
 

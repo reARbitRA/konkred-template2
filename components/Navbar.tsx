@@ -6,6 +6,7 @@ import {
   Database, Wallet, LogOut, Terminal, Cpu, Hammer, Home, ChevronRight, Activity, Shield 
 } from 'lucide-react';
 import { PageView, User } from '../types.ts';
+import { getPathForPage } from '../utils/routes.ts';
 
 interface NavbarProps {
   onNavigate: (page: PageView) => void;
@@ -85,9 +86,15 @@ const Navbar: React.FC<NavbarProps> = ({
         <div className="max-w-7xl mx-auto px-6 md:px-8 flex items-center justify-between">
           
           {/* Logo & Platform ID */}
-          <div 
+          <a 
+            href={getPathForPage('landing')}
             className="flex items-center gap-3 cursor-pointer group pr-4 shrink-0" 
-            onClick={() => onNavigate('landing')}
+            onClick={(e) => {
+              if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
+                e.preventDefault();
+                onNavigate('landing');
+              }
+            }}
           >
             <div className="transition-all duration-150 group-hover:scale-105">
               <Logo3D size={28} />
@@ -99,7 +106,7 @@ const Navbar: React.FC<NavbarProps> = ({
               </div>
               <p className="text-[8px] text-void-600 font-mono tracking-wider -mt-0.5 uppercase">SYSTEM_NODE://CORE</p>
             </div>
-          </div>
+          </a>
 
           {/* Active Module Indicator (Only shown on mobile/tablet when Logged In) */}
           {user && (
@@ -126,8 +133,14 @@ const Navbar: React.FC<NavbarProps> = ({
           {/* Private Public Menu Links (Desktop) */}
           <div className="hidden md:flex items-center gap-4 lg:gap-6 ml-auto px-4">
             {/* REDAEYE Direct Nav Entry */}
-            <button
-              onClick={() => onNavigate('redaeye')}
+            <a
+              href={getPathForPage('redaeye')}
+              onClick={(e) => {
+                if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
+                  e.preventDefault();
+                  onNavigate('redaeye');
+                }
+              }}
               className={`relative flex items-center gap-2 px-3 py-1.5 text-[10px] font-mono uppercase tracking-widest font-black border-2 transition-all duration-200 group/redaeye ${
                 currentPage === 'redaeye'
                   ? 'bg-[#FF003C] text-white border-[#FF003C] shadow-[0_0_15px_rgba(255,0,60,0.6)]'
@@ -137,20 +150,26 @@ const Navbar: React.FC<NavbarProps> = ({
               <Shield size={12} className="shrink-0 animate-pulse text-[#FF003C] group-hover/redaeye:text-white" />
               <span>REDAEYE</span>
               <span className="w-1.5 h-1.5 rounded-full bg-[#f5279c] animate-ping" />
-            </button>
+            </a>
 
             {(user ? dashboardNavItems : publicNavItems).map((item) => {
               const isActive = currentPage === item.page;
               return (
-                <button
+                <a
                   key={item.label}
-                  onClick={() => onNavigate(item.page)}
+                  href={getPathForPage(item.page)}
+                  onClick={(e) => {
+                    if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
+                      e.preventDefault();
+                      onNavigate(item.page);
+                    }
+                  }}
                   className="relative text-[10px] font-mono uppercase tracking-widest py-1.5 hover:text-signal font-black transition-all duration-150 group/link"
                 >
                   <span className={isActive ? 'text-signal font-black underline underline-offset-4 decoration-2' : 'text-void-500 group-hover/link:text-white'}>
                     {item.label}
                   </span>
-                </button>
+                </a>
               );
             })}
           </div>
@@ -159,18 +178,30 @@ const Navbar: React.FC<NavbarProps> = ({
           <div className="hidden md:flex items-center gap-4 ml-4 shrink-0">
             {!user ? (
               <>
-                <button
-                  onClick={() => onNavigate('enter')}
+                <a
+                  href={getPathForPage('enter')}
+                  onClick={(e) => {
+                    if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
+                      e.preventDefault();
+                      onNavigate('enter');
+                    }
+                  }}
                   className="text-[10px] font-mono uppercase tracking-widest font-black text-void-500 hover:text-white py-2 px-3 transition-colors"
                 >
                   Sign In
-                </button>
-                <button
-                  onClick={() => onNavigate('join_network')}
+                </a>
+                <a
+                  href={getPathForPage('join_network')}
+                  onClick={(e) => {
+                    if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
+                      e.preventDefault();
+                      onNavigate('join_network');
+                    }
+                  }}
                   className="relative overflow-hidden px-4 py-2.5 bg-signal text-black text-[10px] font-mono tracking-widest font-black rounded-none border-2 border-black shadow-brutalist hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-brutalist-hover transition-all"
                 >
                   JOIN_NETWORK_
-                </button>
+                </a>
               </>
             ) : (
               /* Compact dashboard user badge */

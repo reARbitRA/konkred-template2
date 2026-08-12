@@ -1,6 +1,7 @@
 import React from 'react';
 import { AppData } from '../types';
 import { Activity, ShieldCheck, Database, Cpu, HardDrive, Terminal } from 'lucide-react';
+import { getPathForPage } from '../utils/routes.ts';
 
 interface SystemFooterProps {
   data: AppData['footer'];
@@ -46,16 +47,16 @@ const SystemFooter: React.FC<SystemFooterProps> = ({ data, counts }) => {
               PLATFORM_DIRECTORY
             </h5>
             <div className="flex flex-col gap-2 pt-1 uppercase">
-              <a href="#marketplace" className="text-void-500 hover:text-signal transition-colors flex items-center gap-1.5">
+              <a href={getPathForPage('marketplace')} className="text-void-500 hover:text-signal transition-colors flex items-center gap-1.5">
                 <span>// BROWSE INDUSTRIAL TOOLS</span>
               </a>
-              <a href="#services" className="text-void-500 hover:text-signal transition-colors flex items-center gap-1.5">
+              <a href={getPathForPage('advisory')} className="text-void-500 hover:text-signal transition-colors flex items-center gap-1.5">
                 <span>// STRATEGIC ADVISORY</span>
               </a>
-              <a href="#intel" className="text-void-500 hover:text-signal transition-colors flex items-center gap-1.5">
+              <a href={getPathForPage('intel')} className="text-void-500 hover:text-signal transition-colors flex items-center gap-1.5">
                 <span>// DEEP INTEL LOGS</span>
               </a>
-              <a href="#academy" className="text-void-500 hover:text-signal transition-colors flex items-center gap-1.5">
+              <a href={getPathForPage('academy')} className="text-void-500 hover:text-signal transition-colors flex items-center gap-1.5">
                 <span>// KNOWLEDGE HUB NODE</span>
               </a>
             </div>

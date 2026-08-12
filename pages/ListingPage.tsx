@@ -22,8 +22,24 @@ const ListingPage: React.FC<ListingPageProps> = ({ listing, onNavigate, onBuy })
   const [estMonthlyReqs, setEstMonthlyReqs] = useState<number>(20000);
   const [estConcurrency, setEstConcurrency] = useState<number>(4);
 
+  if (!listing || !listing.pricing) {
+    return (
+      <div className="min-h-screen bg-void pt-32 pb-20 px-6 flex flex-col items-center justify-center text-center">
+        <AlertCircle size={48} className="text-neon-orange mb-4 animate-pulse" />
+        <h2 className="text-2xl font-mono font-bold text-white mb-2 uppercase tracking-wider">Protocol Specification Not Found</h2>
+        <p className="text-ghost text-sm max-w-md mb-8">The requested protocol specification or asset ID does not exist or has been relocated.</p>
+        <button 
+          onClick={() => onNavigate('marketplace')}
+          className="px-6 py-3 bg-neon-cyan text-black font-mono font-black text-xs uppercase tracking-widest hover:shadow-neon-cyan transition-all"
+        >
+          Return to Marketplace
+        </button>
+      </div>
+    );
+  }
+
   const licenseConfig = LICENSE_TYPES.find(l => l.id === selectedLicense) || LICENSE_TYPES[0];
-  const finalPrice = Math.round(listing.pricing.amount * licenseConfig.multiplier);
+  const finalPrice = Math.round((listing.pricing.amount || 0) * licenseConfig.multiplier);
 
   // Dynamic Live Estimated Compute Cost
   const liveEstimatedComputeCost = useMemo(() => {

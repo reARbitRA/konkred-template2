@@ -21,8 +21,24 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ listing, onNavigate, onConf
     const [selectedCrypto, setSelectedCrypto] = useState('USDT');
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     
-    const selectedLicense = LICENSE_TYPES.find(l => l.id === license)!;
-    const subtotal = listing.pricing.amount * selectedLicense.multiplier;
+    if (!listing || !listing.pricing) {
+        return (
+            <div className="min-h-screen bg-void pt-32 pb-20 px-6 flex flex-col items-center justify-center text-center">
+                <Shield size={48} className="text-neon-cyan mb-4 animate-pulse" />
+                <h2 className="text-2xl font-mono font-bold text-white mb-2 uppercase tracking-wider">Checkout Session Relocated</h2>
+                <p className="text-ghost text-sm max-w-md mb-8">No active protocol listing is selected for checkout.</p>
+                <button 
+                    onClick={() => onNavigate('marketplace')}
+                    className="px-6 py-3 bg-neon-cyan text-black font-mono font-black text-xs uppercase tracking-widest hover:shadow-neon-cyan transition-all"
+                >
+                    Return to Marketplace
+                </button>
+            </div>
+        );
+    }
+
+    const selectedLicense = LICENSE_TYPES.find(l => l.id === license) || LICENSE_TYPES[0];
+    const subtotal = (listing.pricing.amount || 0) * selectedLicense.multiplier;
     const tax = 0;
     const total = subtotal + tax;
 

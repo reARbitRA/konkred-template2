@@ -15,6 +15,7 @@ import {
 } from 'firebase/firestore';
 import { db } from './firebase.ts';
 import { Listing, GlobalStats } from '../types.ts';
+import { MOCK_LISTINGS } from '../data.ts';
 
 class DatabaseService {
     /**
@@ -77,10 +78,15 @@ class DatabaseService {
             const snapshot = await getDocs(q);
             let results = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Listing));
 
+            if (results.length === 0) {
+                results = [...MOCK_LISTINGS];
+            }
+
             // Client-side search (Fuzzy fallback)
             if (filters.query) {
                 const searchTerm = filters.query.toLowerCase();
                 results = results.filter(l => 
+                    l.id.toLowerCase() === searchTerm ||
                     l.title.toLowerCase().includes(searchTerm) || 
                     l.shortDescription.toLowerCase().includes(searchTerm) ||
                     (l.tags && l.tags.some(t => t.toLowerCase().includes(searchTerm)))
@@ -90,7 +96,17 @@ class DatabaseService {
             return results;
         } catch (error: any) {
             console.error("Firestore collection disrupted.", error);
-            return [];
+            let results = [...MOCK_LISTINGS];
+            if (filters.query) {
+                const searchTerm = filters.query.toLowerCase();
+                results = results.filter(l => 
+                    l.id.toLowerCase() === searchTerm ||
+                    l.title.toLowerCase().includes(searchTerm) || 
+                    l.shortDescription.toLowerCase().includes(searchTerm) ||
+                    (l.tags && l.tags.some(t => t.toLowerCase().includes(searchTerm)))
+                );
+            }
+            return results;
         }
     }
 

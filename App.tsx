@@ -61,6 +61,8 @@ import {
     ShoppingBag, Hammer, Wallet, Database, BookOpen, MessageSquare, ChevronRight, Globe, Home, Terminal, Cpu, ShieldAlert
 } from 'lucide-react';
 
+import { getPathForPage, getPageFromPath } from './utils/routes.ts';
+
 const App: React.FC = () => {
     const auth = useAuth();
     const toast = useToast();
@@ -76,10 +78,53 @@ const App: React.FC = () => {
     const [userLibrary, setUserLibrary] = useState<Listing[]>([]); 
     const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
 
-    const navigate = (page: PageView) => {
+    const navigate = (page: PageView, targetListing?: Listing | string) => {
+        let listingId: string | undefined;
+        if (typeof targetListing === 'string') {
+            listingId = targetListing;
+        } else if (targetListing) {
+            setSelectedListing(targetListing);
+            listingId = targetListing.id;
+        } else if (selectedListing) {
+            listingId = selectedListing.id;
+        }
+
         setCurrentPage(page);
+        const newPath = getPathForPage(page, listingId);
+        if (window.location.pathname !== newPath) {
+            window.history.pushState({ page, listingId }, '', newPath);
+        }
         window.scrollTo(0, 0);
     };
+
+    // URL Routing Initialization & PopState Listener
+    useEffect(() => {
+        const syncRouteFromUrl = () => {
+            const { page, listingId } = getPageFromPath(window.location.pathname);
+            setCurrentPage(page);
+
+            if (listingId) {
+                const found = allListings.find(l => l.id === listingId);
+                if (found) {
+                    setSelectedListing(found);
+                } else {
+                    databaseService.getListings({ query: listingId }).then(results => {
+                        const matched = results.find(l => l.id === listingId) || results[0];
+                        if (matched) setSelectedListing(matched);
+                    });
+                }
+            }
+        };
+
+        syncRouteFromUrl();
+
+        const handlePopState = () => {
+            syncRouteFromUrl();
+        };
+
+        window.addEventListener('popstate', handlePopState);
+        return () => window.removeEventListener('popstate', handlePopState);
+    }, [allListings]);
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -222,8 +267,16 @@ const App: React.FC = () => {
                         </div>
                     }>
                         {currentPage === 'landing' && <LandingPage onNavigate={navigate} />}
-                        {currentPage === 'marketplace' && <MarketplacePage onNavigate={navigate} onOpenListing={(l) => { setSelectedListing(l); navigate('listing_detail'); }} />}
-                        {currentPage === 'listing_detail' && selectedListing && <ListingPage listing={selectedListing} onNavigate={navigate} onBuy={handleBuyRequest} />}
+                        {currentPage === 'marketplace' && <MarketplacePage onNavigate={navigate} onOpenListing={(l) => { navigate('listing_detail', l); }} />}
+                        {currentPage === 'listing_detail' && (
+                            selectedListing ? (
+                                <ListingPage listing={selectedListing} onNavigate={navigate} onBuy={handleBuyRequest} />
+                            ) : (
+                                <div className="py-32 flex flex-col items-center justify-center space-y-4">
+                                    <Loader size={36} label="Loading Protocol Specification..." />
+                                </div>
+                            )
+                        )}
                         {currentPage === 'fullkonk' && <FullKonkPage />}
                         {currentPage === 'redaeye' && <RedaeyeSandbox onNavigate={navigate} />}
                         {currentPage === 'redaeye_sandbox' && <RedaeyeSandbox onNavigate={navigate} />}
@@ -234,7 +287,15 @@ const App: React.FC = () => {
                         {currentPage === 'wallet' && <WalletPage onNavigate={navigate} />}
                         {currentPage === 'usage' && <BuyerDashboard onNavigate={navigate} library={userLibrary} />}
                         {currentPage === 'account' && <AccountPage user={auth.user} onNavigate={navigate} />}
-                        {currentPage === 'checkout' && selectedListing && <CheckoutPage listing={selectedListing} onNavigate={navigate} onConfirmed={handleConfirmedPurchase} />}
+                        {currentPage === 'checkout' && (
+                            selectedListing ? (
+                                <CheckoutPage listing={selectedListing} onNavigate={navigate} onConfirmed={handleConfirmedPurchase} />
+                            ) : (
+                                <div className="py-32 flex flex-col items-center justify-center space-y-4">
+                                    <Loader size={36} label="Initializing Checkout Session..." />
+                                </div>
+                            )
+                        )}
                         {currentPage === 'enter' && <EnterGate onEnter={() => navigate('marketplace')} onBack={() => navigate('landing')} onVerificationNeeded={(email) => { setEmailForVerification(email); navigate('verify_email'); }} />}
                         {currentPage === 'join_network' && <JoinNetwork onNavigate={navigate} onComplete={(email) => { setEmailForVerification(email); navigate('verify_email'); }} />}
                         {currentPage === 'verify_email' && <VerifyEmailPage email={emailForVerification!} onNavigateLogin={() => navigate('enter')} />}
