@@ -1,6 +1,5 @@
 
 import React, { useEffect, useState } from 'react';
-import Logo3D from './Logo3D.tsx';
 import { Shield, Zap, Lock, Cpu, Globe, BarChart3, Binary } from 'lucide-react';
 
 interface LoadingScreenProps {
@@ -50,17 +49,16 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete }) => {
       <div className="absolute inset-0 opacity-[0.05] grid-bg pointer-events-none"></div>
       
       <div className="relative z-20 flex flex-col items-center text-center">
-        <div className="relative mb-24">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 border-[0.5px] border-neon-cyan/5 rounded-full animate-spin-slow"></div>
-          <Logo3D size={220} className="relative z-10" />
+        <div className="mb-12 space-y-4">
+          <h1 className="text-6xl md:text-7xl font-display font-black tracking-[0.4em] text-transparent bg-clip-text bg-gradient-to-r from-white via-zinc-200 to-zinc-400 animate-pulse drop-shadow-[0_0_25px_rgba(255,255,255,0.25)] ml-[0.4em]">
+            KONKRED
+          </h1>
+          <p className="text-[10px] font-mono text-neon-cyan tracking-[0.6em] uppercase font-black ml-[0.6em]">
+            Production Uplink Active
+          </p>
         </div>
 
-        <div className="mb-16 space-y-4">
-          <h1 className="text-6xl font-display font-black tracking-[0.4em] text-white">KONKRED</h1>
-          <p className="text-[10px] font-mono text-neon-cyan tracking-[0.6em] uppercase font-black">Production Uplink Active</p>
-        </div>
-
-        <div className="w-[450px] space-y-6">
+        <div className="w-[450px] max-w-[90vw] space-y-6">
           <div className="flex justify-between items-end font-mono text-[10px] uppercase tracking-[0.3em] text-ghost">
             <div className="flex items-center gap-3">
                <Binary size={16} className="text-neon-cyan animate-pulse" />

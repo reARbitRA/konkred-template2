@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import Logo3D from './Logo3D.tsx';
 import { Lock, Cpu, Globe, Zap } from 'lucide-react';
 
 interface AuthLoadingScreenProps {
@@ -40,15 +39,9 @@ const AuthLoadingScreen: React.FC<AuthLoadingScreenProps> = ({ message }) => {
       
       {/* Central Content */}
       <div className="relative z-20 flex flex-col items-center text-center">
-        {/* The 3D LOGO with subtle pulse */}
-        <div className="relative mb-10 transform scale-125 md:scale-150">
-          <Logo3D size={80} />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-28 h-28 border border-neon-cyan/20 rounded-full animate-glow-pulse"></div>
-        </div>
-
-        {/* Branding */}
+        {/* Branding - Text Logo Animation */}
         <div className="mb-8 space-y-2">
-          <h1 className="text-3xl font-display font-black tracking-widest text-white">KONKRED</h1>
+          <h1 className="text-4xl font-display font-black tracking-[0.4em] text-transparent bg-clip-text bg-gradient-to-r from-white via-zinc-200 to-zinc-400 animate-pulse drop-shadow-[0_0_20px_rgba(255,255,255,0.2)] ml-[0.4em]">KONKRED</h1>
           <div className="h-px w-12 bg-neon-cyan mx-auto opacity-50"></div>
         </div>
 
