@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Terminal, Maximize2, Minimize2, Play, Square, Cpu, Wifi } from 'lucide-react';
 
 interface LogLine {
-  id: number;
+  id: string | number;
   type: 'info' | 'success' | 'error' | 'warning' | 'system';
   content: string;
   timestamp: string;
@@ -30,8 +30,10 @@ const TerminalTool: React.FC = () => {
   }, [logs]);
 
   const addLog = (type: LogLine['type'], content: string) => {
-    const timestamp = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' }) + '.' + Math.floor(Math.random() * 999).toString().padStart(3, '0');
-    setLogs(prev => [...prev, { id: Date.now() + Math.random(), type, content, timestamp }]);
+    const ms = Math.floor(performance.now() % 1000).toString().padStart(3, '0');
+    const timestamp = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' }) + '.' + ms;
+    const id = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `log-${Date.now()}`;
+    setLogs(prev => [...prev, { id, type, content, timestamp }]);
   };
 
   const handleCommand = (e: React.FormEvent) => {

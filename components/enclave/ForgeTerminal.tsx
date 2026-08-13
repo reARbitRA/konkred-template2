@@ -104,7 +104,7 @@ export const ForgeTerminal: React.FC<ForgeTerminalProps> = ({ product, onClose, 
 
     for (const stage of stages) {
       addLog(`STATUS: ${stage}... RUNNING`, 'info');
-      await sleep(1000 + Math.random() * 500);
+      await sleep(1000);
       addLog(`STATUS: ${stage}... OK`, 'success');
     }
 
@@ -112,9 +112,12 @@ export const ForgeTerminal: React.FC<ForgeTerminalProps> = ({ product, onClose, 
     setStep('success');
     addLog('HANDSHAKE COMPLETE. SECURE ASSET PAYLOAD DECRYPTED.', 'success');
     
-    // Generate a deterministic but unique-looking Tx hash
-    const fakeHash = '0x' + Array.from({length: 64}, () => Math.floor(Math.random() * 16).toString(16)).join('');
-    addLog(`BLOCK_HASH: ${fakeHash}`, 'info');
+    // Generate real SHA-256 block hash from session payload
+    const msgBuffer = new TextEncoder().encode(`FORGE-EXEC-${Date.now()}`);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const realHash = '0x' + hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    addLog(`BLOCK_HASH: ${realHash}`, 'info');
     addLog('SESSION_TERMINATED: SUCCESS', 'info');
     
     setTimeout(() => {

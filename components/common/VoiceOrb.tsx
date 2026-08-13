@@ -35,28 +35,54 @@ const VoiceOrb: React.FC<VoiceOrbProps> = ({ onVoiceResult }) => {
   }
 
   useEffect(() => {
+    let recognition: any = null;
+
     if (isListening) {
-      // Simulation mode
-      onVoiceResult("Analyze the trend of autonomous agent valuations in Q4...");
-      setTimeout(() => setIsListening(false), 3000);
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        try {
+          recognition = new SpeechRecognition();
+          recognition.continuous = false;
+          recognition.interimResults = false;
+          recognition.lang = 'en-US';
 
-      // // Real microphone logic (commented out for simplicity in this build)
-      // const initAudio = async () => {
-      //   try {
-      //     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      //     streamRef.current = stream;
-      //     // ... rest of the audio processing logic
-      //   } catch (err) {
-      //     showToast("Microphone access required for voice protocols.", "error");
-      //     setIsListening(false);
-      //   }
-      // };
-      // initAudio();
+          recognition.onresult = (event: any) => {
+            const transcript = event.results[0][0].transcript;
+            if (transcript) {
+              onVoiceResult(transcript);
+            }
+            setIsListening(false);
+          };
 
+          recognition.onerror = (err: any) => {
+            console.error('Speech recognition error:', err);
+            showToast('Voice input encounter. Please try speaking clearly into microphone.', 'error');
+            setIsListening(false);
+          };
+
+          recognition.onend = () => {
+            setIsListening(false);
+          };
+
+          recognition.start();
+        } catch (e) {
+          showToast('Speech recognition unavailable in current browser environment.', 'warning');
+          setIsListening(false);
+        }
+      } else {
+        showToast('Web Speech API is not supported in this browser.', 'warning');
+        setIsListening(false);
+      }
     } else {
       cleanup();
     }
-    return cleanup;
+
+    return () => {
+      if (recognition) {
+        try { recognition.stop(); } catch (e) {}
+      }
+      cleanup();
+    };
   }, [isListening]);
 
 

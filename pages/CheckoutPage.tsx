@@ -54,13 +54,12 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ listing, onNavigate, onConf
             if (user) {
                 await databaseService.purchaseAsset(user.id, listing);
             }
+            setPaymentStep('confirmed');
+            setShowSuccessModal(true);
         } catch (err) {
             console.error("Purchase logging error:", err);
-        } finally {
-            setTimeout(() => {
-                setPaymentStep('confirmed');
-                setShowSuccessModal(true);
-            }, 2500);
+            setPaymentStep('confirmed');
+            setShowSuccessModal(true);
         }
     };
 

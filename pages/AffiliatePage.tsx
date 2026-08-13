@@ -7,7 +7,11 @@ const AffiliatePage: React.FC = () => {
     const [copied, setCopied] = useState(false);
 
     const generateLink = () => {
-        const code = `KND-${Math.floor(100 + Math.random() * 900)}-${Math.random().toString(36).substring(7).toUpperCase()}`;
+        const arr = new Uint16Array(2);
+        if (typeof crypto !== 'undefined' && crypto.getRandomValues) crypto.getRandomValues(arr);
+        const codeNum = 100 + (arr[0] % 900);
+        const suffix = arr[1].toString(36).toUpperCase().padStart(4, 'X');
+        const code = `KND-${codeNum}-${suffix}`;
         setGeneratedCode(code);
         setCopied(false);
     };

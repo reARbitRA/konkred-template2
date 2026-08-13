@@ -5,6 +5,8 @@ import {
 } from 'lucide-react';
 import Badge from '../components/common/Badge.tsx';
 import { useToast } from '../contexts/ToastContext.tsx';
+import { useAuth } from '../contexts/AuthContext.tsx';
+import { databaseService } from '../services/database.ts';
 
 interface DisputeToken {
     id: string;
@@ -105,8 +107,11 @@ const DisputePage: React.FC = () => {
         showToast('Arbitration response successfully transmitted to ledger.', 'success');
     };
 
+    const { user } = useAuth();
+    const [ticketRefId, setTicketRefId] = useState('TKT-10001');
+
     // Open support ticket handler
-    const handleSubmitTicket = (e: React.FormEvent) => {
+    const handleSubmitTicket = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!ticketSubject.trim() || !ticketDescription.trim()) {
             showToast('Please fill out all support ticket metrics.', 'warning');
@@ -114,26 +119,41 @@ const DisputePage: React.FC = () => {
         }
 
         setTicketStatus('submitting');
-        setTimeout(() => {
+        try {
+            const refId = await databaseService.fileDispute(user?.id || 'guest', {
+                title: ticketSubject.trim(),
+                category: 'Support Ticket',
+                description: ticketDescription.trim()
+            });
+            setTicketRefId(refId);
             setTicketStatus('success');
             showToast('Help Desk Ticket open successfully.', 'success');
-        }, 1500);
+        } catch (err) {
+            console.error('Failed to create ticket:', err);
+            setTicketStatus('idle');
+        }
     };
 
-    const handleCreateDispute = (e: React.FormEvent) => {
+    const handleCreateDispute = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!newDisputeDesc.trim()) {
             showToast('Please provide explicit technical reasons for creating a dispute.', 'warning');
             return;
         }
 
-        const newId = `DSP-${Math.floor(Math.random() * 9000) + 1000}`;
+        const category = newDisputeReason === 'malicious_payload' ? 'Malicious Code Violation' : 'Technical non-compliance';
+        const newId = await databaseService.fileDispute(user?.id || 'guest', {
+            title: `Dispute for ${newDisputeAsset}`,
+            category,
+            description: newDisputeDesc.trim()
+        });
+
         const newRecord: DisputeToken = {
             id: newId,
             assetName: newDisputeAsset,
             defendant: 'External Node Developer',
             amount: parseFloat(newDisputeAmount) || 89.00,
-            category: newDisputeReason === 'malicious_payload' ? 'Malicious Code Violation' : 'Technical non-compliance',
+            category,
             status: 'under_moderation',
             dateOpened: 'Today',
             description: newDisputeDesc,
@@ -360,7 +380,7 @@ const DisputePage: React.FC = () => {
                                     <div className="p-10 text-center space-y-4 animate-in fade-in">
                                         <CheckCircle className="w-16 h-16 text-neon-green mx-auto mb-2 animate-bounce" />
                                         <p className="text-white font-mono uppercase font-bold tracking-wider">Ticket Created successfully</p>
-                                        <p className="text-ghost text-xs max-w-sm mx-auto">Ticket reference ID #TKT-{Math.floor(Math.random() * 80000) + 10000} is dispatched. Check your associated enclave logs for status updates within 4 hours.</p>
+                                        <p className="text-ghost text-xs max-w-sm mx-auto">Ticket reference ID #{ticketRefId} is dispatched. Check your associated enclave logs for status updates within 4 hours.</p>
                                         <button 
                                             onClick={() => {
                                                 setTicketStatus('idle');

@@ -117,7 +117,9 @@ Adopt an authoritative, elite software architect developer persona representing 
     setGeneratedImgUrl(null);
 
     // Dynamic Seed to ensure fresh retrieval
-    const freshSeed = Math.floor(Math.random() * 100000);
+    const arr = new Uint32Array(1);
+    if (typeof crypto !== 'undefined' && crypto.getRandomValues) crypto.getRandomValues(arr);
+    const freshSeed = arr[0] % 100000;
     setImgSeed(freshSeed);
 
     // Format dimension bounds for Pollinations

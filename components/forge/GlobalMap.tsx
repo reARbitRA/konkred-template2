@@ -37,14 +37,17 @@ const GlobalMap: React.FC = () => {
     const nodes: { x: number; y: number; vx: number; vy: number; type: 'core' | 'edge' }[] = [];
     const packets: { from: number; to: number; progress: number; speed: number }[] = [];
 
-    // Initialize Nodes
+    // Initialize Nodes deterministically
     for (let i = 0; i < NODE_COUNT; i++) {
+        const seed1 = (i * 137 + 13) % 1000 / 1000;
+        const seed2 = (i * 241 + 47) % 1000 / 1000;
+        const seed3 = (i * 389 + 71) % 1000 / 1000;
         nodes.push({
-            x: Math.random() * width,
-            y: Math.random() * height,
-            vx: (Math.random() - 0.5) * 0.5,
-            vy: (Math.random() - 0.5) * 0.5,
-            type: Math.random() > 0.9 ? 'core' : 'edge'
+            x: seed1 * width,
+            y: seed2 * height,
+            vx: (seed3 - 0.5) * 0.5,
+            vy: (seed1 - 0.5) * 0.5,
+            type: seed2 > 0.85 ? 'core' : 'edge'
         });
     }
 
@@ -81,8 +84,8 @@ const GlobalMap: React.FC = () => {
                     ctx.lineTo(nodeB.x, nodeB.y);
                     ctx.stroke();
 
-                    // Randomly spawn packet
-                    if (Math.random() > 0.995) {
+                    // Deterministically spawn packet based on node pair & time
+                    if ((i * 13 + j * 17 + Math.floor(performance.now() / 200)) % 1000 === 0) {
                         packets.push({ from: i, to: j, progress: 0, speed: PACKET_SPEED / dist });
                     }
                 }

@@ -3,6 +3,8 @@ import React, { useState } from 'react';
 import { X, Sparkles, ArrowRight, ShieldCheck, Mail } from 'lucide-react';
 import Loader from '../common/Loader.tsx';
 
+import { databaseService } from '../../services/database.ts';
+
 interface WaitlistModalProps {
   onClose: () => void;
 }
@@ -12,15 +14,19 @@ const WaitlistModal: React.FC<WaitlistModalProps> = ({ onClose }) => {
   const [status, setStatus] = useState<'idle' | 'loading' | 'success'>('idle');
   const [ticketId, setTicketId] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!email.trim()) return;
     setStatus('loading');
     
-    // Simulate API call
-    setTimeout(() => {
-      setTicketId(`#KND-${Math.floor(1000 + Math.random() * 9000)}`);
+    try {
+      const generatedId = await databaseService.joinWaitlist(email.trim());
+      setTicketId(generatedId);
       setStatus('success');
-    }, 2000);
+    } catch (err) {
+      console.error('Waitlist submission error:', err);
+      setStatus('idle');
+    }
   };
 
   return (

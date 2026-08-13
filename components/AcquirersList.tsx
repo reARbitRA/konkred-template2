@@ -13,7 +13,7 @@ const AcquirersList: React.FC<AcquirersListProps> = ({ protocol, onClose }) => {
   const acquirers = Array.from({ length: 8 }).map((_, i) => ({
     id: `acq-${protocol.id}-${i}`,
     name: `User_0x${(parseInt(protocol.id, 36) + i * 12345).toString(16).toUpperCase().slice(0, 4)}...${(i * 987).toString(16).toUpperCase().slice(0, 3)}`,
-    time: `${Math.max(1, i * 3 + Math.floor(Math.random() * 3))}h ago`,
+    time: `${Math.max(1, i * 3 + (parseInt(protocol.id || '1', 36) % 3) + 1)}h ago`,
     verified: i % 3 === 0
   }));
 

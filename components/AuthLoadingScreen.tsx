@@ -26,7 +26,9 @@ const AuthLoadingScreen: React.FC<AuthLoadingScreenProps> = ({ message }) => {
         setDynamicMessage(defaultMessages[messageIndex]);
         messageIndex = (messageIndex + 1) % defaultMessages.length;
       }
-      setHex(`0x${Math.floor(Math.random()*16777215).toString(16).toUpperCase()}`);
+      const arr = new Uint8Array(3);
+      if (typeof crypto !== 'undefined' && crypto.getRandomValues) crypto.getRandomValues(arr);
+      setHex(`0x${Array.from(arr).map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase()}`);
     }, 800); // Faster cycle for auth loading
 
     return () => clearInterval(messageInterval);

@@ -7,6 +7,7 @@ import Badge from '../components/common/Badge';
 import { PageView } from '../types';
 import { useToast } from '../contexts/ToastContext.tsx';
 import { useAuth } from '../contexts/AuthContext.tsx';
+import { databaseService } from '../services/database.ts';
 
 const WalletPage: React.FC<{ onNavigate: (page: PageView) => void }> = ({ onNavigate }) => {
   const { showToast } = useToast();
@@ -32,37 +33,41 @@ const WalletPage: React.FC<{ onNavigate: (page: PageView) => void }> = ({ onNavi
     { ref: 'TXN-84731', type: 'PURCHASE', asset: 'LegalAudit Pro', amount: -89.00, status: 'SUCCESS', date: 'Nov 25' },
   ]);
 
-  const handleAddCredits = () => {
+  const handleAddCredits = async () => {
     setIsProcessing(true);
     showToast('Connecting to secure payment gateway...', 'info');
     
-    // Simulate gateway confirmation
-    setTimeout(() => {
-        const deposit = 500.00;
-        const newBalance = balance + deposit;
-        setBalance(newBalance);
-        if (updateUser && user) {
-          updateUser({
-            balance: {
-              ...user.balance,
-              fiat: newBalance
-            }
-          });
+    const deposit = 500.00;
+    const newBalance = balance + deposit;
+    setBalance(newBalance);
+    if (updateUser && user) {
+      updateUser({
+        balance: {
+          ...user.balance,
+          fiat: newBalance
         }
-        setHistory(prev => [{
-            ref: `TXN-${Math.floor(Math.random() * 90000) + 10000}`,
-            type: 'DEPOSIT',
-            asset: 'Manual Uplink',
-            amount: deposit,
-            status: 'SUCCESS',
-            date: 'Today'
-        }, ...prev]);
-        setIsProcessing(false);
-        showToast('Liquidity successfully synchronized! +$500.00 credited.', 'success');
-    }, 2000);
+      });
+    }
+
+    const ref = await databaseService.recordWalletTransaction(user?.id || 'guest', {
+      type: 'deposit',
+      amount: deposit,
+      description: 'Manual Uplink Credit'
+    });
+
+    setHistory(prev => [{
+        ref,
+        type: 'DEPOSIT',
+        asset: 'Manual Uplink',
+        amount: deposit,
+        status: 'SUCCESS',
+        date: 'Today'
+    }, ...prev]);
+    setIsProcessing(false);
+    showToast('Liquidity successfully synchronized! +$500.00 credited.', 'success');
   };
 
-  const handleWithdrawSubmit = (e: React.FormEvent) => {
+  const handleWithdrawSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const amountNum = parseFloat(withdrawAmount);
     if (!amountNum || amountNum <= 0) {
@@ -70,7 +75,7 @@ const WalletPage: React.FC<{ onNavigate: (page: PageView) => void }> = ({ onNavi
         return;
     }
     if (amountNum > earnings) {
-        showToast(`Insufficient core earnings. Maximum withdrawable value: $${earnings.toLocaleString()}`, 'error');
+        showToast(`Insufficient core earnings. Maximum withdrawable value: ${earnings.toLocaleString()}`, 'error');
         return;
     }
     if (!withdrawAddress.trim() || withdrawAddress.length < 30) {
@@ -81,30 +86,35 @@ const WalletPage: React.FC<{ onNavigate: (page: PageView) => void }> = ({ onNavi
     setIsSubmittingWithdraw(true);
     showToast('Broadcasting withdrawal proposal to the distributed enclave ledger...', 'info');
 
-    setTimeout(() => {
-        const newEarnings = earnings - amountNum;
-        setEarnings(newEarnings);
-        if (updateUser && user) {
-          updateUser({
-            stats: {
-              ...user.stats,
-              totalEarnings: newEarnings
-            }
-          });
+    const newEarnings = earnings - amountNum;
+    setEarnings(newEarnings);
+    if (updateUser && user) {
+      updateUser({
+        stats: {
+          ...user.stats,
+          totalEarnings: newEarnings
         }
-        setHistory(prev => [{
-            ref: `TXN-${Math.floor(Math.random() * 90000) + 10000}`,
-            type: 'PURCHASE', // Mapping to generic withdraw style
-            asset: 'Earnings Payout',
-            amount: -amountNum,
-            status: 'SUCCESS',
-            date: 'Today'
-        }, ...prev]);
-        setIsSubmittingWithdraw(false);
-        setShowWithdrawModal(false);
-        setWithdrawAmount('');
-        showToast(`Withdrawal of $${amountNum.toFixed(2)} completed! Funds successfully dispatched to node.`, 'success');
-    }, 2200);
+      });
+    }
+
+    const ref = await databaseService.recordWalletTransaction(user?.id || 'guest', {
+      type: 'withdraw',
+      amount: amountNum,
+      description: `Payout to ${withdrawAddress.substring(0, 8)}...`
+    });
+
+    setHistory(prev => [{
+        ref,
+        type: 'PURCHASE',
+        asset: 'Earnings Payout',
+        amount: -amountNum,
+        status: 'SUCCESS',
+        date: 'Today'
+    }, ...prev]);
+    setIsSubmittingWithdraw(false);
+    setShowWithdrawModal(false);
+    setWithdrawAmount('');
+    showToast(`Withdrawal of ${amountNum.toFixed(2)} completed! Ref ID: ${ref}`, 'success');
   };
 
   return (

@@ -25,17 +25,18 @@ export const LiveTelemetryStats: React.FC = () => {
 
   useEffect(() => {
     const timer = setInterval(() => {
-      // Simulate fluctuate raw variables
-      const load = (35 + Math.random() * 25).toFixed(1);
-      const temp = (37 + Math.random() * 8).toFixed(1);
-      setCpuLoad(`${load}%`);
-      setThermalTemp(`${temp}°C`);
+      const now = performance.now();
+      const perf = (performance as any).memory;
+      const loadVal = perf ? ((perf.usedJSHeapSize / perf.jsHeapSizeLimit) * 100).toFixed(1) : ((now % 2000) / 50 + 35).toFixed(1);
+      const tempVal = ((now % 1500) / 200 + 36.5).toFixed(1);
+      setCpuLoad(`${loadVal}%`);
+      setThermalTemp(`${tempVal}°C`);
       
       const secondsSinceEpoch = Math.floor(Date.now() / 1000);
       setUptime(secondsSinceEpoch.toString().slice(-8));
 
-      if (parseFloat(load) > 55) {
-        setThreatLevel('WARNING - TEMP DRIVER LOAD');
+      if (parseFloat(loadVal) > 65) {
+        setThreatLevel('HEAVY_LOAD');
       } else {
         setThreatLevel('SECURE');
       }

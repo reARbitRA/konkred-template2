@@ -105,17 +105,20 @@ export const AppTester: React.FC<AppTesterProps> = ({ listing, isOpen, onClose, 
         resultPayload = await aiService.runGenericAgent(prompt, schema, 'system-tester');
       } catch (e) {
         // Fallback simulation
+        const arr = new Uint32Array(1);
+        if (typeof crypto !== 'undefined' && crypto.getRandomValues) crypto.getRandomValues(arr);
+        const codeNum = 100000 + (arr[0] % 900000);
         resultPayload = {
           status: "SUCCESS_200_OK",
           latencyGrade: "OPTIMAL_SUB_100MS",
-          verificationCode: `ENC-${Math.floor(100000 + Math.random() * 900000)}`,
+          verificationCode: `ENC-${codeNum}`,
           confidenceScore: 0.998,
           executionSummary: `Validated asset "${listing.title}" payload under ${concurrency}x concurrency. Zero-drift logic confirmed.`,
           recommendation: "Ready for immediate deployment to production enclave."
         };
       }
 
-      const duration = Date.now() - startTime + Math.floor(Math.random() * 80) + 45;
+      const duration = Math.max(1, Math.round(performance.now() - startTime));
       
       logs.push(`[EXEC_COMPLETE] Runtime returned status 200 OK in ${duration}ms`);
       logs.push(`[TELEMETRY] Memory usage: 142.4MB | CPU Load: ${(12 + concurrency * 1.5).toFixed(1)}%`);

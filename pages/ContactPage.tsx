@@ -3,6 +3,8 @@ import { motion } from 'motion/react';
 import { ArrowLeft, Send, CheckCircle2, DollarSign, ShieldCheck, Mail, MessageSquare, Landmark, Coins } from 'lucide-react';
 import { PageView } from '../types.ts';
 
+import { databaseService } from '../services/database.ts';
+
 interface ContactPageProps {
   onNavigate: (page: PageView) => void;
 }
@@ -20,13 +22,23 @@ const ContactPage: React.FC<ContactPageProps> = ({ onNavigate }) => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.email.trim() || !formData.message.trim()) return;
     setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      await databaseService.submitContactMessage({
+        name: formData.name.trim() || 'Anonymous',
+        email: formData.email.trim(),
+        subject: `[${formData.scope}] Inquiry (${formData.budget})`,
+        message: formData.message.trim()
+      });
       setIsSubmitted(true);
-    }, 1200);
+    } catch (err) {
+      console.error("Contact submission error:", err);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

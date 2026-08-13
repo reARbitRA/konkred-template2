@@ -213,6 +213,85 @@ class DatabaseService {
             throw error;
         }
     }
+
+    /**
+     * Records a waitlist access request in Firestore.
+     */
+    async joinWaitlist(email: string): Promise<string> {
+        const arr = new Uint16Array(1);
+        if (typeof crypto !== 'undefined' && crypto.getRandomValues) crypto.getRandomValues(arr);
+        const ticketNum = 1000 + (arr[0] % 9000);
+        const ticketId = `#KND-${ticketNum}`;
+
+        try {
+            await addDoc(collection(db, 'waitlist'), {
+                email,
+                ticketId,
+                createdAt: serverTimestamp()
+            });
+        } catch (error) {
+            console.error("Failed to store waitlist registration:", error);
+        }
+        return ticketId;
+    }
+
+    /**
+     * Persists customer inquiry/contact form data to Firestore.
+     */
+    async submitContactMessage(data: { name: string; email: string; subject: string; message: string }): Promise<void> {
+        try {
+            await addDoc(collection(db, 'contact_messages'), {
+                ...data,
+                createdAt: serverTimestamp()
+            });
+        } catch (error) {
+            console.error("Failed to submit contact message:", error);
+            throw error;
+        }
+    }
+
+    /**
+     * Log wallet transaction to Firestore ledger.
+     */
+    async recordWalletTransaction(userId: string, transaction: { type: 'deposit' | 'withdraw' | 'transfer'; amount: number; description: string }): Promise<string> {
+        const arr = new Uint32Array(1);
+        if (typeof crypto !== 'undefined' && crypto.getRandomValues) crypto.getRandomValues(arr);
+        const refId = `TXN-${10000 + (arr[0] % 90000)}`;
+
+        try {
+            await addDoc(collection(db, 'users', userId, 'transactions'), {
+                ...transaction,
+                ref: refId,
+                status: 'COMPLETED',
+                createdAt: serverTimestamp()
+            });
+        } catch (error) {
+            console.error("Failed to log transaction:", error);
+        }
+        return refId;
+    }
+
+    /**
+     * Submit a platform dispute to Firestore.
+     */
+    async fileDispute(userId: string, dispute: { title: string; category: string; description: string; listingId?: string }): Promise<string> {
+        const arr = new Uint16Array(1);
+        if (typeof crypto !== 'undefined' && crypto.getRandomValues) crypto.getRandomValues(arr);
+        const disputeId = `DSP-${1000 + (arr[0] % 9000)}`;
+
+        try {
+            await addDoc(collection(db, 'disputes'), {
+                ...dispute,
+                userId,
+                disputeId,
+                status: 'OPEN',
+                createdAt: serverTimestamp()
+            });
+        } catch (error) {
+            console.error("Failed to file dispute:", error);
+        }
+        return disputeId;
+    }
 }
 
 export const databaseService = new DatabaseService();

@@ -9,17 +9,21 @@ interface LoadingScreenProps {
 const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete }) => {
   const [progress, setProgress] = useState(0);
   const [status, setStatus] = useState("INITIALIZING_CORE");
-  const [nodeId] = useState(() => `0x${Math.floor(Math.random() * 0xFFFFFF).toString(16).toUpperCase()}`);
+  const [nodeId] = useState(() => {
+    const arr = new Uint8Array(3);
+    if (typeof crypto !== 'undefined' && crypto.getRandomValues) crypto.getRandomValues(arr);
+    return `0x${Array.from(arr).map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase()}`;
+  });
 
   useEffect(() => {
     const interval = setInterval(() => {
       setProgress(prev => {
         if (prev >= 100) {
           clearInterval(interval);
-          setTimeout(onComplete, 1600); 
+          setTimeout(onComplete, 800); 
           return 100;
         }
-        return Math.min(prev + (Math.random() * 5 + 1), 100);
+        return Math.min(prev + 5, 100);
       });
     }, 50);
 

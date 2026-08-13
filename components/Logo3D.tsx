@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useId } from 'react';
 
 interface Logo3DProps {
   className?: string;
@@ -7,7 +7,8 @@ interface Logo3DProps {
 
 const Logo3D: React.FC<Logo3DProps> = ({ className = '', size = 32 }) => {
   // Generate unique IDs for defs to prevent collision when multiple logo instances exist on the same page
-  const [uniqueId] = useState(() => Math.random().toString(36).substr(2, 9));
+  const rawId = useId();
+  const uniqueId = rawId.replace(/:/g, '');
   const clipId = `reveal-clip-${uniqueId}`;
   const metalGradId = `metal-grad-${uniqueId}`;
   const goldGradId = `gold-grad-${uniqueId}`;

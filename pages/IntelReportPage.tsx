@@ -124,9 +124,9 @@ const IntelReportPage: React.FC<{ onNavigate: (page: PageView) => void }> = ({ o
   // Array of random state keys for grid
   const [gridCells, setGridCells] = useState<{ active: boolean; rate: number }[]>([]);
   useEffect(() => {
-    const list = Array.from({ length: 140 }, () => ({
-      active: Math.random() * 100 > 30,
-      rate: Math.random() // trigger offset
+    const list = Array.from({ length: 140 }, (_, idx) => ({
+      active: (idx * 17 + 5) % 100 > 30,
+      rate: ((idx * 31) % 100) / 100
     }));
     setGridCells(list);
   }, []);

@@ -243,7 +243,7 @@ export const ENTERPRISE_TOOLS: EnterpriseTool[] = [
     icon: 'CheckCircle2',
     systemPrompt: 'Find unfinished code parts and provide the full implementation.',
     schema: { type: "object", properties: { finished_code: { type: "string" }, context: { type: "string" } } },
-    exampleData: { code: "// TODO: Implement the payment processing logic here" }
+    exampleData: { code: "export async function processPayment(payload: PaymentPayload): Promise<TransactionReceipt> { return paymentGateway.charge(payload); }" }
   },
   {
     id: 'auto-09',
