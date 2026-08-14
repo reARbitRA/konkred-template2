@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { getAuth } from 'firebase/auth';
 import { UsageSummary, UsageEvent } from '../../services/fullkonk.analytics';
 
 interface Props {
@@ -53,15 +54,25 @@ export default function AnalyticsDashboard({ userId, onClose }: Props) {
   const [recent,  setRecent]  = useState<UsageEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [days,    setDays]    = useState(30);
+  const [error,   setError]   = useState('');
 
   useEffect(() => {
     if (!userId) return;
+    const controller = new AbortController();
     setLoading(true);
-    fetch(`/api/fullkonk/analytics/${userId}?days=${days}`)
-      .then(r => r.json())
-      .then(d => { setSummary(d.summary); setRecent(d.recent ?? []); })
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    setError('');
+    void getAuth().currentUser?.getIdToken().then(token => fetch(`/api/fullkonk/analytics/${userId}?days=${days}`, {
+      headers: { Authorization: `Bearer ${token}` },
+      signal: controller.signal,
+    })).then(async response => {
+      const data = await response.json() as { summary?: UsageSummary; recent?: UsageEvent[]; error?: string };
+      if (!response.ok || !data.summary) throw new Error(data.error || 'Analytics request failed.');
+      setSummary(data.summary);
+      setRecent(data.recent ?? []);
+    }).catch(fetchError => {
+      if (!(fetchError instanceof DOMException && fetchError.name === 'AbortError')) setError(fetchError instanceof Error ? fetchError.message : 'Analytics unavailable.');
+    }).finally(() => { if (!controller.signal.aborted) setLoading(false); });
+    return () => controller.abort();
   }, [userId, days]);
 
   const providers = summary ? Object.entries(summary.byProvider).sort((a, b) => b[1].count - a[1].count) : [];
@@ -156,6 +167,10 @@ export default function AnalyticsDashboard({ userId, onClose }: Props) {
             <div style={{ textAlign: 'center', padding: 40, color: '#333', fontSize: 11 }}>
               LOADING...
             </div>
+          ) : error ? (
+            <div style={{ textAlign: 'center', padding: 40, color: '#FF003C', fontSize: 11 }}>
+              {error}
+            </div>
           ) : !summary ? (
             <div style={{ textAlign: 'center', padding: 40, color: '#333', fontSize: 11 }}>
               No data yet. Build something first.
@@ -203,7 +218,7 @@ export default function AnalyticsDashboard({ userId, onClose }: Props) {
                   </div>
                   <div style={{ display: 'flex', gap: 1 }}>
                     {Object.entries(summary.byMode).map(([mode, count]) => {
-                      const pct = Math.round((count / summary.totalGenerations) * 100);
+                      const pct = summary.totalGenerations > 0 ? Math.round((count / summary.totalGenerations) * 100) : 0;
                       const modeColors: Record<string, string> = { fullstack: '#FFD700', frontend: '#0055FF', backend: '#00FF88', review: '#FF003C' };
                       return (
                         <div key={mode} style={{ flex: pct || 1, background: modeColors[mode] ?? '#333', padding: '10px 8px', minWidth: 40 }}>

@@ -5,6 +5,12 @@
 @tailwind components;
 @tailwind utilities;
 
+/* fullKONK_> Sandpack follows the platform's square neo-brutalist geometry. */
+.fullkonk-sandpack,
+.fullkonk-sandpack * {
+  border-radius: 0 !important;
+}
+
 :root {
   --void-bg: #0B0F14;          /* Void-1 */
   --surface-1: #0E1319;        /* Void-2 / Card */

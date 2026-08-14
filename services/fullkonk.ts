@@ -17,7 +17,7 @@ export const PROVIDERS: ProviderDef[] = [
     name: 'Google Gemini',
     baseUrl: 'https://generativelanguage.googleapis.com/v1beta',
     envKey: 'GEMINI_API_KEY',
-    priority: { architect: 1, frontend: 1, backend: 1, verify: 1 },
+    priority: { architect: 1, frontend: 1, backend: 1, verify: 1, test: 1 },
     models: [
       { id: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash' },
       { id: 'gemini-2.5-pro',   label: 'Gemini 2.5 Pro' },
@@ -28,7 +28,7 @@ export const PROVIDERS: ProviderDef[] = [
     name: 'Groq',
     baseUrl: 'https://api.groq.com/openai/v1',
     envKey: 'GROQ_API_KEY',
-    priority: { architect: 3, frontend: 1, backend: 2, verify: 2 },
+    priority: { architect: 3, frontend: 1, backend: 2, verify: 2, test: 2 },
     models: [
       { id: 'llama-3.3-70b-versatile',        label: 'Llama 3.3 70B'     },
       { id: 'llama-4-scout-17b-16e-instruct', label: 'Llama 4 Scout'     },
@@ -40,7 +40,7 @@ export const PROVIDERS: ProviderDef[] = [
     name: 'DeepSeek',
     baseUrl: 'https://api.deepseek.com/v1',
     envKey: 'DEEPSEEK_API_KEY',
-    priority: { architect: 1, frontend: 3, backend: 1, verify: 1 },
+    priority: { architect: 1, frontend: 3, backend: 1, verify: 1, test: 1 },
     models: [
       { id: 'deepseek-chat',     label: 'DeepSeek V3' },
       { id: 'deepseek-reasoner', label: 'DeepSeek R1' },
@@ -51,7 +51,7 @@ export const PROVIDERS: ProviderDef[] = [
     name: 'Cerebras',
     baseUrl: 'https://api.cerebras.ai/v1',
     envKey: 'CEREBRAS_API_KEY',
-    priority: { architect: 4, frontend: 4, backend: 3, verify: 3 },
+    priority: { architect: 4, frontend: 4, backend: 3, verify: 3, test: 3 },
     models: [
       { id: 'gpt-oss-120b', label: 'GPT-OSS 120B' },
       { id: 'llama3.1-8b', label: 'Llama 3.1 8B'  },
@@ -62,7 +62,7 @@ export const PROVIDERS: ProviderDef[] = [
     name: 'SambaNova',
     baseUrl: 'https://api.sambanova.ai/v1',
     envKey: 'SAMBANOVA_API_KEY',
-    priority: { architect: 2, frontend: 2, backend: 4, verify: 4 },
+    priority: { architect: 2, frontend: 2, backend: 4, verify: 4, test: 4 },
     models: [
       { id: 'Llama-4-Maverick-17B-128E-Instruct', label: 'Llama 4 Maverick' },
       { id: 'DeepSeek-V3.1-Terminus',             label: 'DeepSeek V3.1'    },
@@ -74,7 +74,7 @@ export const PROVIDERS: ProviderDef[] = [
     name: 'OpenRouter',
     baseUrl: 'https://openrouter.ai/api/v1',
     envKey: 'OPENROUTER_API_KEY',
-    priority: { architect: 5, frontend: 5, backend: 5, verify: 5 },
+    priority: { architect: 5, frontend: 5, backend: 5, verify: 5, test: 5 },
     models: [
       { id: 'meta-llama/llama-3.3-70b-instruct:free', label: 'Llama 3.3 (free)' },
       { id: 'deepseek/deepseek-r1:free',               label: 'DeepSeek R1 (free)' },
@@ -85,16 +85,21 @@ export const PROVIDERS: ProviderDef[] = [
 
 // ─── RATE LIMIT TRACKER ──────────────────────────────────────────
 
+/**
+ * Process-local circuit breaker. A restart deliberately clears it and merely
+ * causes one safe provider re-probe; persisting transient provider health in
+ * Firestore would make a regional 429 incorrectly disable every deployment.
+ */
 const rateLimited = new Map<string, number>();
 
-export function markRateLimited(id: string) {
-  rateLimited.set(id, Date.now() + 60_000);
+export function markRateLimited(id: string, ttlMs = 60_000): void {
+  rateLimited.set(id, Date.now() + Math.max(1_000, ttlMs));
 }
 
 export function isRateLimited(id: string): boolean {
   const until = rateLimited.get(id);
   if (!until) return false;
-  if (Date.now() > until) { rateLimited.delete(id); return false; }
+  if (Date.now() >= until) { rateLimited.delete(id); return false; }
   return true;
 }
 
@@ -132,4 +137,6 @@ Output complete file contents with file paths as comments.`,
   verify: `You are a principal engineer doing integration review.
 Check: API call signatures match routes. Types consistent across frontend/backend. All imports resolve.
 Fix what is broken. Output corrected complete files only. List issues first.`,
+
+  test: `Given the frontend and backend files, write comprehensive tests: unit tests for utilities with Vitest, component tests with Testing Library, Express API route tests with Supertest, and an integration test for the primary flow. Reuse production TypeScript types. Mock Firebase and all external APIs. Output complete test files with paths.`,
 };

@@ -20,6 +20,11 @@ export default function GitHubExportModal({ files, onClose }: Props) {
   const [result,  setResult]  = useState<GitHubExportResult | null>(null);
   const [error,   setError]   = useState('');
 
+  const closeSecurely = () => {
+    setToken('');
+    onClose();
+  };
+
   const handleExport = async () => {
     if (!token.trim() || !owner.trim() || !repo.trim()) {
       setError('Token, owner, and repo are required.');
@@ -38,8 +43,8 @@ export default function GitHubExportModal({ files, onClose }: Props) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? 'Export failed');
       setResult(data);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Export failed');
     } finally {
       setLoading(false);
     }
@@ -82,7 +87,7 @@ export default function GitHubExportModal({ files, onClose }: Props) {
         justifyContent: 'center',
         padding:         20,
       }}
-      onClick={e => { if (e.target === e.currentTarget) onClose(); }}
+      onClick={e => { if (e.target === e.currentTarget) closeSecurely(); }}
     >
       <motion.div
         initial={{ scale: .95, y: 16 }}
@@ -106,7 +111,7 @@ export default function GitHubExportModal({ files, onClose }: Props) {
           <span style={{ fontSize: 10, letterSpacing: 3, color: '#FFD700', textTransform: 'uppercase' }}>
             // EXPORT TO GITHUB
           </span>
-          <button onClick={onClose} style={{ background: 'none', border: '1px solid #222', color: '#555', width: 26, height: 26, cursor: 'pointer', fontSize: 12 }}>
+          <button onClick={closeSecurely} style={{ background: 'none', border: '1px solid #222', color: '#555', width: 26, height: 26, cursor: 'pointer', fontSize: 12 }}>
             ✕
           </button>
         </div>

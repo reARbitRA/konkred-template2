@@ -95,6 +95,15 @@ service cloud.firestore {
       );
     }
 
+    // fullKONK persisted projects
+    match /fk_projects/{projectId} {
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow read, delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow update: if isSignedIn() &&
+        resource.data.userId == request.auth.uid &&
+        request.resource.data.userId == request.auth.uid;
+    }
+
     // fullKONK AI Usage Telemetry
     match /fk_usage/{usageId} {
       allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
