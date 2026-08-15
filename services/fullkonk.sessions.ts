@@ -59,7 +59,10 @@ export async function updateSession(
   sessionId: string,
   data: Partial<Pick<FKSession, 'messages' | 'files' | 'stage' | 'tokenCount' | 'title'>>
 ): Promise<void> {
-  await updateDoc(doc(db, 'fk_sessions', sessionId), {
+  const ref = doc(db, 'fk_sessions', sessionId);
+  const snapshot = await getDoc(ref);
+  if (!snapshot.exists()) throw new Error('Session no longer exists. Start a new session.');
+  await updateDoc(ref, {
     ...data,
     updatedAt: serverTimestamp(),
   });

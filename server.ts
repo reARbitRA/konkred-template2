@@ -11,9 +11,9 @@ import { getFirestore as getAdminFirestore } from "firebase-admin/firestore";
 import firebaseConfig from "./firebase-applet-config.json";
 import { db as sqlDb } from "./src/db/index.ts";
 import { users as sqlUsers } from "./src/db/schema.ts";
-import { getSortedProviders, markRateLimited, isRateLimited, SYSTEM_PROMPTS, PROVIDERS } from './services/fullkonk';
-import { logUsage, getUserUsageSummary, getRecentEvents } from './services/fullkonk.analytics';
+import { SYSTEM_PROMPTS } from './services/fullkonk';
 import { exportToGitHub } from './services/fullkonk.github';
+import { getOrchestratorHealth, MODEL_REGISTRY, orchestrate, TaskType } from './services/fullkonk.orchestrator';
 
 dotenv.config();
 
@@ -31,7 +31,7 @@ async function startServer() {
   const PORT = 3000;
 
   app.use(cors());
-  app.use(express.json());
+  app.use(express.json({ limit: "1mb" }));
 
   // API Routes
   app.get("/api/health", (req, res) => {
@@ -339,313 +339,311 @@ async function startServer() {
 
   // ─── fullKONK_> ROUTES ──────────────────────────────────────────
 
-  // GET /api/fullkonk/providers
+  type AuthenticatedIdentity = { uid: string };
+  type PromptMessage = { role: 'system' | 'user' | 'assistant'; content: string };
+  type UploadedContextFile = { path: string; contentBase64: string; size: number };
+
+  async function authenticatedIdentity(req: express.Request): Promise<AuthenticatedIdentity | null> {
+    const authorization = req.header('authorization') || '';
+    const match = authorization.match(/^Bearer\s+(.+)$/i);
+    if (!match) return null;
+    try {
+      const decoded = await adminAuth.verifyIdToken(match[1]);
+      return { uid: decoded.uid };
+    } catch {
+      return null;
+    }
+  }
+
+  function safeError(error: unknown): string {
+    return error instanceof Error ? error.message : 'Unknown error';
+  }
+
+  function validateContextFiles(value: unknown): UploadedContextFile[] {
+    if (value === undefined) return [];
+    if (!Array.isArray(value) || value.length > 20) throw new Error('Attachments must contain at most 20 files.');
+    const allowed = /\.(?:tsx?|jsx?|json|prisma|sql|ya?ml)$/i;
+    let total = 0;
+    return value.map(item => {
+      if (!item || typeof item !== 'object') throw new Error('Invalid attachment.');
+      const candidate = item as Partial<UploadedContextFile>;
+      if (typeof candidate.path !== 'string' || !allowed.test(candidate.path) || candidate.path.includes('..')) throw new Error('Attachment path or extension is not allowed.');
+      if (typeof candidate.contentBase64 !== 'string' || typeof candidate.size !== 'number' || candidate.size < 0) throw new Error('Invalid attachment payload.');
+      total += candidate.size;
+      if (total > 500 * 1024) throw new Error('Attachments exceed the 500KB limit.');
+      return { path: candidate.path.slice(0, 240), contentBase64: candidate.contentBase64, size: candidate.size };
+    });
+  }
+
   app.get('/api/fullkonk/providers', (_req, res) => {
-    const list = PROVIDERS.map(p => ({
-      id:     p.id,
-      name:   p.name,
-      models: p.models,
-      hasKey: !!process.env[p.envKey],
-    }));
-    res.json({ providers: list });
+    const grouped = new Map<string, { id: string; name: string; hasKey: boolean; models: { id: string; label: string }[] }>();
+    MODEL_REGISTRY.forEach(profile => {
+      const provider = grouped.get(profile.providerId) || { id: profile.providerId, name: profile.providerName, hasKey: Boolean(process.env[profile.envKey]), models: [] };
+      provider.models.push({ id: profile.modelId, label: profile.modelLabel });
+      grouped.set(profile.providerId, provider);
+    });
+    res.json({ providers: [...grouped.values()] });
   });
 
-  // POST /api/fullkonk/generate  (SSE streaming)
-  app.post('/api/fullkonk/generate', async (req, res) => {
-    const { prompt, mode = 'fullstack', provider: preferredProvider, model, temperature = 0.4, maxTokens = 8192, systemPrompt } = req.body;
+  app.get('/api/fullkonk/health', (_req, res) => {
+    res.json({ providers: getOrchestratorHealth() });
+  });
 
-    if (!prompt?.trim()) {
-      return res.status(400).json({ error: 'prompt required' });
+  app.post('/api/fullkonk/optimize-prompt', async (req, res) => {
+    try {
+      const prompt = typeof req.body?.prompt === 'string' ? req.body.prompt.trim() : '';
+      if (!prompt || prompt.length > 4000) return res.status(400).json({ error: 'Prompt must contain 1–4000 characters.' });
+      const groqKey = process.env.GROQ_API_KEY;
+      if (!groqKey) return res.status(503).json({ error: 'Prompt optimizer is unavailable.' });
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 15_000);
+      try {
+        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${groqKey}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: 'llama-3.3-70b-versatile', temperature: 0.25, max_tokens: Math.min(1800, Math.max(256, prompt.length * 2)),
+            messages: [
+              { role: 'system', content: 'Improve this product description for AI code generation. Add: tech stack preferences if missing, specific feature list, expected user flows, data models if inferrable. Return improved version only. Max 3x original length.' },
+              { role: 'user', content: prompt },
+            ],
+          }),
+          signal: controller.signal,
+        });
+        if (!response.ok) return res.status(response.status === 429 ? 429 : 502).json({ error: 'Prompt optimizer provider failed.' });
+        const payload = await response.json() as { choices?: { message?: { content?: string } }[] };
+        const optimized = payload.choices?.[0]?.message?.content?.trim();
+        if (!optimized) return res.status(502).json({ error: 'Prompt optimizer returned no suggestion.' });
+        res.json({ prompt: optimized.slice(0, prompt.length * 3) });
+      } finally {
+        clearTimeout(timer);
+      }
+    } catch (error) {
+      res.status(500).json({ error: safeError(error) });
+    }
+  });
+
+  app.post('/api/fullkonk/generate', async (req, res) => {
+    const prompt = typeof req.body?.prompt === 'string' ? req.body.prompt.trim() : '';
+    const mode = ['fullstack', 'frontend', 'backend', 'review'].includes(req.body?.mode) ? req.body.mode as 'fullstack' | 'frontend' | 'backend' | 'review' : 'fullstack';
+    const preferredProvider = typeof req.body?.provider === 'string' ? req.body.provider : undefined;
+    const requestedModel = typeof req.body?.model === 'string' ? req.body.model : undefined;
+    const temperature = typeof req.body?.temperature === 'number' ? Math.min(1, Math.max(0, req.body.temperature)) : 0.4;
+    const maxTokens = typeof req.body?.maxTokens === 'number' ? Math.min(16_384, Math.max(1024, req.body.maxTokens)) : 8192;
+    const customSystemPrompt = typeof req.body?.systemPrompt === 'string' ? req.body.systemPrompt.slice(0, 12_000) : undefined;
+    const projectId = typeof req.body?.projectId === 'string' ? req.body.projectId : undefined;
+    if (!prompt) return res.status(400).json({ error: 'prompt required' });
+
+    let attachedFiles: UploadedContextFile[];
+    try { attachedFiles = validateContextFiles(req.body?.attachedFiles); }
+    catch (error) { return res.status(400).json({ error: safeError(error) }); }
+
+    let context = '';
+    try {
+      if (projectId) {
+        const identity = await authenticatedIdentity(req);
+        if (!identity) return res.status(401).json({ error: 'Authentication required to access a project.' });
+        const project = await adminDb.collection('fk_projects').doc(projectId).get();
+        if (!project.exists) return res.status(404).json({ error: 'Project not found.' });
+        const data = project.data();
+        if (data?.userId !== identity.uid) return res.status(403).json({ error: 'Project access denied.' });
+        const projectFiles = Array.isArray(data.files) ? data.files as { path?: unknown; content?: unknown }[] : [];
+        const serialized = projectFiles.filter(file => typeof file.path === 'string' && typeof file.content === 'string').map(file => `\n[${file.path as string}]\n${(file.content as string).slice(0, 40_000)}`).join('');
+        context += `\n\nExisting project files:${serialized}\n\nExtend this project. Do not rewrite what already works.`;
+      }
+      if (attachedFiles.length) {
+        const decoded = attachedFiles.map(file => {
+          const content = Buffer.from(file.contentBase64, 'base64').toString('utf8');
+          if (Buffer.byteLength(content, 'utf8') > file.size + 4) throw new Error(`Attachment size mismatch: ${file.path}`);
+          return `\n[${file.path}]\n${content}`;
+        }).join('');
+        context += `\n\nUser's existing codebase context:${decoded}\n\nGenerate code that integrates cleanly with this.`;
+      }
+    } catch (error) {
+      return res.status(400).json({ error: safeError(error) });
     }
 
-    res.setHeader('Content-Type',  'text/event-stream');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('Connection',    'keep-alive');
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache, no-transform');
+    res.setHeader('Connection', 'keep-alive');
     res.setHeader('X-Accel-Buffering', 'no');
     res.flushHeaders();
 
-    const send = (chunk: object) => {
-      if (!res.writableEnded) res.write(`data: ${JSON.stringify(chunk)}\n\n`);
+    const requestAbort = new AbortController();
+    let disconnected = false;
+    const disconnect = (): void => { disconnected = true; requestAbort.abort(); };
+    req.once('aborted', disconnect);
+    res.once('close', () => { if (!res.writableEnded) disconnect(); });
+    const send = (chunk: object): void => {
+      if (disconnected || res.destroyed || res.writableEnded) return;
+      try { res.write(`data: ${JSON.stringify(chunk)}\n\n`); } catch { requestAbort.abort(); }
     };
 
-    // ── streaming fetch helper ───────────────────────────────────
-    async function streamStage(
-      task: string,
-      messages: { role: string; content: string }[],
-      onChunk: (text: string) => void,
-    ): Promise<string> {
-      const providers = preferredProvider
-        ? [PROVIDERS.find(p => p.id === preferredProvider)!, ...getSortedProviders(task).filter(p => p.id !== preferredProvider)]
-        : getSortedProviders(task);
+    let totalCharacters = 0;
+    let currentProvider = '';
 
-      for (const prov of providers) {
-        if (!prov) continue;
-        const apiKey = process.env[prov.envKey] || (prov.id === 'google' ? (process.env.GEMINI_API_KEY || process.env.API_KEY) : undefined);
-        if (!apiKey) continue;
-        if (isRateLimited(prov.id)) continue;
-
-        if (prov.id === 'google') {
-          const selectedModel = (model && prov.models.some(m => m.id === model))
-            ? model
-            : 'gemini-2.5-flash';
-
-          send({ type: 'provider', provider: 'Google Gemini', model: selectedModel });
-
-          try {
-            const ai = new GoogleGenAI({
-              apiKey,
-              httpOptions: { headers: { 'User-Agent': 'aistudio-build' } }
-            });
-
-            const systemInstruction = messages.find(m => m.role === 'system')?.content;
-            const userMessages = messages.filter(m => m.role !== 'system');
-
-            const streamResult = await ai.models.generateContentStream({
-              model: selectedModel,
-              contents: userMessages.map(m => ({
-                role: m.role === 'assistant' ? 'model' : 'user',
-                parts: [{ text: m.content }]
-              })),
-              config: {
-                systemInstruction: systemInstruction || undefined,
-                temperature,
-                maxOutputTokens: maxTokens,
-              }
-            });
-
-            let full = '';
-            for await (const chunk of streamResult as any) {
-              const text = chunk.text || '';
-              if (text) {
-                full += text;
-                onChunk(text);
-              }
-            }
-            return full;
-          } catch (err: any) {
-            console.error('Gemini fullKONK stream error:', err);
-            send({ type: 'failover', from: 'Google Gemini', error: err?.message });
-            continue;
-          }
-        }
-
-        const selectedModel = model && prov.models.some(m => m.id === model)
-          ? model
-          : prov.models[0].id;
-
-        send({ type: 'provider', provider: prov.name, model: selectedModel });
-
-        try {
-          const response = await fetch(`${prov.baseUrl}/chat/completions`, {
-            method:  'POST',
-            headers: {
-              'Authorization': `Bearer ${apiKey}`,
-              'Content-Type':  'application/json',
-              'HTTP-Referer':  'https://konkred.xyz',
-              'X-Title':       'fullKONK_>',
-            },
-            body: JSON.stringify({
-              model: selectedModel,
-              messages,
-              temperature,
-              max_tokens: maxTokens,
-              stream: true,
-            }),
-            signal: req.socket.destroyed ? AbortSignal.abort() : undefined,
-          });
-
-          if (response.status === 429) {
-            markRateLimited(prov.id);
-            send({ type: 'failover', from: prov.name });
-            continue;
-          }
-
-          if (!response.ok) {
-            const err = await response.text();
-            throw new Error(`${response.status}: ${err}`);
-          }
-
-          const reader = response.body!.getReader();
-          const decoder = new TextDecoder();
-          let full = '';
-
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            const lines = decoder.decode(value).split('\n');
-            for (const line of lines) {
-              if (!line.startsWith('data: ')) continue;
-              const raw = line.slice(6).trim();
-              if (raw === '[DONE]') continue;
-              try {
-                const parsed = JSON.parse(raw);
-                const text = parsed.choices?.[0]?.delta?.content ?? '';
-                if (text) { full += text; onChunk(text); }
-              } catch {}
-            }
-          }
-
-          return full;
-
-        } catch (err: any) {
-          if (err?.message?.includes('429')) markRateLimited(prov.id);
-          send({ type: 'failover', from: prov.name, error: err?.message });
-          continue;
-        }
-      }
-
-      throw new Error('All providers exhausted.');
+    async function streamStage(task: TaskType, messages: PromptMessage[], onChunk: (text: string) => void): Promise<string> {
+      const result = await orchestrate({
+        task,
+        messages,
+        temperature,
+        maxTokens,
+        preferProviders: preferredProvider ? [preferredProvider] : undefined,
+        preferModel: requestedModel,
+        requireThinking: ['architect', 'backend', 'verify', 'review'].includes(task),
+        minContextWindow: task === 'architect' ? 32_000 : undefined,
+      }, {
+        onChunk: text => {
+          totalCharacters += text.length;
+          onChunk(text);
+        },
+        onProviderSelect: (providerName, modelName) => {
+          currentProvider = providerName;
+          send({ type: 'provider', provider: providerName, model: modelName });
+        },
+        onFailover: (from, to, reason) => send({ type: 'failover', from, to, error: reason }),
+        onMetrics: (tokensPerSecond, _attemptTokens, providerName) => send({
+          type: 'metrics',
+          data: { tokensPerSecond, totalTokens: Math.ceil(totalCharacters / 4), provider: providerName },
+        }),
+        onReset: characters => {
+          totalCharacters = Math.max(0, totalCharacters - characters);
+          send({ type: 'reset', characters });
+        },
+      }, requestAbort.signal);
+      return result.content;
     }
 
     try {
-      // ── REVIEW mode ─────────────────────────────────────────────
       if (mode === 'review') {
         send({ type: 'stage', stage: 'review' });
-        let out = '';
-        await streamStage('verify',
-          [
-            { role: 'system', content: systemPrompt || SYSTEM_PROMPTS.verify },
-            { role: 'user',   content: prompt },
-          ],
-          chunk => { out += chunk; send({ type: 'delta', content: chunk }); },
-        );
-        send({ type: 'done' });
-        return;
-      }
-
-      // ── STAGE 1: ARCHITECT ───────────────────────────────────────
-      send({ type: 'stage', stage: 'architect' });
-      let architecture = '';
-      await streamStage('architect',
-        [
-          { role: 'system', content: systemPrompt || SYSTEM_PROMPTS.architect },
-          { role: 'user',   content: `Design the complete architecture for: ${prompt}` },
-        ],
-        chunk => { architecture += chunk; send({ type: 'delta', content: chunk }); },
-      );
-
-      if (res.writableEnded) return;
-
-      // ── STAGE 2: BUILD ───────────────────────────────────────────
-      if (mode === 'frontend' || mode === 'fullstack') {
-        send({ type: 'stage', stage: 'frontend' });
+        await streamStage('review', [{ role: 'system', content: customSystemPrompt || SYSTEM_PROMPTS.verify }, { role: 'user', content: prompt + context }], output => send({ type: 'delta', content: output }));
+      } else {
+        send({ type: 'stage', stage: 'architect' });
+        const architecture = await streamStage('architect', [{ role: 'system', content: customSystemPrompt || SYSTEM_PROMPTS.architect }, { role: 'user', content: `Design the complete architecture for: ${prompt}${context}` }], output => send({ type: 'delta', content: output }));
         let frontend = '';
-        await streamStage('frontend',
-          [
-            { role: 'system', content: SYSTEM_PROMPTS.frontend },
-            { role: 'user',   content: `Architecture:\n${architecture}\n\nImplement the complete frontend.` },
-          ],
-          chunk => { frontend += chunk; send({ type: 'delta', content: chunk }); },
-        );
-
-        if (mode === 'fullstack' && !res.writableEnded) {
-          send({ type: 'stage', stage: 'backend' });
-          let backend = '';
-          await streamStage('backend',
-            [
-              { role: 'system', content: SYSTEM_PROMPTS.backend },
-              { role: 'user',   content: `Architecture:\n${architecture}\n\nFrontend done. Implement the complete backend.` },
-            ],
-            chunk => { backend += chunk; send({ type: 'delta', content: chunk }); },
-          );
-
-          if (!res.writableEnded) {
-            send({ type: 'stage', stage: 'verify' });
-            let verified = '';
-            await streamStage('verify',
-              [
-                { role: 'system', content: SYSTEM_PROMPTS.verify },
-                { role: 'user',   content: `Architecture:\n${architecture}\n\nFrontend:\n${frontend}\n\nBackend:\n${backend}\n\nVerify and fix integration.` },
-              ],
-              chunk => { verified += chunk; send({ type: 'delta', content: chunk }); },
-            );
-          }
+        let backend = '';
+        if (mode === 'frontend' || mode === 'fullstack') {
+          send({ type: 'stage', stage: 'frontend' });
+          frontend = await streamStage('frontend', [{ role: 'system', content: SYSTEM_PROMPTS.frontend }, { role: 'user', content: `Architecture:\n${architecture}${context}\n\nImplement the complete frontend.` }], output => send({ type: 'delta', content: output }));
         }
-      } else if (mode === 'backend') {
-        send({ type: 'stage', stage: 'backend' });
-        await streamStage('backend',
-          [
-            { role: 'system', content: SYSTEM_PROMPTS.backend },
-            { role: 'user',   content: `Architecture:\n${architecture}\n\nImplement the complete backend.` },
-          ],
-          chunk => send({ type: 'delta', content: chunk }),
-        );
+        if (mode === 'backend' || mode === 'fullstack') {
+          send({ type: 'stage', stage: 'backend' });
+          backend = await streamStage('backend', [{ role: 'system', content: SYSTEM_PROMPTS.backend }, { role: 'user', content: `Architecture:\n${architecture}${context}\n\nImplement the complete backend.` }], output => send({ type: 'delta', content: output }));
+        }
+        let integrated = `${frontend}\n${backend}`;
+        if (mode === 'fullstack') {
+          send({ type: 'stage', stage: 'verify' });
+          integrated = await streamStage('verify', [{ role: 'system', content: SYSTEM_PROMPTS.verify }, { role: 'user', content: `Architecture:\n${architecture}\n\nFrontend:\n${frontend}\n\nBackend:\n${backend}\n\nVerify and output the complete final integrated file set.` }], output => send({ type: 'delta', content: output }));
+          send({ type: 'stage', stage: 'test' });
+          await streamStage('test', [{ role: 'system', content: SYSTEM_PROMPTS.test }, { role: 'user', content: `Architecture:\n${architecture}\n\nIntegrated files:\n${integrated}\n\nWrite the complete test files.` }], output => send({ type: 'delta', content: output }));
+        }
       }
-
-      send({ type: 'done' });
-
-    } catch (err: any) {
-      send({ type: 'error', error: err?.message ?? 'Pipeline failed' });
+      if (!requestAbort.signal.aborted) {
+        send({ type: 'metrics', data: { tokensPerSecond: 0, totalTokens: Math.ceil(totalCharacters / 4), provider: currentProvider } });
+        send({ type: 'done' });
+      }
+    } catch (error) {
+      if (!requestAbort.signal.aborted) send({ type: 'error', error: safeError(error) });
     } finally {
-      if (!res.writableEnded) res.end();
+      if (!res.writableEnded && !res.destroyed) res.end();
     }
   });
 
-  // GET /api/fullkonk/sessions/:userId
   app.get('/api/fullkonk/sessions/:userId', async (req, res) => {
     try {
-      const { userId } = req.params;
+      const identity = await authenticatedIdentity(req);
+      if (!identity) return res.status(401).json({ error: 'Authentication required.' });
+      if (identity.uid !== req.params.userId) return res.status(403).json({ error: 'User mismatch.' });
       const count = Math.min(Number(req.query.count) || 20, 50);
-      
-      const snap = await adminDb
-        .collection('fk_sessions')
-        .where('userId', '==', userId)
-        .limit(count)
-        .get();
-
-      const sessions = snap.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })).sort((a: any, b: any) => {
-        const timeA = a.updatedAt?.toMillis ? a.updatedAt.toMillis() : new Date(a.updatedAt || 0).getTime();
-        const timeB = b.updatedAt?.toMillis ? b.updatedAt.toMillis() : new Date(b.updatedAt || 0).getTime();
-        return timeB - timeA;
-      });
-
-      res.json({ sessions, userId });
-    } catch (err: any) {
-      res.status(500).json({ error: err.message });
-    }
+      const snapshot = await adminDb.collection('fk_sessions').where('userId', '==', identity.uid).limit(count).get();
+      const sessions = snapshot.docs.map(item => ({ id: item.id, data: item.data() })).sort((a, b) => {
+        const aUpdated = a.data.updatedAt as { toMillis?: () => number } | undefined;
+        const bUpdated = b.data.updatedAt as { toMillis?: () => number } | undefined;
+        return (bUpdated?.toMillis?.() || 0) - (aUpdated?.toMillis?.() || 0);
+      }).map(item => ({ id: item.id, ...item.data }));
+      res.json({ sessions, userId: identity.uid });
+    } catch (error) { res.status(500).json({ error: safeError(error) }); }
   });
 
-  // POST /api/fullkonk/usage
   app.post('/api/fullkonk/usage', async (req, res) => {
     try {
-      const { userId, provider, model, mode, stage, tokens, durationMs, success } = req.body;
-      if (!userId || !provider) return res.status(400).json({ error: 'userId and provider required' });
-      await logUsage({ userId, provider, model, mode, stage, tokens: tokens ?? 0, durationMs: durationMs ?? 0, success: success ?? true });
+      const identity = await authenticatedIdentity(req);
+      if (!identity) return res.status(401).json({ error: 'Authentication required.' });
+      if (identity.uid !== req.body?.userId) return res.status(403).json({ error: 'User mismatch.' });
+      const { provider, model, mode, stage, tokens, durationMs, success } = req.body;
+      if (typeof provider !== 'string') return res.status(400).json({ error: 'provider required' });
+      await adminDb.collection('fk_usage').add({
+        userId: identity.uid,
+        provider,
+        model: typeof model === 'string' ? model : '',
+        mode: typeof mode === 'string' ? mode : '',
+        stage: typeof stage === 'string' ? stage : '',
+        tokens: typeof tokens === 'number' ? tokens : 0,
+        durationMs: typeof durationMs === 'number' ? durationMs : 0,
+        success: typeof success === 'boolean' ? success : true,
+        createdAt: new Date(),
+      });
       res.json({ ok: true });
-    } catch (err: any) {
-      res.status(500).json({ error: err.message });
-    }
+    } catch (error) { res.status(500).json({ error: safeError(error) }); }
   });
 
-  // GET /api/fullkonk/analytics/:userId
   app.get('/api/fullkonk/analytics/:userId', async (req, res) => {
     try {
-      const { userId } = req.params;
-      const days = Math.min(Number(req.query.days) || 30, 90);
-      const [summary, recent] = await Promise.all([
-        getUserUsageSummary(userId, days),
-        getRecentEvents(userId, 10),
-      ]);
-      res.json({ summary, recent });
-    } catch (err: any) {
-      res.status(500).json({ error: err.message });
-    }
+      const identity = await authenticatedIdentity(req);
+      if (!identity) return res.status(401).json({ error: 'Authentication required.' });
+      if (identity.uid !== req.params.userId) return res.status(403).json({ error: 'User mismatch.' });
+      const days = Math.min(Math.max(Number(req.query.days) || 30, 1), 90);
+      const since = new Date(Date.now() - days * 86_400_000);
+      const snapshot = await adminDb.collection('fk_usage').where('userId', '==', identity.uid).limit(1000).get();
+      const events = snapshot.docs.map(item => {
+        const data = item.data();
+        const created = data.createdAt && typeof data.createdAt.toDate === 'function' ? data.createdAt.toDate() as Date : new Date(0);
+        return {
+          id: item.id,
+          userId: identity.uid,
+          provider: typeof data.provider === 'string' ? data.provider : 'unknown',
+          model: typeof data.model === 'string' ? data.model : '',
+          mode: typeof data.mode === 'string' ? data.mode : 'unknown',
+          stage: typeof data.stage === 'string' ? data.stage : '',
+          tokens: typeof data.tokens === 'number' ? data.tokens : 0,
+          durationMs: typeof data.durationMs === 'number' ? data.durationMs : 0,
+          success: data.success !== false,
+          createdAt: created.getTime(),
+        };
+      }).filter(event => event.createdAt >= since.getTime()).sort((a, b) => b.createdAt - a.createdAt);
+      const summary = {
+        totalGenerations: events.length,
+        totalTokens: 0,
+        totalDurationMs: 0,
+        byProvider: {} as Record<string, { count: number; tokens: number }>,
+        byMode: {} as Record<string, number>,
+        failoverCount: 0,
+        avgDurationMs: 0,
+      };
+      events.forEach(event => {
+        summary.totalTokens += event.tokens;
+        summary.totalDurationMs += event.durationMs;
+        summary.byProvider[event.provider] ||= { count: 0, tokens: 0 };
+        summary.byProvider[event.provider].count += 1;
+        summary.byProvider[event.provider].tokens += event.tokens;
+        summary.byMode[event.mode] = (summary.byMode[event.mode] || 0) + 1;
+      });
+      summary.avgDurationMs = events.length ? Math.round(summary.totalDurationMs / events.length) : 0;
+      res.json({ summary, recent: events.slice(0, 10) });
+    } catch (error) { res.status(500).json({ error: safeError(error) }); }
   });
 
-  // POST /api/fullkonk/github/export
   app.post('/api/fullkonk/github/export', async (req, res) => {
     try {
-      const { files, token, owner, repo, branch = 'fullkonk-output', message = 'Generated by fullKONK_>' } = req.body;
-      if (!files?.length) return res.status(400).json({ error: 'files required' });
-      if (!token || !owner || !repo) return res.status(400).json({ error: 'token, owner, repo required' });
-      const result = await exportToGitHub(files, { token, owner, repo, branch, message });
-      res.json(result);
-    } catch (err: any) {
-      res.status(500).json({ error: err.message });
-    }
+      const { files, token, owner, repo, branch = 'fullkonk-output', message = 'Generated by fullKONK_>' } = req.body || {};
+      if (!Array.isArray(files) || files.length === 0) return res.status(400).json({ error: 'files required' });
+      if (typeof token !== 'string' || !/^(?:gh[pousr]_[A-Za-z0-9_]{20,255}|github_pat_[A-Za-z0-9_]{20,255})$/.test(token)) return res.status(400).json({ error: 'A valid GitHub token is required.' });
+      if (typeof owner !== 'string' || typeof repo !== 'string' || !/^[A-Za-z0-9_.-]+$/.test(owner) || !/^[A-Za-z0-9_.-]+$/.test(repo)) return res.status(400).json({ error: 'Valid owner and repository names are required.' });
+      if (typeof branch !== 'string' || !/^[A-Za-z0-9._/-]+$/.test(branch) || branch.includes('..')) return res.status(400).json({ error: 'Invalid branch name.' });
+      const result = await exportToGitHub(files, { token, owner, repo, branch, message: typeof message === 'string' ? message.slice(0, 200) : 'Generated by fullKONK_>' });
+      res.status(result.success ? 200 : 502).json(result);
+    } catch (error) { res.status(500).json({ error: safeError(error) }); }
   });
 
   // Serve REDAEYE sales checkout page
@@ -662,7 +660,7 @@ async function startServer() {
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
-      server: { middlewareMode: true },
+      server: { middlewareMode: true, allowedHosts: true },
       appType: "spa",
     });
     app.use(vite.middlewares);

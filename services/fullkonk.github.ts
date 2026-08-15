@@ -1,179 +1,170 @@
-// services/fullkonk.github.ts
-
 import { GeneratedFile } from '../types';
 
 export interface GitHubConfig {
-  token:  string;
-  owner:  string;
-  repo:   string;
+  token: string;
+  owner: string;
+  repo: string;
   branch: string;
   message: string;
 }
 
 export interface GitHubExportResult {
-  success:  boolean;
-  prUrl?:   string;
+  success: boolean;
+  prUrl?: string;
   commitSha?: string;
   filesUploaded: number;
-  errors:   string[];
+  errors: string[];
 }
 
-// Base64 encode for GitHub API (works in both Node.js and Browser)
-function toBase64(str: string): string {
-  if (typeof Buffer !== 'undefined') {
-    return Buffer.from(str, 'utf-8').toString('base64');
+function toBase64(value: string): string {
+  if (typeof Buffer !== 'undefined') return Buffer.from(value, 'utf8').toString('base64');
+  const bytes = new TextEncoder().encode(value);
+  let binary = '';
+  bytes.forEach(byte => { binary += String.fromCharCode(byte); });
+  return btoa(binary);
+}
+
+function encodePath(filePath: string): string {
+  return filePath.split('/').filter(Boolean).map(encodeURIComponent).join('/');
+}
+
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : 'Unknown GitHub error';
+}
+
+async function githubFetch(url: string, init: RequestInit, retries = 2): Promise<Response> {
+  let response: Response | null = null;
+  for (let attempt = 0; attempt <= retries; attempt += 1) {
+    response = await fetch(url, init);
+    if (response.status !== 429 && response.status < 500) return response;
+    if (attempt < retries) {
+      const retryAfter = Number(response.headers.get('retry-after'));
+      const delay = Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter * 1000 : 300 * (2 ** attempt);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
   }
-  return btoa(unescape(encodeURIComponent(str)));
+  if (!response) throw new Error('GitHub did not return a response.');
+  return response;
 }
 
-// Get or create branch
-async function ensureBranch(config: GitHubConfig): Promise<string> {
-  const base = `https://api.github.com/repos/${config.owner}/${config.repo}`;
-  const headers = {
-    'Authorization': `Bearer ${config.token}`,
-    'Content-Type':  'application/json',
-    'Accept':        'application/vnd.github+json',
+function headers(config: GitHubConfig): Record<string, string> {
+  return {
+    Authorization: `Bearer ${config.token}`,
+    'Content-Type': 'application/json',
+    Accept: 'application/vnd.github+json',
+    'User-Agent': 'KONKRED-fullKONK',
   };
+}
 
-  // Get repo default branch
-  const repoRes = await fetch(base, { headers });
-  if (!repoRes.ok) throw new Error('Cannot access repository. Check token, owner, and repo name.');
-  const repoData = await repoRes.json();
+async function responseError(response: Response, fallback: string): Promise<string> {
+  try {
+    const payload = await response.json() as { message?: unknown };
+    return typeof payload.message === 'string' ? payload.message : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+async function ensureBranch(config: GitHubConfig): Promise<string> {
+  const base = `https://api.github.com/repos/${encodeURIComponent(config.owner)}/${encodeURIComponent(config.repo)}`;
+  const repoResponse = await githubFetch(base, { headers: headers(config) });
+  if (repoResponse.status === 404) throw new Error('Repository not found or the token cannot access it.');
+  if (!repoResponse.ok) throw new Error(await responseError(repoResponse, 'Cannot access repository.'));
+  const repoData = await repoResponse.json() as { default_branch?: string };
   const defaultBranch = repoData.default_branch || 'main';
 
-  // Get default branch SHA
-  const refRes = await fetch(`${base}/git/refs/heads/${defaultBranch}`, { headers });
-  if (!refRes.ok) throw new Error(`Cannot access default branch '${defaultBranch}'.`);
-  const refData = await refRes.json();
-  const sha = refData.object.sha;
+  const refResponse = await githubFetch(`${base}/git/refs/heads/${encodeURIComponent(defaultBranch)}`, { headers: headers(config) });
+  if (!refResponse.ok) throw new Error(await responseError(refResponse, `Cannot access default branch '${defaultBranch}'.`));
+  const refData = await refResponse.json() as { object?: { sha?: string } };
+  const sha = refData.object?.sha;
+  if (!sha) throw new Error('GitHub returned an invalid default branch reference.');
 
-  // Check if branch exists
-  const branchRes = await fetch(`${base}/git/refs/heads/${config.branch}`, { headers });
-  if (branchRes.status === 404) {
-    // Create branch
-    await fetch(`${base}/git/refs`, {
-      method:  'POST',
-      headers,
+  const branchResponse = await githubFetch(`${base}/git/refs/heads/${encodeURIComponent(config.branch)}`, { headers: headers(config) });
+  if (branchResponse.status === 404) {
+    const createResponse = await githubFetch(`${base}/git/refs`, {
+      method: 'POST',
+      headers: headers(config),
       body: JSON.stringify({ ref: `refs/heads/${config.branch}`, sha }),
     });
+    if (!createResponse.ok) throw new Error(await responseError(createResponse, `Could not create branch '${config.branch}'.`));
+  } else if (!branchResponse.ok) {
+    throw new Error(await responseError(branchResponse, `Could not inspect branch '${config.branch}'.`));
   }
-
   return defaultBranch;
 }
 
-// Get existing file SHA (needed for updates)
-async function getFileSha(
-  config: GitHubConfig,
-  path: string,
-): Promise<string | undefined> {
-  const res = await fetch(
-    `https://api.github.com/repos/${config.owner}/${config.repo}/contents/${path}?ref=${config.branch}`,
-    {
-      headers: {
-        'Authorization': `Bearer ${config.token}`,
-        'Accept':        'application/vnd.github+json',
-      },
-    },
-  );
-  if (!res.ok) return undefined;
-  const data = await res.json();
+async function getFileSha(config: GitHubConfig, filePath: string): Promise<string | undefined> {
+  const url = `https://api.github.com/repos/${encodeURIComponent(config.owner)}/${encodeURIComponent(config.repo)}/contents/${encodePath(filePath)}?ref=${encodeURIComponent(config.branch)}`;
+  const response = await githubFetch(url, { headers: headers(config) });
+  if (response.status === 404) return undefined;
+  if (!response.ok) throw new Error(await responseError(response, `Could not inspect ${filePath}.`));
+  const data = await response.json() as { sha?: string };
   return data.sha;
 }
 
-// Upload a single file
-async function uploadFile(
-  config: GitHubConfig,
-  file: GeneratedFile,
-): Promise<void> {
+async function uploadFile(config: GitHubConfig, file: GeneratedFile): Promise<string | undefined> {
   const sha = await getFileSha(config, file.path);
-
   const body: Record<string, string> = {
     message: config.message,
     content: toBase64(file.content),
-    branch:  config.branch,
+    branch: config.branch,
   };
   if (sha) body.sha = sha;
-
-  const res = await fetch(
-    `https://api.github.com/repos/${config.owner}/${config.repo}/contents/${file.path}`,
-    {
-      method:  'PUT',
-      headers: {
-        'Authorization': `Bearer ${config.token}`,
-        'Content-Type':  'application/json',
-        'Accept':        'application/vnd.github+json',
-      },
-      body: JSON.stringify(body),
-    },
-  );
-
-  if (!res.ok) {
-    const err = await res.json();
-    throw new Error(err.message ?? `Failed to upload ${file.path}`);
-  }
+  const url = `https://api.github.com/repos/${encodeURIComponent(config.owner)}/${encodeURIComponent(config.repo)}/contents/${encodePath(file.path)}`;
+  const response = await githubFetch(url, {
+    method: 'PUT',
+    headers: headers(config),
+    body: JSON.stringify(body),
+  });
+  if (!response.ok) throw new Error(await responseError(response, `Failed to upload ${file.path}.`));
+  const data = await response.json() as { commit?: { sha?: string } };
+  return data.commit?.sha;
 }
 
-// Create PR
-async function createPR(config: GitHubConfig, baseBranch = 'main'): Promise<string> {
-  const res = await fetch(
-    `https://api.github.com/repos/${config.owner}/${config.repo}/pulls`,
-    {
-      method:  'POST',
-      headers: {
-        'Authorization': `Bearer ${config.token}`,
-        'Content-Type':  'application/json',
-        'Accept':        'application/vnd.github+json',
-      },
-      body: JSON.stringify({
-        title: `[fullKONK_>] ${config.message}`,
-        head:  config.branch,
-        base:  baseBranch,
-        body:  `Generated by fullKONK_> on konkred.xyz\n\n${config.message}`,
-      }),
-    },
-  );
-  if (!res.ok) return '';
-  const data = await res.json();
-  return data.html_url ?? '';
+async function createPR(config: GitHubConfig, baseBranch: string): Promise<string> {
+  if (config.branch === baseBranch || config.branch === 'main' && baseBranch === 'main') return '';
+  const url = `https://api.github.com/repos/${encodeURIComponent(config.owner)}/${encodeURIComponent(config.repo)}/pulls`;
+  const response = await githubFetch(url, {
+    method: 'POST',
+    headers: headers(config),
+    body: JSON.stringify({
+      title: `[fullKONK_>] ${config.message}`,
+      head: config.branch,
+      base: baseBranch,
+      body: `Generated by fullKONK_> on konkred.xyz\n\n${config.message}`,
+    }),
+  });
+  if (!response.ok) throw new Error(await responseError(response, 'Files uploaded, but pull request creation failed.'));
+  const data = await response.json() as { html_url?: string };
+  return data.html_url || '';
 }
 
-// Main export function
-export async function exportToGitHub(
-  files: GeneratedFile[],
-  config: GitHubConfig,
-): Promise<GitHubExportResult> {
+export async function exportToGitHub(files: GeneratedFile[], config: GitHubConfig): Promise<GitHubExportResult> {
+  if (files.length === 0) return { success: false, filesUploaded: 0, errors: ['No files to export.'] };
   const errors: string[] = [];
   let filesUploaded = 0;
-  let prUrl = '';
-  let defaultBranch = 'main';
-
+  let commitSha: string | undefined;
+  let defaultBranch: string;
   try {
     defaultBranch = await ensureBranch(config);
-  } catch (err: any) {
-    return { success: false, errors: [err.message], filesUploaded: 0 };
+  } catch (error) {
+    return { success: false, filesUploaded: 0, errors: [errorMessage(error)] };
   }
-
   for (const file of files) {
     try {
-      await uploadFile(config, file);
-      filesUploaded++;
-    } catch (err: any) {
-      errors.push(`${file.path}: ${err.message}`);
+      commitSha = await uploadFile(config, file) || commitSha;
+      filesUploaded += 1;
+    } catch (error) {
+      errors.push(`${file.path}: ${errorMessage(error)}`);
     }
   }
-
+  let prUrl: string | undefined;
   if (filesUploaded > 0 && config.branch !== defaultBranch) {
     try {
-      prUrl = await createPR(config, defaultBranch);
-    } catch {
-      // PR creation failure is non-fatal
+      prUrl = await createPR(config, defaultBranch) || undefined;
+    } catch (error) {
+      errors.push(errorMessage(error));
     }
   }
-
-  return {
-    success:       filesUploaded > 0,
-    prUrl:         prUrl || undefined,
-    filesUploaded,
-    errors,
-  };
+  return { success: filesUploaded > 0, filesUploaded, commitSha, prUrl, errors };
 }

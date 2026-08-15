@@ -16,7 +16,7 @@ export type AIProviderID =
 
 // ─── fullKONK_> TYPES ────────────────────────────────────────────
 
-export type ProviderID = 'google' | 'groq' | 'deepseek' | 'cerebras' | 'sambanova' | 'openrouter';
+export type ProviderID = 'google' | 'groq' | 'deepseek' | 'cerebras' | 'sambanova' | 'openrouter' | 'github' | 'nvidia' | 'huggingface';
 
 export type BuildMode = 'fullstack' | 'frontend' | 'backend' | 'review';
 
@@ -26,6 +26,7 @@ export type PipelineStage =
   | 'frontend'
   | 'backend'
   | 'verify'
+  | 'test'
   | 'review'
   | 'done'
   | 'error';
@@ -41,7 +42,27 @@ export interface FKMessage {
 export interface GeneratedFile {
   path: string;
   content: string;
+  /** Normalized lowercase language identifier. */
   language: string;
+  isTest?: boolean;
+}
+
+export interface AttachedCodeFile {
+  path: string;
+  contentBase64: string;
+  size: number;
+}
+
+export interface FKProject {
+  id: string;
+  userId: string;
+  name: string;
+  description: string;
+  stack: string[];
+  files: GeneratedFile[];
+  sessions: string[];
+  createdAt: number;
+  updatedAt: number;
 }
 
 export interface GenerateRequest {
@@ -52,18 +73,20 @@ export interface GenerateRequest {
   temperature?: number;
   maxTokens?: number;
   systemPrompt?: string;
+  projectId?: string;
+  attachedFiles?: AttachedCodeFile[];
 }
 
-export interface StreamChunk {
-  type: 'stage' | 'delta' | 'provider' | 'failover' | 'file' | 'done' | 'error';
-  stage?: PipelineStage;
-  content?: string;
-  provider?: string;
-  model?: string;
-  from?: string;
-  error?: string;
-  file?: GeneratedFile;
-}
+export type StreamChunk =
+  | { type: 'stage'; stage: PipelineStage; content?: string }
+  | { type: 'delta'; content: string }
+  | { type: 'provider'; provider: string; model: string }
+  | { type: 'failover'; from: string; to?: string; error?: string }
+  | { type: 'metrics'; data: { tokensPerSecond: number; totalTokens: number; provider: string } }
+  | { type: 'reset'; characters: number }
+  | { type: 'file'; file: GeneratedFile }
+  | { type: 'done' }
+  | { type: 'error'; error: string };
 
 export interface AIProviderConfig {
   primaryProvider: AIProviderID;

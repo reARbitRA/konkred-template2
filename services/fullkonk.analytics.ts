@@ -38,10 +38,14 @@ export interface UsageSummary {
 
 // Log a usage event
 export async function logUsage(data: Omit<UsageEvent, 'id' | 'createdAt'>): Promise<void> {
-  await addDoc(collection(db, 'fk_usage'), {
-    ...data,
-    createdAt: serverTimestamp(),
-  });
+  try {
+    await addDoc(collection(db, 'fk_usage'), {
+      ...data,
+      createdAt: serverTimestamp(),
+    });
+  } catch {
+    // Telemetry must never interrupt a generation.
+  }
 }
 
 // Get usage summary for a user over N days
@@ -70,7 +74,8 @@ export async function getUserUsageSummary(userId: string, days = 30): Promise<Us
     events = snap.docs
       .map(d => d.data() as Omit<UsageEvent, 'id'>)
       .filter(e => {
-        const ms = (e.createdAt as any)?.toMillis?.() ?? 0;
+        const createdAt = e.createdAt as unknown;
+        const ms = createdAt instanceof Timestamp ? createdAt.toMillis() : 0;
         return ms >= since;
       });
   }
