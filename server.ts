@@ -12,7 +12,7 @@ import { db as sqlDb } from "./src/db/index.ts";
 import { users as sqlUsers } from "./src/db/schema.ts";
 import { SYSTEM_PROMPTS } from './services/fullkonk';
 import { exportToGitHub } from './services/fullkonk.github';
-import { getOrchestratorHealth, MODEL_REGISTRY, orchestrate, TaskType } from './services/fullkonk.orchestrator';
+import { getOrchestratorHealth, hasProviderApiKey, MODEL_REGISTRY, orchestrate, TaskType } from './services/fullkonk.orchestrator';
 
 dotenv.config();
 
@@ -376,7 +376,7 @@ export async function createApp(): Promise<express.Express> {
   app.get('/api/fullkonk/providers', (_req, res) => {
     const grouped = new Map<string, { id: string; name: string; hasKey: boolean; models: { id: string; label: string }[] }>();
     MODEL_REGISTRY.forEach(profile => {
-      const provider = grouped.get(profile.providerId) || { id: profile.providerId, name: profile.providerName, hasKey: Boolean(process.env[profile.envKey]), models: [] };
+      const provider = grouped.get(profile.providerId) || { id: profile.providerId, name: profile.providerName, hasKey: hasProviderApiKey(profile), models: [] };
       provider.models.push({ id: profile.modelId, label: profile.modelLabel });
       grouped.set(profile.providerId, provider);
     });
