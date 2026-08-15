@@ -655,22 +655,5 @@ export async function createApp(): Promise<express.Express> {
     return res.sendFile(devFile);
   });
 
-  if (process.env.VERCEL) {
-    app.use((_req, res) => res.status(404).json({ error: 'API route not found.' }));
-  } else if (process.env.NODE_ENV !== "production") {
-    const { createServer: createViteServer } = await import('vite');
-    const vite = await createViteServer({
-      server: { middlewareMode: true, allowedHosts: true },
-      appType: "spa",
-    });
-    app.use(vite.middlewares);
-  } else {
-    const distPath = path.join(process.cwd(), 'dist');
-    app.use(express.static(distPath));
-    app.get('*all', (_req, res) => {
-      res.sendFile(path.join(distPath, 'index.html'));
-    });
-  }
-
   return app;
 }
