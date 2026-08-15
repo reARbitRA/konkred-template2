@@ -17,7 +17,7 @@ interface Props {
   onStop: () => void;
 }
 
-const PROVIDER_COLORS: Record<string, string> = { google: '#4285F4', groq: '#F55036', deepseek: '#4D6BFE', cerebras: '#00FF88', sambanova: '#FF6B00', openrouter: '#9B00FF' };
+const PROVIDER_COLORS: Record<string, string> = { google: '#4285F4', groq: '#F55036', deepseek: '#4D6BFE', cerebras: '#00FF88', sambanova: '#FF6B00', openrouter: '#9B00FF', github: '#FFFFFF', nvidia: '#76B900', huggingface: '#FFD21E' };
 const NORMAL_STAGES: PipelineStage[] = ['architect', 'frontend', 'backend', 'verify', 'test', 'done'];
 const LABELS: Partial<Record<PipelineStage, string>> = { architect: 'ARCHITECT', frontend: 'FRONTEND', backend: 'BACKEND', verify: 'VERIFY', test: 'TEST', review: 'REVIEW', done: 'COMPLETE', error: 'ERROR' };
 

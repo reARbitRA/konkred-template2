@@ -11,8 +11,9 @@ import { getFirestore as getAdminFirestore } from "firebase-admin/firestore";
 import firebaseConfig from "./firebase-applet-config.json";
 import { db as sqlDb } from "./src/db/index.ts";
 import { users as sqlUsers } from "./src/db/schema.ts";
-import { getSortedProviders, markRateLimited, isRateLimited, SYSTEM_PROMPTS, PROVIDERS } from './services/fullkonk';
+import { SYSTEM_PROMPTS } from './services/fullkonk';
 import { exportToGitHub } from './services/fullkonk.github';
+import { getOrchestratorHealth, MODEL_REGISTRY, orchestrate, TaskType } from './services/fullkonk.orchestrator';
 
 dotenv.config();
 
@@ -375,7 +376,17 @@ async function startServer() {
   }
 
   app.get('/api/fullkonk/providers', (_req, res) => {
-    res.json({ providers: PROVIDERS.map(provider => ({ id: provider.id, name: provider.name, models: provider.models, hasKey: Boolean(process.env[provider.envKey]) })) });
+    const grouped = new Map<string, { id: string; name: string; hasKey: boolean; models: { id: string; label: string }[] }>();
+    MODEL_REGISTRY.forEach(profile => {
+      const provider = grouped.get(profile.providerId) || { id: profile.providerId, name: profile.providerName, hasKey: Boolean(process.env[profile.envKey]), models: [] };
+      provider.models.push({ id: profile.modelId, label: profile.modelLabel });
+      grouped.set(profile.providerId, provider);
+    });
+    res.json({ providers: [...grouped.values()] });
+  });
+
+  app.get('/api/fullkonk/health', (_req, res) => {
+    res.json({ providers: getOrchestratorHealth() });
   });
 
   app.post('/api/fullkonk/optimize-prompt', async (req, res) => {
@@ -470,132 +481,43 @@ async function startServer() {
 
     let totalCharacters = 0;
     let currentProvider = '';
-    const rolling: { at: number; characters: number }[] = [];
-    const metricTimer = setInterval(() => {
-      const now = Date.now();
-      while (rolling.length && rolling[0].at < now - 500) rolling.shift();
-      const recentCharacters = rolling.reduce((sum, item) => sum + item.characters, 0);
-      send({ type: 'metrics', data: { tokensPerSecond: Math.round((recentCharacters / 4) * 2 * 10) / 10, totalTokens: Math.ceil(totalCharacters / 4), provider: currentProvider } });
-    }, 500);
 
-    async function withInactivityTimeout<T>(promise: Promise<T>, controller?: AbortController): Promise<T> {
-      let timer: NodeJS.Timeout | undefined;
-      const timeout = new Promise<never>((_, reject) => { timer = setTimeout(() => { controller?.abort(); reject(new Error('Provider timed out after 30 seconds.')); }, 30_000); });
-      try { return await Promise.race([promise, timeout]); }
-      finally { if (timer) clearTimeout(timer); }
-    }
-
-    async function streamStage(task: string, messages: PromptMessage[], onChunk: (text: string) => void): Promise<string> {
-      const preferred = preferredProvider ? PROVIDERS.find(provider => provider.id === preferredProvider) : undefined;
-      const candidates = [...(preferred ? [preferred] : []), ...getSortedProviders(task).filter(provider => provider.id !== preferred?.id)];
-      const available = candidates.filter(provider => {
-        const key = process.env[provider.envKey] || (provider.id === 'google' ? process.env.API_KEY : undefined);
-        return Boolean(key) && !isRateLimited(provider.id);
-      });
-      if (!available.length) throw new Error('No AI provider is available. Configure a provider key or wait for rate limits to reset.');
-      const failures: string[] = [];
-      for (let index = 0; index < available.length; index += 1) {
-        const provider = available[index];
-        const apiKey = process.env[provider.envKey] || (provider.id === 'google' ? process.env.API_KEY : undefined);
-        if (!apiKey) continue;
-        const selectedModel = requestedModel && provider.models.some(item => item.id === requestedModel) ? requestedModel : provider.models[0].id;
-        currentProvider = provider.name;
-        send({ type: 'provider', provider: provider.name, model: selectedModel });
-        let attemptOutput = '';
-        const rollingStart = rolling.length;
-        const emit = (text: string): void => {
-          attemptOutput += text;
+    async function streamStage(task: TaskType, messages: PromptMessage[], onChunk: (text: string) => void): Promise<string> {
+      const result = await orchestrate({
+        task,
+        messages,
+        temperature,
+        maxTokens,
+        preferProviders: preferredProvider ? [preferredProvider] : undefined,
+        preferModel: requestedModel,
+        requireThinking: ['architect', 'backend', 'verify', 'review'].includes(task),
+        minContextWindow: task === 'architect' ? 32_000 : undefined,
+      }, {
+        onChunk: text => {
           totalCharacters += text.length;
-          rolling.push({ at: Date.now(), characters: text.length });
           onChunk(text);
-        };
-        try {
-          if (provider.id === 'google') {
-            const controller = new AbortController();
-            const abort = () => controller.abort();
-            requestAbort.signal.addEventListener('abort', abort, { once: true });
-            try {
-              const ai = new GoogleGenAI({ apiKey, httpOptions: { headers: { 'User-Agent': 'aistudio-build' } } });
-              const stream = await withInactivityTimeout(ai.models.generateContentStream({
-                model: selectedModel,
-                contents: messages.filter(message => message.role !== 'system').map(message => ({ role: message.role === 'assistant' ? 'model' : 'user', parts: [{ text: message.content }] })),
-                config: { systemInstruction: messages.find(message => message.role === 'system')?.content, temperature, maxOutputTokens: maxTokens, abortSignal: controller.signal },
-              }), controller);
-              const iterator = stream[Symbol.asyncIterator]();
-              while (!requestAbort.signal.aborted) {
-                const result = await withInactivityTimeout(iterator.next(), controller);
-                if (result.done) break;
-                const text = result.value.text || '';
-                if (text) emit(text);
-              }
-            } finally {
-              requestAbort.signal.removeEventListener('abort', abort);
-            }
-          } else {
-            const controller = new AbortController();
-            const abort = () => controller.abort();
-            requestAbort.signal.addEventListener('abort', abort, { once: true });
-            try {
-              const response = await withInactivityTimeout(fetch(`${provider.baseUrl}/chat/completions`, {
-                method: 'POST',
-                headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json', 'HTTP-Referer': 'https://konkred.xyz', 'X-Title': 'fullKONK_>' },
-                body: JSON.stringify({ model: selectedModel, messages, temperature, max_tokens: maxTokens, stream: true }),
-                signal: controller.signal,
-              }), controller);
-              if (response.status === 429) {
-                const retryAfterSeconds = Number(response.headers.get('retry-after'));
-                markRateLimited(provider.id, Number.isFinite(retryAfterSeconds) ? retryAfterSeconds * 1000 : 60_000);
-                throw new Error('Rate limited');
-              }
-              if (!response.ok) throw new Error(`Provider returned HTTP ${response.status}.`);
-              if (!response.body) throw new Error('Provider returned an empty stream.');
-              const reader = response.body.getReader();
-              const decoder = new TextDecoder();
-              let pending = '';
-              while (!requestAbort.signal.aborted) {
-                const result = await withInactivityTimeout(reader.read(), controller);
-                pending += decoder.decode(result.value || new Uint8Array(), { stream: !result.done });
-                const lines = pending.split('\n');
-                pending = lines.pop() || '';
-                for (const line of lines) {
-                  if (!line.startsWith('data:')) continue;
-                  const raw = line.slice(5).trim();
-                  if (!raw || raw === '[DONE]') continue;
-                  try {
-                    const parsed = JSON.parse(raw) as { choices?: { delta?: { content?: string } }[] };
-                    const text = parsed.choices?.[0]?.delta?.content || '';
-                    if (text) emit(text);
-                  } catch { /* Ignore malformed provider event, retaining framing. */ }
-                }
-                if (result.done) break;
-              }
-            } finally {
-              requestAbort.signal.removeEventListener('abort', abort);
-            }
-          }
-          if (requestAbort.signal.aborted) throw new Error('Generation cancelled.');
-          return attemptOutput;
-        } catch (error) {
-          if (requestAbort.signal.aborted) throw error;
-          if (attemptOutput.length) {
-            totalCharacters = Math.max(0, totalCharacters - attemptOutput.length);
-            rolling.splice(rollingStart);
-            send({ type: 'reset', characters: attemptOutput.length });
-          }
-          const message = safeError(error);
-          if (/429|rate limit/i.test(message)) markRateLimited(provider.id);
-          failures.push(`${provider.name}: ${message}`);
-          const next = available[index + 1];
-          send({ type: 'failover', from: provider.name, to: next?.name, error: /timeout/i.test(message) ? 'Provider timeout' : 'Provider unavailable' });
-        }
-      }
-      throw new Error(`All providers failed: ${failures.join('; ')}`);
+        },
+        onProviderSelect: (providerName, modelName) => {
+          currentProvider = providerName;
+          send({ type: 'provider', provider: providerName, model: modelName });
+        },
+        onFailover: (from, to, reason) => send({ type: 'failover', from, to, error: reason }),
+        onMetrics: (tokensPerSecond, _attemptTokens, providerName) => send({
+          type: 'metrics',
+          data: { tokensPerSecond, totalTokens: Math.ceil(totalCharacters / 4), provider: providerName },
+        }),
+        onReset: characters => {
+          totalCharacters = Math.max(0, totalCharacters - characters);
+          send({ type: 'reset', characters });
+        },
+      }, requestAbort.signal);
+      return result.content;
     }
 
     try {
       if (mode === 'review') {
         send({ type: 'stage', stage: 'review' });
-        await streamStage('verify', [{ role: 'system', content: customSystemPrompt || SYSTEM_PROMPTS.verify }, { role: 'user', content: prompt + context }], output => send({ type: 'delta', content: output }));
+        await streamStage('review', [{ role: 'system', content: customSystemPrompt || SYSTEM_PROMPTS.verify }, { role: 'user', content: prompt + context }], output => send({ type: 'delta', content: output }));
       } else {
         send({ type: 'stage', stage: 'architect' });
         const architecture = await streamStage('architect', [{ role: 'system', content: customSystemPrompt || SYSTEM_PROMPTS.architect }, { role: 'user', content: `Design the complete architecture for: ${prompt}${context}` }], output => send({ type: 'delta', content: output }));
@@ -624,7 +546,6 @@ async function startServer() {
     } catch (error) {
       if (!requestAbort.signal.aborted) send({ type: 'error', error: safeError(error) });
     } finally {
-      clearInterval(metricTimer);
       if (!res.writableEnded && !res.destroyed) res.end();
     }
   });

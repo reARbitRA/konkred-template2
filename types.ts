@@ -16,7 +16,7 @@ export type AIProviderID =
 
 // ─── fullKONK_> TYPES ────────────────────────────────────────────
 
-export type ProviderID = 'google' | 'groq' | 'deepseek' | 'cerebras' | 'sambanova' | 'openrouter';
+export type ProviderID = 'google' | 'groq' | 'deepseek' | 'cerebras' | 'sambanova' | 'openrouter' | 'github' | 'nvidia' | 'huggingface';
 
 export type BuildMode = 'fullstack' | 'frontend' | 'backend' | 'review';
 
