@@ -1,7 +1,7 @@
-import type { Express } from 'express';
 import type { IncomingMessage, ServerResponse } from 'node:http';
+import { createApp } from '../server.ts';
 
-let appPromise: Promise<Express> | undefined;
+const appPromise = createApp();
 
 export default async function handler(request: IncomingMessage, response: ServerResponse): Promise<void> {
   try {
