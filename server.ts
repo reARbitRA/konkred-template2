@@ -3,7 +3,6 @@ import express from "express";
 import path from "path";
 import cors from "cors";
 import dotenv from "dotenv";
-import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
 import { initializeApp as initAdmin, getApps as getAdminApps } from "firebase-admin/app";
 import { getAuth as getAdminAuth } from "firebase-admin/auth";
@@ -26,9 +25,8 @@ const adminAuth = getAdminAuth();
 const adminDb = getAdminFirestore();
 
 
-async function startServer() {
+export async function createApp(): Promise<express.Express> {
   const app = express();
-  const PORT = 3000;
 
   app.use(cors());
   app.use(express.json({ limit: "1mb" }));
@@ -657,8 +655,10 @@ async function startServer() {
     return res.sendFile(devFile);
   });
 
-  // Vite middleware for development
-  if (process.env.NODE_ENV !== "production") {
+  if (process.env.VERCEL) {
+    app.use((_req, res) => res.status(404).json({ error: 'API route not found.' }));
+  } else if (process.env.NODE_ENV !== "production") {
+    const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
       server: { middlewareMode: true, allowedHosts: true },
       appType: "spa",
@@ -667,14 +667,22 @@ async function startServer() {
   } else {
     const distPath = path.join(process.cwd(), 'dist');
     app.use(express.static(distPath));
-    app.get('*all', (req, res) => {
+    app.get('*all', (_req, res) => {
       res.sendFile(path.join(distPath, 'index.html'));
     });
   }
 
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`KONKRED Executive Server running on http://localhost:${PORT}`);
-  });
+  return app;
 }
 
-startServer();
+if (!process.env.VERCEL) {
+  const port = Number(process.env.PORT) || 3000;
+  void createApp().then(app => {
+    app.listen(port, "0.0.0.0", () => {
+      console.log(`KONKRED Executive Server running on http://localhost:${port}`);
+    });
+  }).catch(error => {
+    console.error('Failed to start KONKRED server:', error);
+    process.exitCode = 1;
+  });
+}
