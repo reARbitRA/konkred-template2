@@ -5,7 +5,11 @@ let appPromise: Promise<Express> | undefined;
 
 export default async function handler(request: IncomingMessage, response: ServerResponse): Promise<void> {
   try {
-    appPromise ||= import('../lib/fullkonk-server.mjs').then(module => module.createApp());
+    appPromise ||= import('../lib/fullkonk-server.cjs').then(module => {
+      const createApp = module.createApp || module.default?.createApp;
+      if (typeof createApp !== 'function') throw new Error('Bundled server did not export createApp.');
+      return createApp();
+    });
     const app = await appPromise;
     app(request, response);
   } catch (error) {

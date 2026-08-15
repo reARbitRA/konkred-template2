@@ -5,7 +5,7 @@
   "functions": {
     "api/index.ts": {
       "maxDuration": 300,
-      "includeFiles": "lib/fullkonk-server.mjs"
+      "includeFiles": "lib/fullkonk-server.cjs"
     }
   },
   "rewrites": [
