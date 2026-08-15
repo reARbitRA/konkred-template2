@@ -5,7 +5,7 @@ let appPromise: Promise<Express> | undefined;
 
 export default async function handler(request: IncomingMessage, response: ServerResponse): Promise<void> {
   try {
-    appPromise ||= import('../server').then(module => module.createApp());
+    appPromise ||= import('../server.ts').then(module => module.createApp());
     const app = await appPromise;
     app(request, response);
   } catch (error) {
