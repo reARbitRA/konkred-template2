@@ -49,6 +49,30 @@ export const MODEL_REGISTRY: ModelProfile[] = [
   { providerId: 'huggingface', providerName: 'HuggingFace', baseUrl: 'https://api-inference.huggingface.co/v1', envKey: 'HUGGINGFACE_API_KEY', modelId: 'Qwen/Qwen3-235B-A22B', modelLabel: 'Qwen3 235B (HF)', contextWindow: 40_960, maxOutput: 8_192, thinkingScore: 9, capabilityScore: 8, speedScore: 4, supportsThinking: true, free: true, rpm: 10, tpm: 20_000, tpd: -1, specialty: ['reasoning', 'general'] },
 ];
 
+// Existing KONKRED deployments predate the canonical *_API_KEY names.
+// Keep those established Vercel variable names working without
+// duplicating or exposing secrets.
+const ENV_KEY_ALIASES: Record<string, string[]> = {
+  GEMINI_API_KEY: ['GEMINI'],
+  SAMBANOVA_API_KEY: ['SAMBANOVA'],
+  OPENROUTER_API_KEY: ['OPENROUTER'],
+  HUGGINGFACE_API_KEY: ['HUGGINGFACE'],
+  CEREBRAS_API_KEY: ['CEREBRAS'],
+  NVIDIA_API_KEY: ['NVIDIA'],
+  DEEPSEEK_API_KEY: ['DEEPSEEK'],
+  GITHUB_TOKEN: ['GITHUB_MODELS_TOKEN'],
+};
+
+export function resolveProviderApiKey(profile: Pick<ModelProfile, 'envKey'>): string | undefined {
+  return [profile.envKey, ...(ENV_KEY_ALIASES[profile.envKey] || [])]
+    .map(name => process.env[name]?.trim())
+    .find((value): value is string => Boolean(value));
+}
+
+export function hasProviderApiKey(profile: Pick<ModelProfile, 'envKey'>): boolean {
+  return Boolean(resolveProviderApiKey(profile));
+}
+
 interface TaskWeights { capability: number; thinking: number; speed: number; context: number }
 const TASK_WEIGHTS: Record<TaskType, TaskWeights> = {
   architect: { capability: .4, thinking: .4, speed: .1, context: .1 }, reasoning: { capability: .3, thinking: .6, speed: .05, context: .05 },
@@ -104,7 +128,7 @@ export interface StreamCallbacks {
 
 export function getCandidates(request: OrchestratorRequest): ModelProfile[] {
   return MODEL_REGISTRY.filter(profile => {
-    if (!process.env[profile.envKey] || !modelAvailable(profile)) return false;
+    if (!hasProviderApiKey(profile) || !modelAvailable(profile)) return false;
     if (request.minContextWindow && profile.contextWindow < request.minContextWindow) return false;
     return true;
   }).sort((a, b) => {
@@ -152,8 +176,8 @@ async function readWithTimeout(reader: ReadableStreamDefaultReader<Uint8Array>, 
 }
 
 async function streamModel(profile: ModelProfile, request: OrchestratorRequest, callbacks: StreamCallbacks, signal?: AbortSignal): Promise<string> {
-  const apiKey = process.env[profile.envKey];
-  if (!apiKey) throw new Error(`Missing environment variable ${profile.envKey}.`);
+  const apiKey = resolveProviderApiKey(profile);
+  if (!apiKey) throw new Error(`Missing environment variable ${profile.envKey} or its supported alias.`);
   const response = await fetchWithTimeout(`${profile.baseUrl}/chat/completions`, {
     method: 'POST', headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json', 'HTTP-Referer': 'https://konkred.xyz', 'X-Title': 'fullKONK_> Orchestrator' },
     body: JSON.stringify({ model: profile.modelId, messages: request.messages, temperature: request.temperature ?? .3, max_tokens: Math.min(request.maxTokens || 8192, profile.maxOutput), stream: true }),
@@ -238,7 +262,7 @@ export interface ProviderHealth { provider: string; model: string; providerId: s
 export function getOrchestratorHealth(): ProviderHealth[] {
   return MODEL_REGISTRY.map(profile => {
     const entry = rateLimitStore.get(modelKey(profile));
-    const hasKey = Boolean(process.env[profile.envKey]);
+    const hasKey = hasProviderApiKey(profile);
     return { provider: profile.providerName, model: profile.modelLabel, providerId: profile.providerId, modelId: profile.modelId, available: hasKey && modelAvailable(profile), hasKey, rateLimited: Boolean(entry && Date.now() < entry.until), backoffUntil: entry?.until || null, score: Math.round(score(profile, 'general') * 10) / 10 };
   });
 }
