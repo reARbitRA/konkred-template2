@@ -15,13 +15,16 @@ interface Props {
   streaming: boolean;
   metrics: PipelineMetrics;
   onStop: () => void;
+  /** Shown only for recoverable failures, once every candidate model failed. */
+  canRetry?: boolean;
+  onRetry?: () => void;
 }
 
 const PROVIDER_COLORS: Record<string, string> = { google: '#4285F4', groq: '#F55036', deepseek: '#4D6BFE', cerebras: '#00FF88', sambanova: '#FF6B00', openrouter: '#9B00FF', github: '#FFFFFF', nvidia: '#76B900', huggingface: '#FFD21E' };
 const NORMAL_STAGES: PipelineStage[] = ['architect', 'frontend', 'backend', 'verify', 'test', 'done'];
 const LABELS: Partial<Record<PipelineStage, string>> = { architect: 'ARCHITECT', frontend: 'FRONTEND', backend: 'BACKEND', verify: 'VERIFY', test: 'TEST', review: 'REVIEW', done: 'COMPLETE', error: 'ERROR' };
 
-export default function PipelineStatus({ stage, text, streaming, metrics, onStop }: Props) {
+export default function PipelineStatus({ stage, text, streaming, metrics, onStop, canRetry = false, onRetry }: Props) {
   if (stage === 'idle') return null;
   const stages = stage === 'review' ? ['review', 'done'] as PipelineStage[] : NORMAL_STAGES;
   const effectiveStage = stage === 'error' ? stages[Math.max(0, stages.length - 2)] : stage;
@@ -42,5 +45,6 @@ export default function PipelineStatus({ stage, text, streaming, metrics, onStop
     <span style={{ color: '#FFD700' }}>{metrics.totalTokens.toLocaleString()} TOK</span>
     <span style={{ color: '#555' }}>{(metrics.elapsedMs / 1000).toFixed(1)}S</span>
     {streaming && <button onClick={onStop} style={{ background: '#FF003C', border: 0, color: '#fff', padding: '4px 10px', fontFamily: 'inherit', fontSize: 9, fontWeight: 700, cursor: 'pointer' }}>■ STOP</button>}
+    {!streaming && stage === 'error' && canRetry && onRetry && <button onClick={onRetry} style={{ background: '#FFD700', border: 0, color: '#000', padding: '4px 10px', fontFamily: 'inherit', fontSize: 9, fontWeight: 700, letterSpacing: 1, cursor: 'pointer' }}>↻ RETRY</button>}
   </div>;
 }

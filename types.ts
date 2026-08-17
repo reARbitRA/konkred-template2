@@ -86,7 +86,7 @@ export type StreamChunk =
   | { type: 'reset'; characters: number }
   | { type: 'file'; file: GeneratedFile }
   | { type: 'done' }
-  | { type: 'error'; error: string };
+  | { type: 'error'; error: string; kind?: 'configuration' | 'provider'; retryable?: boolean };
 
 export interface AIProviderConfig {
   primaryProvider: AIProviderID;

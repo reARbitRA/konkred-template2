@@ -12,7 +12,7 @@ import { db as sqlDb } from "./src/db/index.ts";
 import { users as sqlUsers } from "./src/db/schema.ts";
 import { SYSTEM_PROMPTS } from './services/fullkonk';
 import { exportToGitHub } from './services/fullkonk.github';
-import { getOrchestratorHealth, hasProviderApiKey, MODEL_REGISTRY, orchestrate, TaskType } from './services/fullkonk.orchestrator';
+import { getKeyedModels, getOrchestratorHealth, hasProviderApiKey, MODEL_REGISTRY, NoProvidersConfiguredError, orchestrate, redactSecrets, TaskType } from './services/fullkonk.orchestrator';
 
 dotenv.config();
 
@@ -354,7 +354,7 @@ export async function createApp(): Promise<express.Express> {
   }
 
   function safeError(error: unknown): string {
-    return error instanceof Error ? error.message : 'Unknown error';
+    return redactSecrets(error instanceof Error ? error.message : 'Unknown error');
   }
 
   function validateContextFiles(value: unknown): UploadedContextFile[] {
@@ -380,7 +380,8 @@ export async function createApp(): Promise<express.Express> {
       provider.models.push({ id: profile.modelId, label: profile.modelLabel });
       grouped.set(profile.providerId, provider);
     });
-    res.json({ providers: [...grouped.values()] });
+    const providers = [...grouped.values()];
+    res.json({ providers, configured: providers.some(provider => provider.hasKey) });
   });
 
   app.get('/api/fullkonk/health', (_req, res) => {
@@ -542,7 +543,17 @@ export async function createApp(): Promise<express.Express> {
         send({ type: 'done' });
       }
     } catch (error) {
-      if (!requestAbort.signal.aborted) send({ type: 'error', error: safeError(error) });
+      if (!requestAbort.signal.aborted) {
+        // Only a deployment with zero credentials is a configuration fault.
+        // Everything else is transient and the client may retry.
+        const configuration = error instanceof NoProvidersConfiguredError;
+        send({
+          type: 'error',
+          error: safeError(error),
+          kind: configuration ? 'configuration' : 'provider',
+          retryable: !configuration,
+        });
+      }
     } finally {
       if (!res.writableEnded && !res.destroyed) res.end();
     }

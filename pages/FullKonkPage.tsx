@@ -18,6 +18,14 @@ const MODES: { id: BuildMode; label: string }[] = [
 const EXTENSIONS: Record<string, string> = { ts: 'typescript', tsx: 'tsx', js: 'javascript', jsx: 'jsx', html: 'html', css: 'css', json: 'json', prisma: 'prisma', sql: 'sql', yaml: 'yaml', yml: 'yaml', sh: 'bash', bash: 'bash' };
 interface ProviderOption { id: string; name: string; hasKey: boolean; models: { id: string; label: string }[] }
 
+/** A pipeline failure that the user may retry, as opposed to a real misconfiguration. */
+class RetryablePipelineError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'RetryablePipelineError';
+  }
+}
+
 function normalizeLanguage(value: string, path: string): string {
   const raw = value.toLowerCase().trim();
   if (raw && raw !== 'text' && raw !== 'plaintext') return EXTENSIONS[raw] || raw;
@@ -121,6 +129,8 @@ export default function FullKonkPage() {
   const [showGitHub, setShowGitHub] = useState(false);
   const [sidebarRefresh, setSidebarRefresh] = useState(0);
   const [saveState, setSaveState] = useState('SAVE AS PROJECT');
+  const [providersLoaded, setProvidersLoaded] = useState(false);
+  const [retryable, setRetryable] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const startTimeRef = useRef(0);
   const generationTextRef = useRef('');
@@ -139,11 +149,14 @@ export default function FullKonkPage() {
       .then(data => {
         const available = (data.providers || []).filter(option => option.hasKey);
         setProviderOptions(available);
+        setProvidersLoaded(true);
         if (available.length && !available.some(option => option.id === provider)) {
           setProvider(available[0].id);
           setModel(available[0].models[0]?.id || '');
         }
       })
+      // A failed probe says nothing about server configuration; never claim
+      // "no providers" just because this request could not be completed.
       .catch(() => undefined);
     return () => controller.abort();
   }, []);
@@ -176,6 +189,7 @@ export default function FullKonkPage() {
     baseFilesRef.current = activeProject?.files || files;
     setPreviousFiles(baseFilesRef.current);
     setStreaming(true);
+    setRetryable(false);
     setStage(mode === 'review' ? 'review' : 'architect');
     setStageText('INITIALIZING PIPELINE');
     metricsRef.current = { tokensPerSecond: 0, totalTokens: 0, provider: '', elapsedMs: 0 };
@@ -256,12 +270,16 @@ export default function FullKonkPage() {
               break;
             case 'file': setFiles(current => mergeFiles(current, [{ ...parsed.file, language: parsed.file.language.toLowerCase() }])); break;
             case 'done': completed = true; setStage('done'); setStageText('BUILD COMPLETE'); break;
-            case 'error': throw new Error(parsed.error);
+            // A provider-level failure means the orchestrator already exhausted
+            // every candidate; surface it as retryable rather than terminal.
+            case 'error': throw parsed.kind === 'configuration'
+              ? new Error(parsed.error)
+              : new RetryablePipelineError(parsed.error);
           }
         }
         if (result.done) break;
       }
-      if (!completed) throw new Error('Generation stream closed before completion.');
+      if (!completed) throw new RetryablePipelineError('Generation stream closed before completion.');
       const finalFiles = mergeFiles(baseFilesRef.current, extractFiles(generationTextRef.current));
       setFiles(finalFiles);
       setActiveFile(current => current && finalFiles.some(file => file.path === current) ? current : finalFiles[0]?.path || null);
@@ -273,6 +291,9 @@ export default function FullKonkPage() {
         setStage('idle'); setStageText('');
       } else {
         const message = error instanceof Error ? error.message : 'Unknown pipeline error';
+        // Exhausted failover and network faults are recoverable; only a real
+        // server-side configuration fault is reported as terminal.
+        setRetryable(error instanceof RetryablePipelineError || error instanceof TypeError);
         setStage('error'); setStageText(message); addMessage({ role: 'assistant', stage: 'error', content: `ERROR: ${message}` });
         if (userId) void logUsage({ userId, provider, model, mode, stage: 'error', tokens: metricsRef.current.totalTokens, durationMs: Date.now() - startTimeRef.current, success: false });
       }
@@ -281,6 +302,14 @@ export default function FullKonkPage() {
       abortRef.current = null;
     }
   }, [activeProject, activeSession, addMessage, appendToLast, attachments, files, maxTokens, mode, model, provider, streaming, systemPrompt, temperature, userId]);
+
+  /** Re-runs the last prompt after a recoverable failure. */
+  const handleRetry = useCallback(() => {
+    const prompt = latestPromptRef.current;
+    if (!prompt || streaming) return;
+    setRetryable(false);
+    void handleSend(prompt);
+  }, [handleSend, streaming]);
 
   useEffect(() => {
     if (stage !== 'done' || !activeSession || !userId) return;
@@ -323,7 +352,7 @@ export default function FullKonkPage() {
       {files.length > 0 && <button onClick={() => setShowGitHub(true)} style={{ ...topButton, background: '#0055FF', color: '#fff', borderColor: '#0055FF' }}>↑ GITHUB</button>}
       <div style={{ display: 'flex' }}>{MODES.map(item => <button key={item.id} disabled={streaming} onClick={() => setMode(item.id)} style={{ ...topButton, color: mode === item.id ? '#000' : '#555', background: mode === item.id ? '#FFD700' : '#050505', borderColor: mode === item.id ? '#FFD700' : '#222' }}>{item.label}</button>)}</div>
       <button onClick={() => setShowSettings(value => !value)} style={topButton}>⚙ SETTINGS</button>
-      <select value={provider} disabled={streaming} onChange={event => { const next = providerOptions.find(option => option.id === event.target.value); setProvider(event.target.value); if (next?.models[0]) setModel(next.models[0].id); }} style={selectStyle}>{providerOptions.length ? providerOptions.map(option => <option key={option.id} value={option.id}>{option.name.toUpperCase()}</option>) : <option value={provider}>NO PROVIDERS</option>}</select>
+      <select value={provider} disabled={streaming} onChange={event => { const next = providerOptions.find(option => option.id === event.target.value); setProvider(event.target.value); if (next?.models[0]) setModel(next.models[0].id); }} style={selectStyle}>{providerOptions.length ? providerOptions.map(option => <option key={option.id} value={option.id}>{option.name.toUpperCase()}</option>) : <option value={provider}>{providersLoaded ? 'NO PROVIDERS' : 'LOADING…'}</option>}</select>
       <select value={model} disabled={streaming} onChange={event => setModel(event.target.value)} style={selectStyle}>{(providerOptions.find(option => option.id === provider)?.models || [{ id: model, label: model }]).map(option => <option key={option.id} value={option.id}>{option.label}</option>)}</select>
     </header>
     {showSettings && <div style={{ display: 'grid', gridTemplateColumns: '120px 160px minmax(240px, 1fr)', gap: 10, alignItems: 'center', padding: '8px 16px', background: '#050505', borderBottom: '1px solid #222', fontFamily: '"JetBrains Mono", monospace', fontSize: 8, color: '#666' }}>
@@ -331,7 +360,7 @@ export default function FullKonkPage() {
       <label>MAX TOKENS <select value={maxTokens} onChange={event => setMaxTokens(Number(event.target.value))} style={{ ...selectStyle, marginLeft: 5 }}><option value={4096}>4096</option><option value={8192}>8192</option><option value={16384}>16384</option></select></label>
       <input value={systemPrompt} onChange={event => setSystemPrompt(event.target.value)} placeholder="Optional system prompt override" style={{ ...selectStyle, width: '100%', boxSizing: 'border-box' }} />
     </div>}
-    <PipelineStatus stage={stage} text={stageText} streaming={streaming} metrics={metrics} onStop={() => abortRef.current?.abort()} />
+    <PipelineStatus stage={stage} text={stageText} streaming={streaming} metrics={metrics} onStop={() => abortRef.current?.abort()} canRetry={retryable && Boolean(latestPromptRef.current)} onRetry={handleRetry} />
     <main style={{ flex: 1, minHeight: 0, display: 'grid', gridTemplateColumns: showSidebar && userId ? '220px minmax(300px, 380px) minmax(0, 1fr)' : 'minmax(300px, 380px) minmax(0, 1fr)' }}>
       {showSidebar && userId && <SessionSidebar userId={userId} activeSessionId={activeSession} activeProjectId={activeProject?.id || null} refreshKey={sidebarRefresh} onSelect={selectSession} onSelectProject={selectProject} onNew={clearWorkspace} />}
       <div style={{ minWidth: 0, borderRight: '3px solid #111' }}><ChatPanel messages={messages} streaming={streaming} attachments={attachments} onAttachmentsChange={setAttachments} onSend={prompt => { void handleSend(prompt); }} onClear={clearWorkspace} /></div>

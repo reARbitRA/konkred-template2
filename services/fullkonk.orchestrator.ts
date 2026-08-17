@@ -73,6 +73,50 @@ export function hasProviderApiKey(profile: Pick<ModelProfile, 'envKey'>): boolea
   return Boolean(resolveProviderApiKey(profile));
 }
 
+// Provider error bodies routinely echo the credential that was rejected.
+// Every string that can reach a log, an SSE frame or the UI passes through here.
+const CREDENTIAL_ENV_NAMES = new Set<string>([
+  ...MODEL_REGISTRY.map(profile => profile.envKey),
+  ...Object.keys(ENV_KEY_ALIASES),
+  ...Object.values(ENV_KEY_ALIASES).flat(),
+]);
+const TOKEN_PATTERN = /\b(?:sk|gsk|hf|nvapi|csk|xai|api|key)[-_][A-Za-z0-9_.-]{12,}\b/gi;
+
+export function redactSecrets(value: string): string {
+  let output = value;
+  for (const name of CREDENTIAL_ENV_NAMES) {
+    const secret = process.env[name]?.trim();
+    if (secret && secret.length >= 8) output = output.split(secret).join('[redacted]');
+  }
+  return output
+    .replace(TOKEN_PATTERN, '[redacted]')
+    .replace(/(Bearer\s+)[A-Za-z0-9_.-]+/gi, '$1[redacted]')
+    .replace(/([?&](?:key|api_key|access_token|token)=)[^&\s"']+/gi, '$1[redacted]');
+}
+
+function describeError(error: unknown): string {
+  return redactSecrets(error instanceof Error ? error.message : 'Unknown provider error');
+}
+
+/** Raised only when the deployment genuinely has no usable provider credential. */
+export class NoProvidersConfiguredError extends Error {
+  readonly code = 'no_providers';
+  constructor(message = 'No AI providers available. Configure at least one provider API key.') {
+    super(message);
+    this.name = 'NoProvidersConfiguredError';
+  }
+}
+
+/** Raised when credentials exist but every candidate model failed for this request. */
+export class AllModelsFailedError extends Error {
+  readonly code = 'all_failed';
+  readonly retryable = true;
+  constructor(message: string) {
+    super(message);
+    this.name = 'AllModelsFailedError';
+  }
+}
+
 interface TaskWeights { capability: number; thinking: number; speed: number; context: number }
 const TASK_WEIGHTS: Record<TaskType, TaskWeights> = {
   architect: { capability: .4, thinking: .4, speed: .1, context: .1 }, reasoning: { capability: .3, thinking: .6, speed: .05, context: .05 },
@@ -126,12 +170,24 @@ export interface StreamCallbacks {
   onReset: (characters: number) => void;
 }
 
+/** Every model whose provider credential (canonical name or alias) is present. */
+export function getKeyedModels(): ModelProfile[] {
+  return MODEL_REGISTRY.filter(profile => hasProviderApiKey(profile));
+}
+
 export function getCandidates(request: OrchestratorRequest): ModelProfile[] {
-  return MODEL_REGISTRY.filter(profile => {
-    if (!hasProviderApiKey(profile) || !modelAvailable(profile)) return false;
-    if (request.minContextWindow && profile.contextWindow < request.minContextWindow) return false;
-    return true;
-  }).sort((a, b) => {
+  const keyed = getKeyedModels();
+  const fitsRequest = (profile: ModelProfile): boolean =>
+    !request.minContextWindow || profile.contextWindow >= request.minContextWindow;
+
+  // Backoff must never empty the candidate list while usable credentials exist:
+  // a temporarily penalized provider is still a better answer than an error page.
+  let pool = keyed.filter(profile => fitsRequest(profile) && modelAvailable(profile));
+  if (!pool.length) pool = keyed.filter(fitsRequest);
+  if (!pool.length) pool = keyed.filter(modelAvailable);
+  if (!pool.length) pool = keyed;
+
+  return pool.slice().sort((a, b) => {
     const aModel = request.preferModel === a.modelId ? 1 : 0;
     const bModel = request.preferModel === b.modelId ? 1 : 0;
     if (aModel !== bModel) return bModel - aModel;
@@ -183,7 +239,7 @@ async function streamModel(profile: ModelProfile, request: OrchestratorRequest, 
     body: JSON.stringify({ model: profile.modelId, messages: request.messages, temperature: request.temperature ?? .3, max_tokens: Math.min(request.maxTokens || 8192, profile.maxOutput), stream: true }),
   }, signal);
   if (!response.ok) {
-    const detail = (await response.text().catch(() => '')).slice(0, 200);
+    const detail = redactSecrets((await response.text().catch(() => '')).slice(0, 200));
     const retryAfter = Number(response.headers.get('retry-after'));
     if (response.status === 429) penalize(profile, 'rate_limit', Number.isFinite(retryAfter) ? retryAfter * 1_000 : undefined);
     else penalize(profile, 'error');
@@ -236,26 +292,52 @@ async function streamModel(profile: ModelProfile, request: OrchestratorRequest, 
 }
 
 export async function orchestrate(request: OrchestratorRequest, callbacks: StreamCallbacks, signal?: AbortSignal): Promise<OrchestratorResult> {
+  // A deployment without any credential is a configuration problem; anything
+  // else is a transient provider problem that must be failed over, not surfaced.
+  if (!getKeyedModels().length) throw new NoProvidersConfiguredError();
+
   const candidates = getCandidates(request);
-  if (!candidates.length) throw new Error('No AI providers available. Configure a matching provider key or wait for model backoff to expire.');
+  if (!candidates.length) throw new NoProvidersConfiguredError();
+
   const startedAt = Date.now();
+  const failures: string[] = [];
   let lastError = 'Unknown provider error';
+  let previousLabel = '';
+
   for (let index = 0; index < candidates.length; index += 1) {
     const profile = candidates[index];
-    if (index > 0) callbacks.onFailover(`${candidates[index - 1].providerName} / ${candidates[index - 1].modelLabel}`, `${profile.providerName} / ${profile.modelLabel}`, lastError);
-    callbacks.onProviderSelect(profile.providerName, profile.modelLabel);
+    const label = `${profile.providerName} / ${profile.modelLabel}`;
+    if (index > 0) {
+      // Notifying the UI must never abort the pipeline.
+      try { callbacks.onFailover(previousLabel, label, lastError); } catch { /* non-fatal */ }
+    }
+    try { callbacks.onProviderSelect(profile.providerName, profile.modelLabel); } catch { /* non-fatal */ }
+    previousLabel = label;
+
     let streamedCharacters = 0;
     try {
-      const content = await streamModel(profile, request, { ...callbacks, onChunk: text => { streamedCharacters += text.length; callbacks.onChunk(text); } }, signal);
+      const content = await streamModel(profile, request, {
+        ...callbacks,
+        onChunk: text => { streamedCharacters += text.length; callbacks.onChunk(text); },
+      }, signal);
       return { content, provider: profile.providerName, model: profile.modelLabel, tokensUsed: Math.ceil(content.length / 4), durationMs: Date.now() - startedAt, attempts: index + 1 };
     } catch (error) {
+      // A caller-initiated abort is the only reason to stop early.
       if (signal?.aborted) throw error;
-      if (streamedCharacters) callbacks.onReset(streamedCharacters);
+      if (streamedCharacters) {
+        try { callbacks.onReset(streamedCharacters); } catch { /* non-fatal */ }
+      }
+      // Every failed model is penalized so the next request skips it for a while.
       if (!rateLimitStore.has(modelKey(profile))) penalize(profile, 'error');
-      lastError = error instanceof Error ? error.message : 'Unknown provider error';
+      lastError = describeError(error);
+      failures.push(`${label}: ${lastError}`);
     }
   }
-  throw new Error(`All ${candidates.length} available models failed. Last error: ${lastError}`);
+
+  const summary = failures.slice(-3).join(' | ');
+  throw new AllModelsFailedError(
+    `All ${candidates.length} candidate model(s) failed for this request. ${summary || `Last error: ${lastError}`}`,
+  );
 }
 
 export interface ProviderHealth { provider: string; model: string; providerId: string; modelId: string; available: boolean; hasKey: boolean; rateLimited: boolean; backoffUntil: number | null; score: number }
