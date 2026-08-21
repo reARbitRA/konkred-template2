@@ -1,125 +1,206 @@
-# KONKRED Platform v1 — Purge of mock marketplace, data-driven 15-product catalogue, honest demos & test-mode monetization
+# KONKRED 36-entry portfolio — canonical catalogue, routes, UX patterns, demo contract
 
-Closes the "konkred platform v1" mission. This PR turns `konkred-template2` from the legacy mock "AI Asset Marketplace" into a clean, production-quality, data-driven AI workflow marketplace and product platform.
+> Session branch `arena/01a0246b-konkred-template2` → `main`. Owner source documents (26 files, merged from `main@e3d7d61`) are treated strictly as **DATA**; every manifest field is machine-extracted and cross-checked, never hand-invented.
 
-> **Branch note:** the mission brief specified `agent/konkred-platform-v1`; this Arena session is fixed to `arena/01a0246b-konkred-template2` (documented in `agent/REPOSITORY_AUDIT.md §1`). All work lives on this branch; the PR targets `main`. **No production merge/deploy happens without human approval.**
+## 1. Repository audit summary
 
-## What changed
+- Stack unchanged: React 19 + Vite 6 client, Express 5 server, vitest, Playwright (CI-only).
+- Source documents arrived on `main` (`e3d7d61`, 26 files ≈ 41k lines) and were merged into this branch (`ce48dbc`).
+- `scripts/extract-portfolio.mjs` parses the comprehensive guidebook and **fails on any mismatch** between guidebook scores/tiers/results and the two validation reports.
+- `scripts/build-portfolio-manifest.mjs` generates `content/catalogue/portfolio-36.json` (36 entries) from: extracted guidebook data + legacy `catalog/product-manifest.json` (schemas/prompts/fixtures) + the owner's canonical route/UX mapping.
+- Build gate: `npm run build:client` runs `npm run validate:portfolio` first — the build fails on any manifest violation.
 
-### 1. Summary of mock features removed
-- **Hardcoded marketplace & fake sellers:** `data.ts` (`MOCK_LISTINGS`, fake sellers CyberSec Labs / Quantitative Logic Corp / Nexus Automation, fake prices, ratings, review counts, sales/view counts, fake audit scores `AUD-8841` etc.), `services/database.ts` mock fallbacks, `services/payments.ts` mock payment intents.
-- **Mock commerce flows:** marketplace, listing detail, listing wizard, checkout, wallet, seller dashboard, buyer dashboard, usage metrics, affiliate, dispute, admin, pricing, playgrounds, intel-report pages + `marketplace/`, `seller/`, `buyer/`, `enclave/`, `modals/` component trees; `AppTester` fake metrics/cost calculator; `AcquisitionSuccessModal`.
-- **Forge fakes:** removed all Forge tabs except the real Neural Audit — Prompt Refiner (`OptimizeTool`), Agent Architect (`AgentBuilder`), Market Intel (`EnterpriseArmory` + `services/gemini.ts` + `lib/enterpriseTools.ts` exampleData), Kernel Shell (`SystemTerminal`/`TerminalTool`, fake `v4.2.0-STABLE`), fake Doc Generator (`DocumentTool`), `GlobalMap`.
-- **Fake K-Tools catalogue:** `KToolsPage` ("51 LIVE TOOLS") + the 51-tool `ToolLibrarySection` in `KonkredSections.tsx`.
-- **Fake network/node/liquidity/ledger counters:** `ValuationTerminal`, `AcquirersList`, `Protocol*`, `Tools`/`ToolCard`, `useGlobalStats`, footer counters, unused landing components with fake stats.
-- **Unsupported claims:** "LIVE", "STABLE", "verified/certified", "audit certificates", "bug-free, deploy-ready", "1M+ tokens/day", "400+ exploit vectors", "30+ LLM providers", fake invoice/card history in account Billing, fake doc statuses, blog view counts and marketplace-premium editorial claims.
-- Purged routes now resolve to a **real 404 page** or an **intentional redirect** (see route table below). No fake page renders anywhere.
+## 2. Mock features removed (cumulative)
 
-### 2. Summary of preserved features
-- **Audit / AUDITOR / Neural Audit** — real `AuditTool` (moved to `components/audit/`) + server-side Gemini via `/api/ai/generate`, now on a **dedicated audit-only page** at `/forge-audit` (alias `/audit`) with **no unrelated Forge tabs**.
-- **REDAEYE** — `/redaeye` preserved (React adversarial sandbox + static `public/redaeye.html`); `/redaeye-sandbox` kept private as the same component.
-- **fullKONK_>** — `/fullkonk` + all `/api/fullkonk/*` server routes, orchestrator, provider failover, sessions/analytics, GitHub export untouched.
-- Real auth (Firebase), contact form (now with honest storage success/failure), waitlist, account/settings pages.
+Previously purged (~100 files, commit `b508689`): fake marketplace, sellers, listings, wallet, checkout, dashboards, disputes, admin, K-Tools, mock Forge.
+This PR additionally removes:
+- `pages/ProductDetailPage.tsx`, `components/catalog/ProductCard.tsx`, `components/catalog/StatusBadge.tsx` (superseded — no duplicate product surfaces remain)
+- "Marketplace" wording from the browser title (`index.html`)
+- Old lowercase demo statuses that predated the canonical `DemoResponse` contract
+- No sellers, ratings, reviews, sales counts, customers, certifications, ROI or accuracy claims exist anywhere in the new code (enforced by `tests/no-fakes.test.ts`, now scanning the portfolio manifest and all portfolio pages/patterns).
 
-### 3. Route fixes & all 15 product routes
-- AUDITOR landing button → `/forge-audit` (was `/marketplace`) ✅
-- fullKONK landing button → `/fullkonk` (was `/forge`) ✅
-- `/forge` → redirects to `/fullkonk`; `/marketplace`, `/ktools`, `/pricing`, `/catalogue` → redirect to `/products`; `/wallet`, `/checkout`, `/enclave`, `/seller-dashboard`, `/listing/*`, etc. → 404.
+## 3. Preserved flagship features
 
-All 15 canonical products have catalogue cards and detail pages under the **shared manifest-driven architecture** (one manifest, one catalogue, one card, one detail template — no per-product hardcoded pages):
+- **AUDITOR / Audit / Neural Audit** — `/forge-audit`, `/audit`, `/auditor` → `pages/AuditPage.tsx` + `components/audit/AuditTool.tsx` + `services/ai.ts`
+- **REDAEYE** — `/redaeye` (`public/redaeye.html`, `pages/RedaeyeSandbox.tsx`)
+- **fullKONK_>** — `/fullkonk` (`pages/FullKonkPage.tsx`, `/api/fullkonk/*`)
 
-| # | Slug | Category | Status |
-|---|------|----------|--------|
-| 1 | `contract-review-copilot` | Legal & Contracts | PUBLIC_DEMO |
-| 2 | `iac-security-copilot` | Security & GRC | SUPERVISED_PILOT |
-| 3 | `ma-due-diligence-workbench` | M&A & Transactions | ENTERPRISE_INTEGRATION |
-| 4 | `incident-learning-postmortem` | Security & GRC | PUBLIC_DEMO |
-| 5 | `grc-evidence-request-triage` | Security & GRC | STANDARD_KIT |
-| 6 | `reconciliation-copilot` | Finance & Accounting | STANDARD_KIT |
-| 7 | `rfp-response-copilot` | Sales & Business Development | SUPERVISED_PILOT |
-| 8 | `govcon-rfp-compliance-workbench` | Sales & Business Development | SUPERVISED_PILOT |
-| 9 | `fpa-variance-analysis` | Finance & Accounting | STANDARD_KIT |
-| 10 | `executive-flash-brief` | Executive & Strategy | PUBLIC_DEMO |
-| 11 | `commercial-lease-abstraction` | Legal & Contracts | STANDARD_KIT |
-| 12 | `seo-content-opportunity-planner` | Marketing & Content | PUBLIC_DEMO |
-| 13 | `evidence-backed-prd-generator` | Product & Engineering | PUBLIC_DEMO |
-| 14 | `customer-health-churn-copilot` | Customer Success | SUPERVISED_PILOT |
-| 15 | `ab-experiment-interpretation` | Data & Experimentation | PUBLIC_DEMO |
+All three verified by `tests/routes.test.ts` and the Playwright suite.
 
-Every product: canonical prompt, input/output JSON schemas, buyer, pricing proposal, limitation statements, validation status (`pending` until a validation sprint), risk level, and **HUMAN_APPROVAL_REQUIRED** notices on all high-risk products. No product implies autonomous or production-equal maturity.
+## 4. Complete 36-entry route table
 
-### 4. Changed files
-157 files changed, +5,042 / −15,930. Highlights:
-- **Deleted (~100 files):** all marketplace/seller/buyer/enclave/forge/modals/landing trees, `data.ts`, `services/payments.ts`, `services/gemini.ts`, `lib/enterpriseTools.ts`, 17 purged pages, unused hooks/components.
-- **New:** `agent/REPOSITORY_AUDIT.md`, `agent/IMPLEMENTATION_PLAN.md`, `agent/PRODUCT_MANIFEST.json` (+ byte-identical `catalog/product-manifest.json`), `catalog/{types,validate,products,fixtures}.ts`, `catalog/fixtures/*` (11 synthetic public fixtures + README), `pages/{CataloguePage,ProductDetailPage,AuditPage,NotFoundPage}.tsx`, `components/catalog/*` (ProductCard, StatusBadge, RiskBadge, ProductDemo, ProductInquiryModal), `components/audit/AuditTool.tsx`, `services/demoService.ts`, `vitest.config.ts`, `playwright.config.ts`, `tests/*` (6 unit files + e2e).
-- **Modified:** `App.tsx`, `utils/routes.ts`, `types.ts`, `constants.ts`, `Navbar`, `SystemFooter`, `LandingPage`, `KonkredSections`, `services/{ai,database}.ts`, `server.ts` (new `/api/demo/run`), `index.html`, `CommandPalette`, `DocumentationPage`, `AcademyPage`, `BlogHub`, `ResourcesPage`, `ConsultingPage`, `Billing`, `Notifications`, `SignupModal`, `RedaeyeSandbox` text, `package.json` (+vitest/playwright), `tsconfig.json`, `.gitignore`, `public/redaeye.html` (link fix).
+| # | Type | Title | Route | Status | Score | Validation |
+|---|------|-------|-------|--------|-------|------------|
+| 1 | SUITE | Customer Support Control Suite | `/suites/customer-support-control` | `PUBLIC_CATALOGUE_SUPERVISED` | 86/100 | PASS |
+| 2 | SUITE | Finance Close, Reconciliation & Reporting Suite | `/suites/finance-close-reporting` | `PUBLIC_CATALOGUE_SUPERVISED` | 88/100 | PASS |
+| 3 | SUITE | Finance Planning, Treasury & Liquidity Suite | `/suites/finance-planning-treasury` | `PUBLIC_CATALOGUE_SUPERVISED` | 84/100 | PASS |
+| 4 | SUITE | Finance AP/AR, Billing & Collections Operations Suite | `/suites/finance-ap-ar-operations` | `PUBLIC_CATALOGUE_SUPERVISED` | 84/100 | PASS |
+| 5 | SUITE | Finance Risk, Crime & Credit Analytics Suite | `/suites/finance-risk-crime-credit` | `INTERNAL_CONTROLLED_PILOT` | 83/100 | PASS |
+| 6 | SUITE | Finance Tax, Revenue Recognition & Compliance Suite | `/suites/finance-tax-revenue-compliance` | `INTERNAL_CONTROLLED_PILOT` | 84/100 | PASS |
+| 7 | SUITE | Investment & M&A Analytics Workbench | `/suites/investment-ma-analytics` | `PUBLIC_CATALOGUE_SUPERVISED` | 84/100 | PASS |
+| 8 | SUITE | Pricing & Monetization Science Suite | `/suites/pricing-monetization-science` | `PUBLIC_CATALOGUE_SUPERVISED` | 82/100 | PASS |
+| 9 | SUITE | Healthcare Revenue Cycle Review Suite | `/suites/healthcare-revenue-cycle` | `INTERNAL_CONTROLLED_PILOT` | 84/100 | PASS |
+| 10 | SUITE | Clinical & Patient-Care Decision-Support Copilot | `/suites/clinical-patient-decision-support` | `INTERNAL_CONTROLLED_PILOT` | 83/100 | PASS |
+| 11 | SUITE | Clinical Trials & Life-Sciences Operations Suite | `/suites/clinical-trials-life-sciences` | `INTERNAL_CONTROLLED_PILOT` | 84/100 | PASS |
+| 12 | SUITE | Healthcare Operations, Privacy & Compliance Suite | `/suites/healthcare-operations-compliance` | `INTERNAL_CONTROLLED_PILOT` | 83/100 | PASS |
+| 13 | SUITE | Fraud, Identity & Financial-Crime Triage Suite | `/suites/fraud-identity-financial-crime` | `INTERNAL_CONTROLLED_PILOT` | 82/100 | PASS |
+| 14 | SUITE | Security Risk, Access & Data-Integrity Suite | `/suites/security-access-data-integrity` | `PUBLIC_CATALOGUE_SUPERVISED` | 86/100 | PASS |
+| 15 | SUITE | Legal Contract & Transaction Review Suite | `/suites/legal-contract-transaction` | `PUBLIC_CATALOGUE_SUPERVISED` | 85/100 | PASS |
+| 16 | SUITE | Legal Regulatory, Privacy & AI-Governance Suite | `/suites/legal-regulatory-privacy-ai` | `INTERNAL_CONTROLLED_PILOT` | 84/100 | PASS |
+| 17 | SUITE | HR Hiring, Privacy & Onboarding Suite | `/suites/hr-hiring-privacy-onboarding` | `INTERNAL_CONTROLLED_PILOT` | 83/100 | PASS |
+| 18 | SUITE | Communications Control Suite | `/suites/communications-control` | `PUBLIC_CATALOGUE_SUPERVISED` | 84/100 | PASS |
+| 19 | SUITE | Marketing & Sales Evidence Module Library | `/suites/marketing-sales-evidence` | `PUBLIC_CATALOGUE_SUPERVISED` | 82/100 | PASS |
+| 20 | SUITE | Operations & Procurement Intelligence Suite | `/suites/operations-procurement` | `PUBLIC_CATALOGUE_SUPERVISED` | 84/100 | PASS |
+| 21 | SUITE | Mixed Quick-Win Control Workflows | `/suites/mixed-quick-win-workflows` | `INTERNAL_CONTROLLED_PILOT` | 83/100 | PASS |
+| 22 | WORKFLOW | Contract Review Copilot | `/tools/contract-review` | `PUBLIC_DEMO` | 84/100 | PASS |
+| 23 | WORKFLOW | IaC Security Copilot | `/tools/iac-security` | `PUBLIC_CATALOGUE_SUPERVISED` | 83/100 | PASS |
+| 24 | WORKFLOW | M&A Due-Diligence Workbench | `/tools/ma-diligence` | `ENTERPRISE_INTEGRATION` | 82/100 | PASS |
+| 25 | WORKFLOW | Incident Learning and Post-Mortem | `/tools/incident-postmortem` | `PUBLIC_DEMO` | 84/100 | PASS |
+| 26 | WORKFLOW | GRC Evidence Request Triage | `/tools/grc-evidence` | `WORKFLOW_KIT` | 84/100 | PASS |
+| 27 | WORKFLOW | Cash/Bank/PSP Reconciliation Copilot | `/tools/reconciliation` | `WORKFLOW_KIT` | 82/100 | PASS |
+| 28 | WORKFLOW | Enterprise RFP Response Copilot | `/tools/enterprise-rfp` | `PUBLIC_CATALOGUE_SUPERVISED` | 82/100 | PASS |
+| 29 | WORKFLOW | GovCon RFP Compliance Workbench | `/tools/govcon-rfp` | `PUBLIC_CATALOGUE_SUPERVISED` | 85/100 | PASS |
+| 30 | WORKFLOW | FP&A Monthly Variance Analysis | `/tools/fpa-variance` | `WORKFLOW_KIT` | 82/100 | PASS |
+| 31 | WORKFLOW | Executive Flash Brief | `/tools/executive-flash` | `PUBLIC_DEMO` | 81/100 | PASS |
+| 32 | WORKFLOW | Commercial Lease Abstraction | `/tools/lease-abstraction` | `WORKFLOW_KIT` | 82/100 | PASS |
+| 33 | WORKFLOW | SEO Content Opportunity Planner | `/tools/seo-planner` | `PUBLIC_DEMO` | 81/100 | PASS |
+| 34 | WORKFLOW | Evidence-Backed PRD Generator | `/tools/evidence-backed-prd` | `CONDITIONAL_VALIDATION` | 84/100 | CONDITIONAL |
+| 35 | WORKFLOW | Customer Health and Churn Copilot | `/tools/customer-health` | `PUBLIC_CATALOGUE_SUPERVISED` | 82/100 | PASS |
+| 36 | WORKFLOW | A/B Experiment Interpretation Assistant | `/tools/ab-experiment` | `PUBLIC_DEMO` | 85/100 | PASS |
 
-### 5. Environment variables required (names only — never values)
-`GEMINI_API_KEY` (required for live audit + demos), `ENABLE_PRODUCT_DEMOS` (demo feature flag), plus existing optional provider keys (`ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `OPENROUTER_API_KEY`, `GROQ_API_KEY`, `DEEPSEEK_API_KEY`, `MISTRAL_API_KEY`, `XAI_API_KEY`, `CEREBRAS_API_KEY`, `SAMBANOVA_API_KEY`, `NVIDIA_API_KEY`, `HUGGINGFACE_API_KEY`, `GITHUB_TOKEN`, `QWEN_ACCESS_KEY_ID`, `QWEN_ACCESS_KEY_SECRET`, `TOGETHER_API_KEY`, `FIREWORKS_API_KEY`, `PERPLEXITY_API_KEY`), `GITHUB_CLIENT_ID`/`GITHUB_CLIENT_SECRET`, `SQL_HOST`/`SQL_USER`/`SQL_PASSWORD`/`SQL_DB_NAME`, `VITE_APP_NAME`, `VITE_API_URL`. All AI keys are **server-side only**; none appear in client bundles.
+Legacy redirects: `/products/<legacySlug>` → `/tools/<slug>` (all 15), `/products` `/marketplace` `/ktools` `/sell` → `/catalogue`.
+Platform routes: `/pricing`, `/kits/:slug`, `/sprint`, `/enterprise`, `/partners`, `/validation`.
+Purged routes (`/checkout`, `/wallet`, `/seller-dashboard`, …) remain 404.
 
-### 6. Test commands & exact results (local sandbox, commit `4e026c4`)
-| Command | Result |
-| :--- | :--- |
-| `npm ci` | ✅ |
-| `npm run lint` / `npm run typecheck` (`tsc --noEmit`) | ✅ 0 errors |
-| `npm test` (vitest) | ✅ **99/99 passed** (6 files) |
-| `npm run build` | ✅ |
-| `npm run build:vercel` | ✅ |
-| `npx playwright test` | ⚠️ 33 tests collected; **chromium download blocked in this sandbox** (network-restricted CDN) — suite is CI-ready and must run where browsers can be installed |
+## 5. Complete UIUX differentiation matrix
 
-Coverage includes: 15 product slugs + detail routes, catalogue search/filters, manifest validation (statuses, uniqueness, no fabricated fields, manifest copy equality), demo input/output schema validation (NEEDS_INPUT / BLOCKED incl. nested enums), inquiry-form validation, no-secret leakage, no fake marketplace data, purged-route behavior, audit/redaeye/fullkonk routes, API health + demo gating + 404/error states, mobile overflow + accessibility basics (E2E).
+All 36 entries ship a **dedicated** interaction-pattern component under `components/portfolio/patterns/` — each with a unique layout skeleton and `data-testid="pattern-<slug>"`:
 
-### 7. Vercel Preview URL
-**https://konkred-template2-kx81hrixe-ari-miyanjis-projects.vercel.app** (deployment `5471632`, state: success)
+- `suites-a.tsx` (11): ticket-queue command center · close checklist+approval drawer · scenario sliders lab · three-way-match workbench · model-governance console · authority-timeline workpaper · data-room cockpit · pricing lab with guardrail chart · RCM review board · clinician evidence desk · trial-ops timeline
+- `suites-b.tsx` (10): control-map grid · SVG evidence graph · findings console with severity filters · synchronized document studio · obligation graph · HR governance board · comms approval studio with editable canvas · claims registry/matrix tabs · procurement cockpit · controlled module selector
+- `workflows.tsx` (15): split-pane contract review · IaC code viewer + finding matrix · diligence workstream board · timeline scrubber · evidence kanban · deterministic ledger-matching lanes · RFP readiness matrix · source-coordinate navigator · waterfall/table variance toggle · KPI threshold composer · lease extraction sheet with quote anchors · topic-cluster bubble canvas · PRD traceability board · account signal cards · A/B validity console
 
-> Note: the Vercel account has **deployment protection** enabled — the preview URL requires
-> Vercel login (the owner can view it; anonymous visitors are redirected to Vercel auth).
+Uniqueness is enforced by test (`tests/portfolio.test.ts`: 36 distinct pattern slugs, every entry covered).
 
-### 8. Known limitations
-- Payment/CRM credentials are **not configured**: all purchase/booking CTAs are **test-mode lead forms** — nothing is charged, and the UI says so explicitly.
-- Public demos are **gated** (`ENABLE_PRODUCT_DEMOS` + a server-side AI key). In previews without a key, demos return **REQUEST_PILOT** instead of simulating success.
-- All 15 validation reports are **pending** — no accuracy/ROI claims are made anywhere.
-- 4 products (M&A DD, RFP Response, GovCon, Lease Abstraction) have **no public fixture** and correctly state demos are unavailable (pilot entry).
-- Playwright E2E could not execute in this sandbox (browser download blocked) — needs a CI environment.
-- `lib/fullkonk-server.cjs` (pre-existing committed build artifact) is regenerated by `build:vercel` and may appear in the diff.
-- Product kit prices are **proposals** pending human confirmation.
+## 6. Manifest/schema validation result
 
-### 9. Rollback procedure
-1. Each stage is an isolated commit (`00d332a` → `4e026c4`); the PR can be closed without merging with zero impact on `main`/production.
-2. If a problem appears after merge: `git revert <merge-commit>` on `main` (or redeploy the previous production SHA in Vercel — instant rollback, no code change).
-3. No data migrations were introduced; reverting restores the previous UI/routes fully.
+```
+$ npm run validate:portfolio
+portfolio manifest VALID — 36 entries (21 suites + 15 workflows), ids/slugs/routes unique,
+parents resolve, validators linked, no autonomous actions.
+```
 
-### 10.1 UX revision — product pages are sellable micro-tools (owner feedback, 2026-08-21)
+Validator (`content/catalogue/validate.ts`) enforces: unique id/slug/route · parent resolution + parentRoute match · controlled tiers (`PUBLIC_CATALOGUE_SUPERVISED`, `INTERNAL_CONTROLLED_PILOT`, `CONDITIONAL_VALIDATION`, `ENTERPRISE_INTEGRATION`) must name a human approver · `autonomousActions === []` · `validationReport`/`promptReference` files exist · PASS/CONDITIONAL entries must cite test focus + recorded result + public sources · `publicDemo: true` requires an available demo + existing fixture · 21/15 counts · 15 unique legacy slug mappings · routes match entry type.
 
-Per owner direction, the 15 product pages no longer display spec-sheet content:
-- **Removed from the public UI:** HUMAN_APPROVAL_REQUIRED banners, risk badges, the
-  written prompt, input/output schema blocks, and detailed limitation lists.
-- **Added:** an interactive micro-tool on every product page — form fields generated
-  from the product's input schema, "Load Sample Data" (synthetic public fixture),
-  Run → schema-validated output, and friendly NEEDS_INPUT / REQUEST_PILOT / error states.
-- Prompts, schemas, limitations, risk and approval metadata remain in the manifest
-  (backend/internal) and are delivered as part of the Workflow Kit — they are no longer
-  shown to customers.
-- All 15 products now include a public synthetic sample fixture (4 new fixtures added:
-  M&A DD, RFP Response, GovCon, Lease Abstraction) so every tool is loadable with sample data.
-- Catalogue cards: removed risk/approval chips; CTA renamed to "Launch Tool".
+## 7. Public demo/validation result by product
 
-### 10. Human decisions still required
-1. Approve/merge this PR (agent will not merge itself).
-2. Confirm proposed Workflow Kit / Validation Sprint / All-Catalog Workspace pricing.
-3. Configure payment + CRM (Stripe/lead DB) to move CTAs out of test mode; set `ENABLE_PRODUCT_DEMOS=true` and `GEMINI_API_KEY` for live demos.
-4. Approve product status labels (PUBLIC_DEMO / STANDARD_KIT / SUPERVISED_PILOT / ENTERPRISE_INTEGRATION) and the 15 canonical prompts.
-5. Schedule validation sprints to replace `pending` validation reports.
-6. Decide whether the 4 pilot-only products should receive public fixtures.
+| Product | Slug | Demo state | Validation evidence |
+|---|---|---|---|
+| Customer Support Control Suite | `customer-support-control` | no executable demo — evidence page + interface preview | `PASS` — Public incident timeline and public churn benchmark used to test evide |
+| Finance Close, Reconciliation & Reporting Suite | `finance-close-reporting` | no executable demo — evidence page + interface preview | `PASS` — Public bank/ledger example data and public budget/investor data used t |
+| Finance Planning, Treasury & Liquidity Suite | `finance-planning-treasury` | no executable demo — evidence page + interface preview | `PASS` — Public investor liquidity and revenue figures used to test reproducibl |
+| Finance AP/AR, Billing & Collections Operations Suite | `finance-ap-ar-operations` | no executable demo — evidence page + interface preview | `PASS` — Public bank/ledger records and a public questionnaire used to test exc |
+| Finance Risk, Crime & Credit Analytics Suite | `finance-risk-crime-credit` | no executable demo — evidence page + interface preview | `PASS` — Public AML guidance and public investor material used to test model/la |
+| Finance Tax, Revenue Recognition & Compliance Suite | `finance-tax-revenue-compliance` | no executable demo — evidence page + interface preview | `PASS` — Public financial and control sources used to test missing-policy behav |
+| Investment & M&A Analytics Workbench | `investment-ma-analytics` | no executable demo — evidence page + interface preview | `PASS` — Public investor-presentation evidence and reproducible ratio calculati |
+| Pricing & Monetization Science Suite | `pricing-monetization-science` | no executable demo — evidence page + interface preview | `PASS` — Public A/B data and public SEO-factor data used to test external-stati |
+| Healthcare Revenue Cycle Review Suite | `healthcare-revenue-cycle` | no executable demo — evidence page + interface preview | `PASS` — Public CMS coding information used to test versioned coding-source req |
+| Clinical & Patient-Care Decision-Support Copilot | `clinical-patient-decision-support` | no executable demo — evidence page + interface preview | `PASS` — Public FDA AI/ML medical-device information used to test evidence-sour |
+| Clinical Trials & Life-Sciences Operations Suite | `clinical-trials-life-sciences` | no executable demo — evidence page + interface preview | `PASS` — A public ClinicalTrials.gov record and public FDA GCP guidance used to |
+| Healthcare Operations, Privacy & Compliance Suite | `healthcare-operations-compliance` | no executable demo — evidence page + interface preview | `PASS` — Public HHS HIPAA material used to test privacy-source traceability and |
+| Fraud, Identity & Financial-Crime Triage Suite | `fraud-identity-financial-crime` | no executable demo — evidence page + interface preview | `PASS` — Public FinCEN guidance used to test policy/version and model-ground-tr |
+| Security Risk, Access & Data-Integrity Suite | `security-access-data-integrity` | no executable demo — evidence page + interface preview | `PASS` — Public Terraform security patterns and public control checklist used t |
+| Legal Contract & Transaction Review Suite | `legal-contract-transaction` | no executable demo — evidence page + interface preview | `PASS` — Public MSA and commercial lease sources used to test source-span extra |
+| Legal Regulatory, Privacy & AI-Governance Suite | `legal-regulatory-privacy-ai` | no executable demo — evidence page + interface preview | `PASS` — Public European Commission AI Act and HHS material used to test jurisd |
+| HR Hiring, Privacy & Onboarding Suite | `hr-hiring-privacy-onboarding` | no executable demo — evidence page + interface preview | `PASS` — Public EEOC Title VII material used to test job-related criteria, huma |
+| Communications Control Suite | `communications-control` | no executable demo — evidence page + interface preview | `PASS` — Public incident postmortem used to test source-linked fact extraction, |
+| Marketing & Sales Evidence Module Library | `marketing-sales-evidence` | no executable demo — evidence page + interface preview | `PASS` — Public RFP, SEO-factor and advertising-guidance sources used to test c |
+| Operations & Procurement Intelligence Suite | `operations-procurement` | no executable demo — evidence page + interface preview | `PASS` — Public RFP and public incident material used to test source-preserving |
+| Mixed Quick-Win Control Workflows | `mixed-quick-win-workflows` | no executable demo — evidence page + interface preview | `PASS` — Public IaC, incident and reconciliation sources used to test shared re |
+| Contract Review Copilot | `contract-review` | publicDemo=true (fixture `catalog/fixtures/contract-review-sample.json`) | `PASS` — Public MSA source-span evidence and missing-playbook hard stop |
+| IaC Security Copilot | `iac-security` | publicDemo=true (fixture `catalog/fixtures/iac-security-sample.json`) | `PASS` — Known IaC finding recall and destructive-command guard |
+| M&A Due-Diligence Workbench | `ma-diligence` | publicDemo=true (fixture `catalog/fixtures/ma-due-diligence-sample.json`) | `PASS` — Public investor evidence, calculation lineage and conditional risk |
+| Incident Learning and Post-Mortem | `incident-postmortem` | publicDemo=true (fixture `catalog/fixtures/incident-sample.json`) | `PASS` — Public postmortem timeline reconstruction |
+| GRC Evidence Request Triage | `grc-evidence` | publicDemo=true (fixture `catalog/fixtures/grc-requests-sample.json`) | `PASS` — Exact control mapping and evidence-register normalization |
+| Cash/Bank/PSP Reconciliation Copilot | `reconciliation` | publicDemo=true (fixture `catalog/fixtures/reconciliation-sample.json`) | `PASS` — Exact candidates, ambiguity detection and no automatic journal entry |
+| Enterprise RFP Response Copilot | `enterprise-rfp` | publicDemo=true (fixture `catalog/fixtures/rfp-response-sample.json`) | `PASS` — Missing claims-registry negative grounding test |
+| GovCon RFP Compliance Workbench | `govcon-rfp` | publicDemo=true (fixture `catalog/fixtures/govcon-rfp-sample.json`) | `PASS` — Requirement-cue extraction and source-quality handling |
+| FP&A Monthly Variance Analysis | `fpa-variance` | publicDemo=true (fixture `catalog/fixtures/fpa-sample.json`) | `PASS` — Budget/actual normalization and policy-mismatch safety |
+| Executive Flash Brief | `executive-flash` | publicDemo=true (fixture `catalog/fixtures/executive-brief-sample.json`) | `PASS` — KPI-threshold status, source coverage and distribution gate |
+| Commercial Lease Abstraction | `lease-abstraction` | publicDemo=true (fixture `catalog/fixtures/commercial-lease-sample.json`) | `PASS` — Required-term extraction and exact holdover quote |
+| SEO Content Opportunity Planner | `seo-planner` | publicDemo=true (fixture `catalog/fixtures/seo-sample.json`) | `PASS` — Tool-data sufficiency and no-fabricated-forecast guard |
+| Evidence-Backed PRD Generator | `evidence-backed-prd` | publicDemo=true (fixture `catalog/fixtures/prd-sample.json`) | `CONDITIONAL` — Public research synthesis and engineering-review separation |
+| Customer Health and Churn Copilot | `customer-health` | publicDemo=true (fixture `catalog/fixtures/customer-health-sample.json`) | `PASS` — Calibrated reference model and explainable risk mode |
+| A/B Experiment Interpretation Assistant | `ab-experiment` | publicDemo=true (fixture `catalog/fixtures/ab-test-sample.json`) | `PASS` — External statistical reference agreement and stats-engine guard |
+
+Demo endpoint (`POST /api/demo/run`) returns the canonical contract:
+`status ∈ COMPLETE|NEEDS_INPUT|BLOCKED|INCOMPLETE_SOURCE_SET|NEEDS_EXTERNAL_VALIDATOR|ERROR`, `productId`, `runId`, `sourceRefs`, `validation{schema,provenance,safety}`, `limitations`, `actionsExecuted: []`.
+In this environment (no `GEMINI_API_KEY`/`API_KEY`) model-backed runs return `NEEDS_EXTERNAL_VALIDATOR` — labelled honestly, never faked. Suites never expose a fake demo engine.
+
+## 8. Test commands and exact outputs
+
+```
+$ npm run lint && npm run typecheck   # tsc --noEmit
+exit 0 (no errors)
+
+$ npm test                            # vitest run
+Test Files  7 passed (7)
+     Tests  104 passed (104)
+
+$ npm run validate:portfolio
+portfolio manifest VALID — 36 entries …
+
+$ npm run build                       # validate + vite build + server bundle
+✓ built in 8.26s ; dist/server.cjs 323.9 kb ; exit 0
+
+$ npm run build:vercel                # validate + vite build + esbuild api bundle
+lib/fullkonk-server.cjs 4.1mb ; exit 0
+```
+
+Playwright (`npm run test:e2e`): suite rewritten for all 36 routes + redirects + platform pages. **Collected, not executed in this sandbox** — the browser CDN is blocked here (D-013); it runs in CI or on the reviewer's machine.
+
+## 9. Vercel Preview URL
+
+Latest push deploys automatically to the project's Vercel preview:
+https://konkred-template2-kx81hrixe-ari-miyanjis-projects.vercel.app
+(deployment protected by Vercel login; each push to this branch produces a fresh preview URL in the Vercel dashboard)
+
+## 10. Environment variable names (names only — no values in repo, client or PR)
+
+Server/model: `GEMINI_API_KEY`, `API_KEY`, `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `OPENROUTER_API_KEY`, `GROQ_API_KEY`, `DEEPSEEK_API_KEY`, `MISTRAL_API_KEY`, `XAI_API_KEY`, `CEREBRAS_API_KEY`, `SAMBANOVA_API_KEY`, `NVIDIA_API_KEY`, `HUGGINGFACE_API_KEY`, `TOGETHER_API_KEY`, `FIREWORKS_API_KEY`, `PERPLEXITY_API_KEY`, `QWEN_ACCESS_KEY_ID`, `QWEN_ACCESS_KEY_SECRET`, `GITHUB_TOKEN`
+Auth/site: `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, `VITE_APP_NAME`, `VITE_API_URL`, `VITE_TRUST_WALLET_USDT_TRON`, `SQL_HOST`, `SQL_USER`, `SQL_PASSWORD`, `SQL_DB_NAME`
+Feature flags: `ENABLE_PRODUCT_DEMOS`
+
+## 11. Known limitations
+
+- Model-backed demo runs are **not enabled** here (no server-side key); the UI honestly returns `NEEDS_EXTERNAL_VALIDATOR` instead of simulating output.
+- Static design scores are design targets, not measured model performance; PASS marks are narrow deterministic public-data preflights. Next level (target-model evaluation on versioned fixtures) not run.
+- 21 suite pages ship rich illustrative interface previews (labelled) — they are not live multi-tenant consoles.
+- Playwright E2E authored but not executable in this sandbox (browser download blocked).
+- Suite-level pricing keeps non-Kit/Sprint/Pilot offers (e.g. "Diligence Evidence Pack") in `pricing.note` verbatim rather than coercing them into schema fields (D-015).
+
+## 12. Payment / CRM / connector states
+
+| System | State |
+|---|---|
+| Payment | **Test mode** — kit/sprint/pilot CTAs open the inquiry form; nothing is charged; `checkout_success` unreachable (no provider callback exists) |
+| CRM | Not configured — inquiries stored via the existing test-mode form only |
+| Connectors (CRM/CS, ERP, etc.) | Listed as suite capabilities from the guidebook; none are live integrations |
+
+## 13. Rollback procedure
+
+1. Vercel: redeploy the previous production deployment from the dashboard (instant rollback).
+2. Git: `git revert 09f9fa3 83538b9 ce48dbc` on this branch (or merge `main` pre-PR state) — the three commits are additive except `utils/routes.ts`, `App.tsx`, `server.ts`, `index.html` and deleted legacy pages, all cleanly revertible.
+3. No data migrations were run; no external systems were modified — rollback is purely code.
+
+## 14. Human decisions still required
+
+1. **Merge** this PR (owner-only; the agent never merges its own PR).
+2. **Production deploy** to konkred.xyz remains blocked until explicit owner approval.
+3. Demo engine: provide/enable `GEMINI_API_KEY` + `ENABLE_PRODUCT_DEMOS` on Vercel to turn model-backed demos on.
+4. Payment provider + CRM selection when commerce goes live.
+5. Confirm per-suite commercial entries that lack Kit/Sprint/Pilot labels (currently preserved verbatim in `pricing.note`).
+6. Domain/SEO: confirm canonical host redirects for legacy inbound links if any exist outside this repo.
 
 ---
-
-### Definition-of-done checklist
-- [x] Old mock marketplace & fake modules gone from source and production build
-- [x] Audit, REDAEYE, fullKONK work; AUDITOR → audit-only page; fullKONK → `/fullkonk`
-- [x] 15 products in catalogue, all with detail pages, accurate status labels, no fake social proof
-- [x] Public demos use public fixtures or explicitly state unavailable; demos show DEMO / NOT_FOR_PRODUCTION_DECISION
-- [x] No secrets in GitHub or client bundles
-- [x] Lint, typecheck, unit tests, build pass; E2E CI-ready
-- [ ] Vercel Preview reviewed (pending CI)
-- [ ] Human approval before merge/deploy (this step)
+*Static design target — not measured model performance. Public-data preflight — narrow reference test. No entry is certified, autonomous or production-approved.*
