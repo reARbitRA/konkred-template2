@@ -70,7 +70,10 @@ Every product: canonical prompt, input/output JSON schemas, buyer, pricing propo
 Coverage includes: 15 product slugs + detail routes, catalogue search/filters, manifest validation (statuses, uniqueness, no fabricated fields, manifest copy equality), demo input/output schema validation (NEEDS_INPUT / BLOCKED incl. nested enums), inquiry-form validation, no-secret leakage, no fake marketplace data, purged-route behavior, audit/redaeye/fullkonk routes, API health + demo gating + 404/error states, mobile overflow + accessibility basics (E2E).
 
 ### 7. Vercel Preview URL
-Pending — Vercel preview deployment will be attached as a check on this PR once CI runs. (Vercel is connected to this GitHub repo; the preview builds from this branch.)
+**https://konkred-template2-kx81hrixe-ari-miyanjis-projects.vercel.app** (deployment `5471632`, state: success)
+
+> Note: the Vercel account has **deployment protection** enabled — the preview URL requires
+> Vercel login (the owner can view it; anonymous visitors are redirected to Vercel auth).
 
 ### 8. Known limitations
 - Payment/CRM credentials are **not configured**: all purchase/booking CTAs are **test-mode lead forms** — nothing is charged, and the UI says so explicitly.
