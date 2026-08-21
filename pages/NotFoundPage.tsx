@@ -36,7 +36,7 @@ const NotFoundPage: React.FC<NotFoundPageProps> = ({ onNavigate }) => {
             <span>Home</span>
           </button>
           <button
-            onClick={() => onNavigate('products')}
+            onClick={() => onNavigate('catalogue')}
             className="inline-flex items-center gap-2 bg-amber-500 text-black font-mono font-black px-6 py-3 uppercase tracking-wider text-sm border-2 border-black shadow-[3px_3px_0px_0px_#000000] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all cursor-pointer"
           >
             <span>Browse Products</span>

@@ -3,7 +3,8 @@
 
 export type PageView = 
     | 'landing' | 'forge_audit' | 'audit' | 'fullkonk' | 'redaeye' | 'redaeye_sandbox'
-    | 'products' | 'product_detail' | 'not_found'
+    | 'catalogue' | 'suite_detail' | 'workflow_detail' | 'pricing' | 'kit_detail'
+    | 'sprint' | 'enterprise' | 'partners' | 'validation' | 'not_found'
     | 'academy' | 'intel' | 'network' | 'advisory' | 'documentation' | 'career'
     | 'resources' | 'enter' | 'join_network' | 'account' | 'contact' | 'style_guide' | 'verify_email';
 

@@ -5,7 +5,8 @@ import type { Server } from 'node:http';
 
 /**
  * API smoke tests against the real Express app (server-side).
- * Covers health, demo request_pilot gating, unknown-slug 404, and error states.
+ * Covers health, the canonical DemoResponse contract, demo gating without a
+ * key, suite demo rejection, and unknown-slug 404.
  */
 let app: Express;
 let server: Server;
@@ -24,6 +25,17 @@ afterAll(async () => {
   await new Promise<void>((resolve) => server.close(() => resolve()));
 });
 
+const DEMO_STATUSES = ['COMPLETE', 'NEEDS_INPUT', 'BLOCKED', 'INCOMPLETE_SOURCE_SET', 'NEEDS_EXTERNAL_VALIDATOR', 'ERROR'];
+
+async function postDemo(body: unknown): Promise<{ status: number; json: Record<string, unknown> }> {
+  const res = await fetch(`${baseUrl}/api/demo/run`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  return { status: res.status, json: (await res.json()) as Record<string, unknown> };
+}
+
 describe('API', () => {
   it('GET /api/health returns ok', async () => {
     const res = await fetch(`${baseUrl}/api/health`);
@@ -32,38 +44,53 @@ describe('API', () => {
     expect(body.status).toBe('ok');
   });
 
-  it('POST /api/demo/run with unknown slug returns 404 error state', async () => {
-    const res = await fetch(`${baseUrl}/api/demo/run`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ slug: 'no-such-product', input: {} }),
-    });
-    expect(res.status).toBe(404);
-    const body = await res.json();
-    expect(body.status).toBe('error');
+  it('POST /api/demo/run with unknown slug returns 404 ERROR DemoResponse', async () => {
+    const { status, json } = await postDemo({ slug: 'no-such-product', input: {} });
+    expect(status).toBe(404);
+    expect(json.status).toBe('ERROR');
+    expect(json.actionsExecuted).toEqual([]);
   });
 
-  it('POST /api/demo/run returns REQUEST_PILOT when no AI key/flag configured', async () => {
-    const res = await fetch(`${baseUrl}/api/demo/run`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ slug: 'contract-review-copilot', input: { contractText: 'x'.repeat(250) } }),
-    });
-    expect(res.status).toBe(200);
-    const body = await res.json();
-    expect(['request_pilot']).toContain(body.status);
-    expect(body.productSlug).toBe('contract-review-copilot');
+  it('POST /api/demo/run (canonical slug) honours the DemoResponse contract', async () => {
+    const { status, json } = await postDemo({ slug: 'contract-review', input: { contractText: 'x'.repeat(250) } });
+    expect(status).toBe(200);
+    expect(DEMO_STATUSES).toContain(json.status);
+    expect(typeof json.productId).toBe('string');
+    expect(typeof json.runId).toBe('string');
+    expect(Array.isArray(json.sourceRefs)).toBe(true);
+    expect(json.validation).toMatchObject({ schema: expect.any(String), provenance: expect.any(String), safety: expect.any(String) });
+    expect(Array.isArray(json.limitations)).toBe(true);
+    expect(json.actionsExecuted).toEqual([]);
   });
 
-  it('POST /api/demo/run for a product without a public demo returns REQUEST_PILOT', async () => {
-    const res = await fetch(`${baseUrl}/api/demo/run`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ slug: 'ma-due-diligence-workbench', input: {} }),
-    });
-    expect(res.status).toBe(200);
-    const body = await res.json();
-    expect(body.status).toBe('request_pilot');
+  it('POST /api/demo/run returns NEEDS_EXTERNAL_VALIDATOR when no AI key/flag configured', async () => {
+    const { status, json } = await postDemo({ slug: 'contract-review', input: { contractText: 'x'.repeat(250) } });
+    expect(status).toBe(200);
+    if (!process.env.GEMINI_API_KEY && !process.env.API_KEY) {
+      expect(json.status).toBe('NEEDS_EXTERNAL_VALIDATOR');
+      expect(json.productId).toBe('KONKRED-LEG-CON-CANON-0001-v2.0');
+    }
+  });
+
+  it('legacy slugs still resolve on the demo endpoint', async () => {
+    const { status, json } = await postDemo({ slug: 'contract-review-copilot', input: { contractText: 'x'.repeat(250) } });
+    expect(status).toBe(200);
+    expect(json.productId).toBe('KONKRED-LEG-CON-CANON-0001-v2.0');
+  });
+
+  it('suite slugs never fake a demo — NEEDS_EXTERNAL_VALIDATOR with no result', async () => {
+    const { status, json } = await postDemo({ slug: 'customer-support-control', input: {} });
+    expect(status).toBe(200);
+    expect(json.status).toBe('NEEDS_EXTERNAL_VALIDATOR');
+    expect(json.result).toBeUndefined();
+    expect(json.validation).toMatchObject({ schema: 'NOT_RUN' });
+  });
+
+  it('missing input returns NEEDS_INPUT with schema NOT_RUN', async () => {
+    const { status, json } = await postDemo({ slug: 'contract-review', input: {} });
+    expect(status).toBe(200);
+    expect(json.status).toBe('NEEDS_INPUT');
+    expect(json.validation).toMatchObject({ schema: 'NOT_RUN' });
   });
 
   it('fullKONK health endpoint responds (server-side route preserved)', async () => {

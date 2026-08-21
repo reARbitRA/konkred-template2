@@ -123,7 +123,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       } else {
         clearInterval(typeInterval);
         const outputLines = [
-          "[OK] 15 workflow products loaded from catalogue",
+          "[OK] 36 workflow products loaded from catalogue",
           "[OK] Server-side AI provider interface ready",
           "[OK] Audit engine: AUDITOR active",
           "[OK] Adversarial suite: REDAEYE active",
@@ -216,11 +216,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
             Docs
           </a>
           <a
-            href={getPathForPage('products')}
+            href={getPathForPage('catalogue')}
             onClick={(e) => {
               if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
                 e.preventDefault();
-                onNavigate('products');
+                onNavigate('catalogue');
               }
             }}
             className="bg-amber-500 text-black font-black px-4 py-2 border-2 border-black shadow-[2px_2px_0px_0px_#000000] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all flex items-center gap-1.5"
@@ -251,13 +251,13 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
             </h2>
 
             <div className="text-base sm:text-lg text-zinc-300 font-sans space-y-1 max-w-2xl mb-10 leading-relaxed">
-              <p>Fifteen workflow products across legal, security, finance, sales, product and marketing.</p>
+              <p>Thirty-six products: 21 canonical suites and 15 validated workflow tools across legal, security, finance, sales, product, marketing, healthcare, HR and operations.</p>
               <p>Plus the AUDITOR neural audit engine, REDAEYE adversarial diagnostics, and the fullKONK_&gt; product builder.</p>
             </div>
 
             <div className="flex flex-wrap items-center gap-4">
               <button
-                onClick={() => onNavigate('products')}
+                onClick={() => onNavigate('catalogue')}
                 className="bg-amber-500 text-black font-mono font-black px-8 py-4 uppercase tracking-wider text-sm border-2 border-black shadow-[4px_4px_0px_0px_#000000] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0px_0px_#000000] transition-all flex items-center gap-2 cursor-pointer"
               >
                 <span>Browse Products</span>
@@ -418,7 +418,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
               </div>
 
               <button
-                onClick={() => onNavigate('products')}
+                onClick={() => onNavigate('catalogue')}
                 className="w-full bg-amber-500 text-black font-mono font-black py-4 px-6 border-2 border-black uppercase tracking-wider text-sm hover:bg-black hover:text-white transition-all flex items-center justify-between group-hover:shadow-[2px_2px_0px_0px_#000000]"
               >
                 <span>Open Catalogue</span>

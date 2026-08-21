@@ -1,0 +1,145 @@
+/**
+ * Validated workflow page (/tools/:slug) — a sellable micro-tool.
+ * Order (owner-specified): the tool first, its unique workspace surface
+ * second, evidence and a compact scope panel after. No raw prompts, no
+ * high-risk banners.
+ */
+import React, { useEffect, useMemo } from 'react';
+import type { PageView } from '../types.ts';
+import { getEntryBySlug } from '../content/catalogue/portfolio.ts';
+import type { PortfolioEntry } from '../content/catalogue/types.ts';
+import type { ProductRecord } from '../catalog/types.ts';
+import { MicroTool } from '../components/catalog/MicroTool.tsx';
+import { Pattern } from '../components/portfolio/patterns/index.tsx';
+import { StatusChip, DesignScore, ValidationBadge, EvidencePanel } from '../components/portfolio/Evidence.tsx';
+import { ScopeReviewPanel } from '../components/portfolio/ScopeReviewPanel.tsx';
+import { CtaRail } from '../components/portfolio/CtaRail.tsx';
+import { track } from '../utils/analytics.ts';
+import { ArrowLeft, ArrowRight, Wrench } from 'lucide-react';
+
+interface Props {
+  slug: string;
+  onNavigate: (page: PageView, slug?: string) => void;
+}
+
+const WorkflowDetailPage: React.FC<Props> = ({ slug, onNavigate }) => {
+  const entry: PortfolioEntry | undefined = getEntryBySlug(slug);
+  useEffect(() => { if (entry) track('workflow_view', entry.id); }, [entry?.id]);
+
+  // Legacy-compatible shim so MicroTool/validators keep working against the
+  // canonical entry's demo contract.
+  const shim: ProductRecord | null = useMemo(() => {
+    if (!entry?.demo) return null;
+    return {
+      id: entry.id,
+      slug: entry.slug,
+      name: entry.title,
+      category: entry.category,
+      status: 'PUBLIC_DEMO',
+      risk: 'low',
+      humanApprovalRequired: entry.humanApprovalRequired,
+      shortDescription: entry.jobToBeDone ?? '',
+      description: entry.definition ?? '',
+      buyer: entry.buyer ?? '',
+      prompt: entry.demo.prompt,
+      inputSchema: entry.demo.inputSchema,
+      outputSchema: entry.demo.outputSchema,
+      fixture: entry.demo.fixturePath ? { path: entry.demo.fixturePath, label: entry.demo.fixtureLabel ?? '', source: entry.demo.fixtureSource ?? '' } : null,
+      demoStatus: { available: entry.demo.available, fixturePath: entry.demo.fixturePath, note: '' },
+      validationReport: { status: 'available', path: entry.validationReport, note: '' },
+      pricing: (entry.demo.legacyPricing as unknown as ProductRecord['pricing']) ?? { kitUsd: null, validationSprintUsd: null, enterprisePilot: null, currency: 'USD', proposed: true },
+      limitations: entry.demo.legacyLimitations,
+    };
+  }, [entry?.id]);
+
+  if (!entry || entry.type !== 'WORKFLOW' || !shim) {
+    return (
+      <div className="min-h-[60vh] bg-[#0B0F14] text-white flex items-center justify-center px-6 py-24">
+        <div className="max-w-md text-center space-y-4">
+          <p className="font-mono text-xs uppercase tracking-widest text-zinc-400">Workflow not found: {slug}</p>
+          <button onClick={() => onNavigate('catalogue')} className="inline-flex items-center gap-2 bg-amber-500 text-black font-mono font-black text-xs uppercase tracking-widest px-5 py-3 border-2 border-black hover:bg-black hover:text-white transition-colors cursor-pointer">
+            <ArrowLeft size={14} /> Back to Catalogue
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-[#0B0F14] text-white font-sans pb-24 pt-6">
+      <div className="max-w-7xl mx-auto px-6 md:px-8 pt-2 pb-6 border-b border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <button onClick={() => onNavigate('catalogue')} className="inline-flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-amber-500 hover:text-white transition-colors group cursor-pointer">
+          <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
+          <span>BACK TO CATALOGUE</span>
+        </button>
+        <div className="flex items-center gap-3">
+          <ValidationBadge status={entry.validationStatus} />
+          <StatusChip status={entry.status} />
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-6 md:px-8 grid grid-cols-1 lg:grid-cols-12 gap-10 pt-10">
+        <div className="lg:col-span-8 space-y-9">
+          <div className="space-y-4">
+            <p className="text-[10px] font-mono uppercase tracking-widest text-amber-500 font-bold flex items-center gap-2">
+              <Wrench size={12} /> {entry.category} · WORKFLOW
+              {entry.parentRoute && (
+                <button onClick={() => onNavigate('suite_detail', entry.parentRoute!.split('/').pop()!)} className="text-cyan-400 hover:text-cyan-300 cursor-pointer normal-case tracking-normal font-bold">
+                  part of {entry.parentId?.replace('KONKRED-ARB-', '').replace('-CANON-0001-v1.0', '')} suite →
+                </button>
+              )}
+            </p>
+            <h1 className="text-3xl sm:text-4xl font-black font-mono tracking-tight uppercase leading-tight">{entry.title}</h1>
+            <p className="text-base text-zinc-300 leading-relaxed max-w-3xl">{entry.jobToBeDone}</p>
+            <div className="flex flex-wrap items-start gap-6 pt-1">
+              <div className="text-xs text-zinc-400 max-w-md">
+                <span className="font-mono font-black uppercase tracking-widest text-zinc-300">Built for: </span>{entry.buyer}
+              </div>
+              <DesignScore score={entry.staticDesignScore} />
+            </div>
+            <p className="font-mono text-[9px] text-zinc-600">{entry.id} · updated {entry.updatedAt}</p>
+          </div>
+
+          <MicroTool product={shim} fixtureKey={entry.legacySlug ?? undefined} />
+
+          <Pattern entry={entry} />
+
+          <section aria-label="How it runs" className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="space-y-2.5">
+              <h3 className="font-mono font-black uppercase tracking-widest text-xs text-white">How it runs</h3>
+              <ol className="space-y-1.5">
+                {entry.runbook.map((r, i) => (
+                  <li key={i} className="text-[11px] text-zinc-300 flex gap-2.5 leading-snug">
+                    <span className="font-mono font-black text-amber-500">{i + 1}</span>{r}
+                  </li>
+                ))}
+              </ol>
+            </div>
+            <div className="space-y-2.5">
+              <h3 className="font-mono font-black uppercase tracking-widest text-xs text-white">Inputs → outputs</h3>
+              <div className="space-y-1.5">
+                {entry.outputSummary.map((o) => (
+                  <p key={o} className="text-[11px] text-zinc-400 font-mono flex gap-2"><span className="text-emerald-500">←</span>{o}</p>
+                ))}
+              </div>
+              {entry.pricing.kitFromUsd != null && (
+                <button onClick={() => onNavigate('kit_detail', entry.slug)} className="mt-3 inline-flex items-center gap-2 text-[11px] font-mono font-bold uppercase tracking-widest text-cyan-400 hover:text-cyan-300 cursor-pointer">
+                  Workflow Kit details <ArrowRight size={11} />
+                </button>
+              )}
+            </div>
+          </section>
+
+          <EvidencePanel entry={entry} />
+          <ScopeReviewPanel entry={entry} />
+        </div>
+
+        <div className="lg:col-span-4 space-y-4">
+          <CtaRail entry={entry} />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default WorkflowDetailPage;

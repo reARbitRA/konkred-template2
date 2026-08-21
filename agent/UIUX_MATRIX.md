@@ -1,4 +1,6 @@
 # KONKRED — UI/UX Differentiation Matrix (36 entries)
+**STATUS: IMPLEMENTED** — all 36 patterns shipped as dedicated components under `components/portfolio/patterns/` (`suites-a.tsx` 1–11, `suites-b.tsx` 12–21, `workflows.tsx` 1–15, registry in `index.tsx`). Each renders `data-testid="pattern-<slug>"`; uniqueness enforced by `tests/portfolio.test.ts`.
+
 
 Purpose: prove that the 36 pages share one design system but are **not** clones. Each entry below states its
 layout skeleton, the interaction that only it has, the atomic data unit the user manipulates, the shape of the

@@ -33,7 +33,7 @@ const AuditPage: React.FC<AuditPageProps> = ({ onNavigate }) => {
             NEURAL AUDIT // AUDIT-ONLY
           </span>
           <button
-            onClick={() => onNavigate('products')}
+            onClick={() => onNavigate('catalogue')}
             className="px-4 py-2 bg-cyan-500 text-black border border-cyan-400 font-mono text-xs font-black uppercase tracking-wider rounded-xl hover:opacity-90 transition-all flex items-center gap-1.5 cursor-pointer"
           >
             <span>PRODUCT CATALOGUE</span>

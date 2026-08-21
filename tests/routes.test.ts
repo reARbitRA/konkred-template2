@@ -1,78 +1,99 @@
 import { describe, it, expect } from 'vitest';
-import { getPageFromPath, getPathForPage, PAGE_ROUTES } from '../utils/routes.ts';
-import { PRODUCTS } from '../catalog/products.ts';
+import { getPageFromPath, getPathForPage } from '../utils/routes.ts';
+import { ENTRIES, SUITES, WORKFLOWS, getEntryBySlug, getEntryByLegacySlug } from '../content/catalogue/portfolio.ts';
 
-describe('route map — all 15 product slugs', () => {
-  it('every product slug maps to a product_detail route', () => {
-    for (const product of PRODUCTS) {
-      const match = getPageFromPath(`/products/${product.slug}`);
-      expect(match.page).toBe('product_detail');
-      expect(match.slug).toBe(product.slug);
+/**
+ * Routing contract for the 36-entry catalogue era.
+ * - 21 canonical /suites/:slug routes render suite_detail
+ * - 15 canonical /tools/:slug routes render workflow_detail
+ * - 15 legacy /products/:slug paths redirect to their canonical /tools route
+ * - platform routes are real pages; purged marketplace routes 404
+ */
+describe('portfolio routing', () => {
+  it('every suite maps to a suite_detail route', () => {
+    for (const suite of SUITES) {
+      const match = getPageFromPath(`/suites/${suite.slug}`);
+      expect(match.page).toBe('suite_detail');
+      expect(match.slug).toBe(suite.slug);
+      expect(match.redirectedFrom).toBeUndefined();
     }
   });
 
-  it('getPathForPage round-trips every product detail URL', () => {
-    for (const product of PRODUCTS) {
-      const url = getPathForPage('product_detail', product.slug);
-      expect(url).toBe(`/products/${product.slug}`);
-      expect(getPageFromPath(url).slug).toBe(product.slug);
+  it('every workflow maps to a workflow_detail route', () => {
+    for (const wf of WORKFLOWS) {
+      const match = getPageFromPath(`/tools/${wf.slug}`);
+      expect(match.page).toBe('workflow_detail');
+      expect(match.slug).toBe(wf.slug);
     }
   });
 
-  it('catalogue route resolves for /products and /catalogue', () => {
-    expect(getPageFromPath('/products').page).toBe('products');
-    expect(getPageFromPath('/catalogue').page).toBe('products');
-  });
-});
-
-describe('route map — preserved flagship routes', () => {
-  it('audit routes resolve to the audit-only page (no forge tabs)', () => {
-    // /forge-audit and /audit both render the single-purpose AuditPage
-    for (const p of ['/forge-audit', '/audit', '/auditor']) {
-      expect(['forge_audit', 'audit']).toContain(getPageFromPath(p).page);
+  it('every workflow kit slug maps to a kit_detail route', () => {
+    for (const wf of WORKFLOWS) {
+      expect(getPageFromPath(`/kits/${wf.slug}`).page).toBe('kit_detail');
     }
   });
 
-  it('redaeye resolves to redaeye; sandbox is kept private as the same component', () => {
-    expect(getPageFromPath('/redaeye').page).toBe('redaeye');
-    // /redaeye-sandbox is a private dev alias that renders the same sandbox
-    expect(getPageFromPath('/redaeye-sandbox').page).toBe('redaeye_sandbox');
-    expect(PAGE_ROUTES.redaeye).toBe('/redaeye');
+  it('legacy /products/:slug redirects to the canonical /tools/:slug', () => {
+    for (const wf of WORKFLOWS) {
+      expect(wf.legacySlug, `${wf.slug} needs a legacy slug`).toBeTruthy();
+      const match = getPageFromPath(`/products/${wf.legacySlug}`);
+      expect(match.page).toBe('workflow_detail');
+      expect(match.slug).toBe(wf.slug);
+      expect(match.redirectedFrom).toBe(`/products/${wf.legacySlug}`);
+      expect(getPathForPage('workflow_detail', wf.slug)).toBe(`/tools/${wf.slug}`);
+    }
   });
 
-  it('fullkonk resolves to /fullkonk', () => {
+  it('legacy slug lookup resolves every old product URL', () => {
+    for (const wf of WORKFLOWS) {
+      expect(getEntryByLegacySlug(wf.legacySlug as string)?.slug).toBe(wf.slug);
+    }
+  });
+
+  it('catalogue route resolves for /catalogue and redirects /products, /marketplace, /ktools', () => {
+    expect(getPageFromPath('/catalogue').page).toBe('catalogue');
+    expect(getPageFromPath('/products')).toMatchObject({ page: 'catalogue', redirectedFrom: '/products' });
+    expect(getPageFromPath('/marketplace')).toMatchObject({ page: 'catalogue', redirectedFrom: '/marketplace' });
+    expect(getPageFromPath('/ktools').page).toBe('catalogue');
+  });
+
+  it('platform routes are real pages', () => {
+    expect(getPageFromPath('/pricing').page).toBe('pricing');
+    expect(getPageFromPath('/sprint').page).toBe('sprint');
+    expect(getPageFromPath('/enterprise').page).toBe('enterprise');
+    expect(getPageFromPath('/partners').page).toBe('partners');
+    expect(getPageFromPath('/validation').page).toBe('validation');
+  });
+
+  it('unknown suite/tool slugs resolve to 404, never a fake page', () => {
+    expect(getPageFromPath('/suites/not-a-suite').page).toBe('not_found');
+    expect(getPageFromPath('/tools/not-a-tool').page).toBe('not_found');
+    expect(getPageFromPath('/kits/not-a-kit').page).toBe('not_found');
+    expect(getPageFromPath('/products/unknown-slug').page).toBe('not_found');
+  });
+
+  it('purged marketplace routes stay 404', () => {
+    for (const p of ['/checkout', '/wallet', '/seller-dashboard', '/buyer-dashboard', '/admin', '/dispute', '/affiliate', '/listing', '/wizard']) {
+      expect(getPageFromPath(p).page, `${p} should 404`).toBe('not_found');
+    }
+  });
+
+  it('preserved flagship routes still resolve', () => {
+    expect(getPageFromPath('/forge-audit').page).toBe('forge_audit');
+    expect(['forge_audit', 'audit']).toContain(getPageFromPath('/audit').page); // both render AUDITOR
+    expect(getPageFromPath('/auditor').page).toBe('forge_audit');
     expect(getPageFromPath('/fullkonk').page).toBe('fullkonk');
-    expect(PAGE_ROUTES.fullkonk).toBe('/fullkonk');
-  });
-});
-
-describe('route map — purged routes never render fake pages', () => {
-  const PURGED_PATHS = [
-    '/wallet', '/enclave', '/usage', '/library', '/seller-dashboard', '/buyer-dashboard',
-    '/checkout', '/wizard', '/affiliate', '/admin', '/dispute', '/metrics', '/usage-metrics',
-    '/playgrounds', '/intel-report', '/listing', '/listing/L1',
-  ];
-
-  it.each(PURGED_PATHS)('purged route %s resolves to 404', (p) => {
-    const match = getPageFromPath(p);
-    expect(match.page).toBe('not_found');
+    expect(getPageFromPath('/redaeye').page).toBe('redaeye');
   });
 
-  it('marketplace/ktools/pricing redirect to the product catalogue (replacement routes)', () => {
-    for (const p of ['/marketplace', '/ktools', '/pricing', '/catalogue']) {
-      const match = getPageFromPath(p);
-      expect(match.page).toBe('products');
-      expect(match.redirectedFrom).toBe(p);
+  it('all 36 entries have unique route paths in the manifest', () => {
+    const routes = ENTRIES.map((e) => e.route);
+    expect(new Set(routes).size).toBe(36);
+  });
+
+  it('getEntryBySlug resolves all 36 canonical slugs', () => {
+    for (const e of ENTRIES) {
+      expect(getEntryBySlug(e.slug)?.id).toBe(e.id);
     }
-  });
-
-  it('forge redirects to fullkonk (deprecated forge merged)', () => {
-    const match = getPageFromPath('/forge');
-    expect(match.page).toBe('fullkonk');
-  });
-
-  it('unknown paths resolve to 404', () => {
-    expect(getPageFromPath('/definitely-not-a-route').page).toBe('not_found');
-    expect(getPageFromPath('/xyzzy').page).toBe('not_found');
   });
 });

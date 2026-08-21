@@ -5,7 +5,9 @@ import { SITE } from '../src/config/site.ts';
 
 const SystemFooter: React.FC = () => {
   const links = [
-    { label: 'Product Catalogue', page: 'products' as const },
+    { label: 'Catalogue', page: 'catalogue' as const },
+    { label: 'Pricing', page: 'pricing' as const },
+    { label: 'Validation', page: 'validation' as const },
     { label: 'Neural Audit', page: 'forge_audit' as const },
     { label: 'fullKONK_>', page: 'fullkonk' as const },
     { label: 'REDAEYE', page: 'redaeye' as const },

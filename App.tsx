@@ -22,7 +22,9 @@ const FullKonkPage = lazy(() => import('./pages/FullKonkPage.tsx'));
 const RedaeyeSandbox = lazy(() => import('./pages/RedaeyeSandbox.tsx'));
 const AuditPage = lazy(() => import('./pages/AuditPage.tsx'));
 const CataloguePage = lazy(() => import('./pages/CataloguePage.tsx'));
-const ProductDetailPage = lazy(() => import('./pages/ProductDetailPage.tsx'));
+const SuiteDetailPage = lazy(() => import('./pages/SuiteDetailPage.tsx'));
+const WorkflowDetailPage = lazy(() => import('./pages/WorkflowDetailPage.tsx'));
+import { PricingPage, SprintPage, EnterprisePage, PartnersPage, ValidationPage, KitDetailPage } from './pages/PlatformPages.tsx';
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage.tsx'));
 const AccountPage = lazy(() => import('./pages/AccountPage.tsx'));
 const AcademyPage = lazy(() => import('./pages/AcademyPage.tsx'));
@@ -44,12 +46,14 @@ const App: React.FC = () => {
     const [isBooting, setIsBooting] = useState(true);
     const [currentPage, setCurrentPage] = useState<PageView>('landing');
     const [productSlug, setProductSlug] = useState<string | undefined>(undefined);
+    const [suiteSlug, setSuiteSlug] = useState<string | undefined>(undefined);
     const [isCmdOpen, setIsCmdOpen] = useState(false);
     const [emailForVerification, setEmailForVerification] = useState<string | null>(null);
 
     const navigate = (page: PageView, slug?: string) => {
         setCurrentPage(page);
-        if (page === 'product_detail') setProductSlug(slug);
+        if (page === 'workflow_detail' || page === 'kit_detail') setProductSlug(slug);
+        if (page === 'suite_detail') setSuiteSlug(slug);
         const newPath = getPathForPage(page, slug);
         if (window.location.pathname !== newPath) {
             window.history.pushState({ page, slug }, '', newPath);
@@ -63,6 +67,7 @@ const App: React.FC = () => {
             const match = getPageFromPath(window.location.pathname);
             setCurrentPage(match.page);
             setProductSlug(match.slug);
+            setSuiteSlug(match.slug);
 
             // Intentional redirect for purged/aliased routes: replace URL so
             // the resolved path is visible and the fake page never renders.
@@ -139,17 +144,24 @@ const App: React.FC = () => {
                         {currentPage === 'redaeye' && <RedaeyeSandbox onNavigate={navigate} />}
                         {currentPage === 'redaeye_sandbox' && <RedaeyeSandbox onNavigate={navigate} />}
                         {(currentPage === 'forge_audit' || currentPage === 'audit') && <AuditPage onNavigate={navigate} />}
-                        {currentPage === 'products' && <CataloguePage onNavigate={navigate} />}
-                        {currentPage === 'product_detail' && (
-                            productSlug ? (
-                                <ProductDetailPage slug={productSlug} onNavigate={navigate} />
-                            ) : (
-                                <CataloguePage onNavigate={navigate} />
-                            )
+                        {currentPage === 'catalogue' && <CataloguePage onNavigate={navigate} />}
+                        {currentPage === 'suite_detail' && (
+                            suiteSlug ? <SuiteDetailPage slug={suiteSlug} onNavigate={navigate} /> : <CataloguePage onNavigate={navigate} />
                         )}
+                        {currentPage === 'workflow_detail' && (
+                            productSlug ? <WorkflowDetailPage slug={productSlug} onNavigate={navigate} /> : <CataloguePage onNavigate={navigate} />
+                        )}
+                        {currentPage === 'kit_detail' && (
+                            productSlug ? <KitDetailPage slug={productSlug} onNavigate={navigate} /> : <CataloguePage onNavigate={navigate} />
+                        )}
+                        {currentPage === 'pricing' && <PricingPage onNavigate={navigate} />}
+                        {currentPage === 'sprint' && <SprintPage onNavigate={navigate} />}
+                        {currentPage === 'enterprise' && <EnterprisePage onNavigate={navigate} />}
+                        {currentPage === 'partners' && <PartnersPage onNavigate={navigate} />}
+                        {currentPage === 'validation' && <ValidationPage onNavigate={navigate} />}
                         {currentPage === 'not_found' && <NotFoundPage onNavigate={navigate} />}
                         {currentPage === 'account' && <AccountPage user={auth.user} onNavigate={navigate} />}
-                        {currentPage === 'enter' && <EnterGate onEnter={() => navigate('products')} onBack={() => navigate('landing')} onVerificationNeeded={(email) => { setEmailForVerification(email); navigate('verify_email'); }} />}
+                        {currentPage === 'enter' && <EnterGate onEnter={() => navigate('catalogue')} onBack={() => navigate('landing')} onVerificationNeeded={(email) => { setEmailForVerification(email); navigate('verify_email'); }} />}
                         {currentPage === 'join_network' && <JoinNetwork onNavigate={navigate} onComplete={(email) => { setEmailForVerification(email); navigate('verify_email'); }} />}
                         {currentPage === 'verify_email' && <VerifyEmailPage email={emailForVerification!} onNavigateLogin={() => navigate('enter')} />}
                         {currentPage === 'contact' && <ContactPage onNavigate={navigate} />}

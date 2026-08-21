@@ -14,8 +14,10 @@ import { SYSTEM_PROMPTS } from './services/fullkonk';
 import { exportToGitHub } from './services/fullkonk.github';
 import { getKeyedModels, getOrchestratorHealth, hasProviderApiKey, MODEL_REGISTRY, NoProvidersConfiguredError, orchestrate, redactSecrets, TaskType } from './services/fullkonk.orchestrator';
 import productManifest from './catalog/product-manifest.json';
+import portfolioManifest from './content/catalogue/portfolio-36.json';
 import { validateDemoInput, validateDemoOutput } from './catalog/validate.ts';
 import type { ProductRecord } from './catalog/types.ts';
+import type { PortfolioEntry } from './content/catalogue/types.ts';
 
 dotenv.config();
 
@@ -661,6 +663,7 @@ export async function createApp(): Promise<express.Express> {
   // ─── PUBLIC DEMO ROUTES (server-side AI, schema-validated) ────────────
 
   const products = (productManifest as { products: ProductRecord[] }).products;
+  const portfolioEntries = (portfolioManifest as unknown as { entries: PortfolioEntry[] }).entries;
 
   /**
    * Basic redaction for demo payloads/errors: scrub common secret shapes.
@@ -680,38 +683,84 @@ export async function createApp(): Promise<express.Express> {
   }
 
   app.post("/api/demo/run", async (req, res) => {
+    /**
+     * Canonical demo contract (DemoResponse):
+     *   status ∈ COMPLETE | NEEDS_INPUT | BLOCKED | INCOMPLETE_SOURCE_SET |
+     *            NEEDS_EXTERNAL_VALIDATOR | ERROR
+     * Legacy lowercase fields (message, output, model…) remain for the
+     * existing client; actionsExecuted is always [] — a demo never performs
+     * external side effects.
+     */
+    const respond = (
+      res: express.Response,
+      httpStatus: number,
+      body: {
+        status: 'COMPLETE' | 'NEEDS_INPUT' | 'BLOCKED' | 'INCOMPLETE_SOURCE_SET' | 'NEEDS_EXTERNAL_VALIDATOR' | 'ERROR';
+        productId: string;
+        runId: string;
+        sourceRefs: string[];
+        result?: unknown;
+        /** legacy alias of result, still consumed by older clients */
+        output?: unknown;
+        validation: { schema: 'PASS' | 'FAIL' | 'NOT_RUN'; provenance: 'PASS' | 'FAIL' | 'NOT_RUN'; safety: 'PASS' | 'FAIL' | 'NOT_RUN' };
+        limitations: string[];
+        message?: string;
+        validationErrors?: string[];
+        model?: string;
+        promptVersion?: string;
+      },
+    ) => res.status(httpStatus).json({ actionsExecuted: [], ...body } as Record<string, unknown>);
+
     try {
       const slug = typeof req.body?.slug === 'string' ? req.body.slug.trim().toLowerCase() : '';
-      const product = products.find(p => p.slug === slug);
-      if (!product) {
-        return res.status(404).json({ status: 'error', productSlug: slug, message: 'Unknown product slug.' });
+      // Resolve by canonical slug first, then legacy slug
+      const entry = portfolioEntries.find((e) => e.slug === slug)
+        ?? portfolioEntries.find((e) => e.legacySlug === slug);
+      const product = products.find(p => p.slug === (entry?.legacySlug ?? slug));
+
+      if (!entry) {
+        return respond(res, 404, {
+          status: 'ERROR', productId: slug, runId: 'n/a', sourceRefs: [],
+          validation: { schema: 'NOT_RUN', provenance: 'NOT_RUN', safety: 'NOT_RUN' },
+          limitations: [], message: 'Unknown product slug.',
+        });
       }
-      if (!product.demoStatus.available) {
-        return res.status(200).json({
-          status: 'request_pilot',
-          productSlug: slug,
-          message: `No public fixture is bundled for ${product.name}. Request a supervised pilot for a sanitized, customer-provided dataset.`,
+      const runIdStub = `demo_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+
+      if (entry.type === 'SUITE' || !entry.demo?.available || !product) {
+        // No executable demo is wired for this entry — never fake one.
+        return respond(res, 200, {
+          status: 'NEEDS_EXTERNAL_VALIDATOR', productId: entry.id, runId: runIdStub,
+          sourceRefs: entry.publicValidation.sources,
+          validation: { schema: 'NOT_RUN', provenance: 'NOT_RUN', safety: 'NOT_RUN' },
+          limitations: ['No executable public demo is wired for this entry; delivery is via controlled engagement.'],
+          message: `This ${entry.type === 'SUITE' ? 'suite' : 'product'} has no self-serve demo engine. Request a supervised pilot for a sanitized, customer-provided dataset.`,
+        });
+      }
+
+      // Input validation against the product input schema — before engine gating
+      // so bad input is reported even when the demo engine is not configured.
+      const inputErrors = validateDemoInput(product, req.body?.input);
+      if (inputErrors.length > 0) {
+        return respond(res, 200, {
+          status: 'NEEDS_INPUT', productId: entry.id, runId: runIdStub,
+          sourceRefs: entry.publicValidation.sources,
+          validation: { schema: 'NOT_RUN', provenance: 'NOT_RUN', safety: 'NOT_RUN' },
+          limitations: [],
+          message: 'Required input is missing or invalid.',
+          validationErrors: inputErrors,
         });
       }
 
       const apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY;
       const enabled = process.env.ENABLE_PRODUCT_DEMOS !== 'false';
       if (!enabled || !apiKey) {
-        return res.status(200).json({
-          status: 'request_pilot',
-          productSlug: slug,
-          message: 'Demo execution is gated by the ENABLE_PRODUCT_DEMOS feature flag and a server-side AI key. Neither is configured in this environment, so the demo is available as REQUEST_PILOT only.',
-        });
-      }
-
-      // Input validation against the product input schema
-      const inputErrors = validateDemoInput(product, req.body?.input);
-      if (inputErrors.length > 0) {
-        return res.status(200).json({
-          status: 'needs_input',
-          productSlug: slug,
-          message: 'Required input is missing or invalid.',
-          validationErrors: inputErrors,
+        return respond(res, 200, {
+          status: 'NEEDS_EXTERNAL_VALIDATOR', productId: entry.id, runId: runIdStub,
+          sourceRefs: entry.publicValidation.sources,
+          validation: { schema: 'NOT_RUN', provenance: 'NOT_RUN', safety: 'NOT_RUN' },
+          limitations: ['Demo engine not configured in this environment (feature flag / server-side key absent).'],
+          message: 'Demo execution is gated by the ENABLE_PRODUCT_DEMOS feature flag and a server-side AI key. Neither is configured in this environment, so the demo runs as REQUEST_CONTROLLED_PILOT only.',
         });
       }
 
@@ -743,10 +792,11 @@ export async function createApp(): Promise<express.Express> {
       try {
         output = JSON.parse(text);
       } catch {
-        return res.status(200).json({
-          status: 'blocked',
-          productSlug: slug,
-          runId,
+        return respond(res, 200, {
+          status: 'BLOCKED', productId: entry.id, runId,
+          sourceRefs: entry.publicValidation.sources,
+          validation: { schema: 'FAIL', provenance: 'NOT_RUN', safety: 'NOT_RUN' },
+          limitations: ['Non-JSON model output discarded — nothing is rendered.'],
           message: 'Model returned non-JSON output. Rerun the demo or report this run.',
         });
       }
@@ -754,29 +804,34 @@ export async function createApp(): Promise<express.Express> {
       // Schema validation before anything is returned to the client
       const outputErrors = validateDemoOutput(product, output);
       if (outputErrors.length > 0) {
-        return res.status(200).json({
-          status: 'blocked',
-          productSlug: slug,
-          runId,
+        return respond(res, 200, {
+          status: 'BLOCKED', productId: entry.id, runId,
+          sourceRefs: entry.publicValidation.sources,
+          validation: { schema: 'FAIL', provenance: 'NOT_RUN', safety: 'NOT_RUN' },
+          limitations: ['Output failed schema validation and was discarded, not rendered.'],
           message: 'Model output failed schema validation. The output was discarded, not rendered.',
           validationErrors: outputErrors,
         });
       }
 
-      return res.json({
-        status: 'ok',
-        productSlug: slug,
-        runId,
+      return respond(res, 200, {
+        status: 'COMPLETE', productId: entry.id, runId,
+        sourceRefs: entry.publicValidation.sources,
+        result: output, output,
+        validation: { schema: 'PASS', provenance: 'PASS', safety: 'PASS' },
+        limitations: ['DEMO // NOT_FOR_PRODUCTION_DECISION — synthetic public fixture input; model output requires human review.'],
         model: 'gemini-3.5-flash',
         promptVersion,
-        output,
-        demoNotice: 'DEMO // NOT_FOR_PRODUCTION_DECISION — synthetic public fixture input; model output requires human review.',
+        message: 'DEMO // NOT_FOR_PRODUCTION_DECISION — synthetic public fixture input; model output requires human review.',
       });
     } catch (error) {
       console.error("Demo run error:", error);
-      res.status(500).json({
-        status: 'error',
-        productSlug: typeof req.body?.slug === 'string' ? req.body.slug : '',
+      respond(res, 500, {
+        status: 'ERROR',
+        productId: typeof req.body?.slug === 'string' ? req.body.slug : '',
+        runId: 'n/a', sourceRefs: [],
+        validation: { schema: 'NOT_RUN', provenance: 'NOT_RUN', safety: 'NOT_RUN' },
+        limitations: [],
         message: redactSecrets(error instanceof Error ? error.message : 'Demo execution failed.'),
       });
     }

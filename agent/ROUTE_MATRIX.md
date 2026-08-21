@@ -1,4 +1,6 @@
 # KONKRED — Route Matrix (36 catalogue entries + platform + legacy)
+**STATUS: IMPLEMENTED** — routing shipped in `utils/routes.ts` + `content/catalogue/portfolio-36.json`; verified by `tests/routes.test.ts` (12 tests) and `tests/portfolio.test.ts`. Legacy `/products/:slug` URLs redirect to `/tools/:slug`; `/products`, `/marketplace`, `/ktools` redirect to `/catalogue`. Platform routes `/pricing`, `/kits/:slug`, `/sprint`, `/enterprise`, `/partners`, `/validation` are live pages.
+
 
 Canonical source: `content/catalogue/portfolio-36.json`. Every row below is asserted by
 `tests/routes.test.ts` and exercised by `tests/e2e/portfolio.spec.ts`.

@@ -74,16 +74,39 @@ describe('no fake marketplace data in source', () => {
   it('new platform source contains no unsupported claims', () => {
     const files = [
       'pages/CataloguePage.tsx',
-      'pages/ProductDetailPage.tsx',
-      'components/catalog/ProductCard.tsx',
+      'pages/SuiteDetailPage.tsx',
+      'pages/WorkflowDetailPage.tsx',
+      'pages/PlatformPages.tsx',
       'components/catalog/MicroTool.tsx',
       'components/catalog/ProductInquiryModal.tsx',
+      'components/portfolio/Evidence.tsx',
+      'components/portfolio/ScopeReviewPanel.tsx',
+      'components/portfolio/CtaRail.tsx',
+      'components/portfolio/patterns/suites-a.tsx',
+      'components/portfolio/patterns/suites-b.tsx',
+      'components/portfolio/patterns/workflows.tsx',
       'pages/NotFoundPage.tsx',
     ];
     for (const file of files) {
       const content = fs.readFileSync(path.join(ROOT, file), 'utf8');
       expect(content, `${file} contains unsupported claim`).not.toMatch(/bug-free|deploy-ready|autonomous production|100% accurate|zero-hallucination/i);
     }
+  });
+
+  it('portfolio manifest contains no fake sellers, ratings, reviews or sales counts', () => {
+    const manifest = fs.readFileSync(path.join(ROOT, 'content/catalogue/portfolio-36.json'), 'utf8');
+    for (const banned of [/"seller"/i, /"rating"/i, /"salesCount"/i, /"reviewCount"/i, /"customers"/i, /"testimonial"/i]) {
+      expect(manifest, `portfolio manifest matches ${banned}`).not.toMatch(banned);
+    }
+  });
+
+  it('portfolio pages never claim certification or measured accuracy', () => {
+    const dirs = ['pages', 'components/portfolio'];
+    let src = '';
+    for (const d of dirs) {
+      walk(path.join(ROOT, d), (f) => { src += fs.readFileSync(f, 'utf8'); });
+    }
+    expect(src).not.toMatch(/certified compliant|production-approved|guaranteed savings|zero false positives|98% accurate/i);
   });
 });
 

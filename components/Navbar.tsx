@@ -35,7 +35,8 @@ const Navbar: React.FC<NavbarProps> = ({
   }, []);
 
   const publicNavItems = [
-    { label: 'Products', page: 'products' as PageView },
+    { label: 'Catalogue', page: 'catalogue' as PageView },
+    { label: 'Pricing', page: 'pricing' as PageView },
     { label: 'Audit', page: 'forge_audit' as PageView },
     { label: 'fullKONK_>', page: 'fullkonk' as PageView },
     { label: 'Advisory', page: 'advisory' as PageView },
@@ -46,8 +47,15 @@ const Navbar: React.FC<NavbarProps> = ({
   const getPageTitle = (page: PageView) => {
     switch (page) {
       case 'landing': return 'BASE SYSTEM';
-      case 'products': return 'PRODUCT CATALOGUE';
-      case 'product_detail': return 'PRODUCT DETAIL';
+      case 'catalogue': return 'PRODUCT CATALOGUE';
+      case 'suite_detail': return 'SUITE';
+      case 'workflow_detail': return 'WORKFLOW TOOL';
+      case 'kit_detail': return 'WORKFLOW KIT';
+      case 'pricing': return 'PRICING';
+      case 'validation': return 'VALIDATION';
+      case 'sprint': return 'VALIDATION SPRINT';
+      case 'enterprise': return 'ENTERPRISE';
+      case 'partners': return 'PARTNERS';
       case 'forge_audit': return 'AUDITOR';
       case 'fullkonk': return 'fullKONK_>';
       case 'redaeye': return 'REDAEYE';
@@ -295,7 +303,7 @@ const Navbar: React.FC<NavbarProps> = ({
                 <div className="space-y-1.5 label text-left">
                   <span className="text-[8px] font-mono uppercase text-zinc-550 tracking-[0.25em] block pl-3 mb-2 font-bold">PLATFORM</span>
                   <DrawerLink icon={Home} label="Home" onClick={() => handleNav('landing')} active={currentPage === 'landing'} />
-                  <DrawerLink icon={Package} label="Product Catalogue" onClick={() => handleNav('products')} active={currentPage === 'products' || currentPage === 'product_detail'} />
+                  <DrawerLink icon={Package} label="Product Catalogue" onClick={() => handleNav('catalogue')} active={currentPage === 'catalogue' || currentPage === 'suite_detail' || currentPage === 'workflow_detail' || currentPage === 'kit_detail'} />
                   <DrawerLink icon={ShieldCheck} label="AUDITOR (Neural Audit)" onClick={() => handleNav('forge_audit')} active={currentPage === 'forge_audit'} />
                   <DrawerLink icon={Hammer} label="fullKONK_> Compiler" onClick={() => handleNav('fullkonk')} active={currentPage === 'fullkonk'} />
                   <DrawerLink icon={Shield} label="REDAEYE" onClick={() => handleNav('redaeye')} active={currentPage === 'redaeye'} />

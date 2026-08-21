@@ -4,9 +4,12 @@ import { FIXTURES } from '../../catalog/fixtures.ts';
 import { runProductDemo, type DemoRunResult } from '../../services/demoService.ts';
 import { validateDemoInput } from '../../catalog/validate.ts';
 import { Play, Loader2, AlertTriangle, CheckCircle2, Wand2, Eraser, TerminalSquare, ShieldCheck } from 'lucide-react';
+import { track } from '../../utils/analytics.ts';
 
 interface MicroToolProps {
   product: ProductRecord;
+  /** Key into the fixture registry (legacy slug) when it differs from the canonical slug. */
+  fixtureKey?: string;
 }
 
 interface FieldSpec {
@@ -51,9 +54,9 @@ function formatValue(value: unknown): string {
  * - No prompts, schemas, limitations or risk warnings are shown to customers —
  *   those live in the product manifest (backend).
  */
-export const MicroTool: React.FC<MicroToolProps> = ({ product }) => {
+export const MicroTool: React.FC<MicroToolProps> = ({ product, fixtureKey }) => {
   const fields = buildFields(product);
-  const fixture = FIXTURES[product.slug] as Record<string, unknown> | undefined;
+  const fixture = FIXTURES[fixtureKey ?? product.slug] as Record<string, unknown> | undefined;
 
   const initialValues = (): Record<string, string> => {
     const out: Record<string, string> = {};
@@ -123,18 +126,20 @@ export const MicroTool: React.FC<MicroToolProps> = ({ product }) => {
     const inputErrors = validateDemoInput(product, payload);
     if (inputErrors.length > 0) {
       setClientErrors(inputErrors);
-      setResult({ status: 'needs_input', productSlug: product.slug, message: 'Please complete the required inputs below.', validationErrors: inputErrors });
+      setResult({ status: 'NEEDS_INPUT', productId: product.slug, runId: 'client', sourceRefs: [], message: 'Please complete the required inputs below.', validationErrors: inputErrors });
       return;
     }
 
     setIsRunning(true);
     setClientErrors([]);
     setResult(null);
+    track('demo_start', product.slug);
     try {
       const res = await runProductDemo(product.slug, payload);
       setResult(res);
+      if (res.status === 'COMPLETE') track('demo_complete', product.slug);
     } catch (e) {
-      setResult({ status: 'error', productSlug: product.slug, message: e instanceof Error ? e.message : 'The tool failed to run. Please try again.' });
+      setResult({ status: 'ERROR', productId: product.slug, runId: 'client', sourceRefs: [], message: e instanceof Error ? e.message : 'The tool failed to run. Please try again.' });
     } finally {
       setIsRunning(false);
     }
@@ -245,7 +250,7 @@ export const MicroTool: React.FC<MicroToolProps> = ({ product }) => {
         {/* Result panel */}
         {result && (
           <div className="space-y-3">
-            {result.status === 'ok' && (
+            {result.status === 'COMPLETE' && (
               <>
                 <div className="flex flex-wrap items-center gap-2 text-[10px] font-mono text-zinc-500">
                   <CheckCircle2 size={12} className="text-emerald-400" />
@@ -253,13 +258,18 @@ export const MicroTool: React.FC<MicroToolProps> = ({ product }) => {
                   <span>· MODEL: {result.model}</span>
                   <span>· OUTPUT VALIDATED</span>
                 </div>
-                <pre className="bg-[#070A0E] border-2 border-emerald-500/30 rounded-xl p-4 text-xs text-emerald-200 font-mono leading-relaxed overflow-x-auto max-h-[480px] overflow-y-auto whitespace-pre-wrap">
-                  {JSON.stringify(result.output, null, 2)}
+                <pre className="bg-[#070A0E] border-2 border-emerald-500/30 rounded-xl p-4 text-xs text-emerald-200 font-mono leading-relaxed overflow-x-auto max-h-[480px] overflow-y-auto whitespace-pre-wrap" data-testid="demo-result">
+                  {JSON.stringify(result.result ?? result.output, null, 2)}
                 </pre>
+                {result.validation && (
+                  <p className="text-[9px] font-mono text-zinc-600">
+                    validation — schema: {result.validation.schema} · provenance: {result.validation.provenance} · safety: {result.validation.safety} · actions executed: none
+                  </p>
+                )}
               </>
             )}
 
-            {result.status === 'needs_input' && (
+            {result.status === 'NEEDS_INPUT' && (
               <div className="flex items-start gap-2.5 bg-amber-500/10 border border-amber-500/40 rounded-xl px-4 py-3" role="status">
                 <TerminalSquare size={15} className="text-amber-400 shrink-0 mt-0.5" />
                 <div className="space-y-1">
@@ -275,7 +285,7 @@ export const MicroTool: React.FC<MicroToolProps> = ({ product }) => {
               </div>
             )}
 
-            {result.status === 'request_pilot' && (
+            {result.status === 'NEEDS_EXTERNAL_VALIDATOR' && (
               <div className="flex items-start gap-2.5 bg-purple-500/10 border border-purple-500/40 rounded-xl px-4 py-3" role="status">
                 <TerminalSquare size={15} className="text-purple-400 shrink-0 mt-0.5" />
                 <div className="space-y-1">
@@ -294,12 +304,12 @@ export const MicroTool: React.FC<MicroToolProps> = ({ product }) => {
               </div>
             )}
 
-            {(result.status === 'blocked' || result.status === 'error') && (
+            {(result.status === 'BLOCKED' || result.status === 'ERROR') && (
               <div className="flex items-start gap-2.5 bg-red-500/10 border border-red-500/40 rounded-xl px-4 py-3" role="alert">
                 <AlertTriangle size={15} className="text-red-400 shrink-0 mt-0.5" />
                 <div className="space-y-1">
                   <p className="text-xs font-mono font-black uppercase tracking-widest text-red-400">
-                    {result.status === 'blocked' ? 'Output Not Ready' : 'Run Failed'}
+                    {result.status === 'BLOCKED' ? 'Output Not Ready' : 'Run Failed'}
                   </p>
                   <p className="text-xs text-zinc-300 leading-relaxed">{result.message}</p>
                   {result.validationErrors && (

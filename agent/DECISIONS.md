@@ -154,3 +154,49 @@ third party.
 **Observed:** `npx playwright install chromium` fails (browser download blocked). **Decision:** the E2E suite
 is authored and extended to cover all 36 routes and is executed in CI / on the reviewer's machine. Every PR
 report states plainly that E2E results are "collected, not executed here" rather than claiming a pass.
+
+## D-014 — Source documents arrived on `main`; extraction is machine-checked, not hand-copied
+
+**Observed:** owner uploaded 26 source documents to `main` (commit `e3d7d61`); merged into the session branch
+as `ce48dbc`. **Decision:** `scripts/extract-portfolio.mjs` parses the comprehensive guidebook chapters and
+**cross-checks every suite score/tier and workflow result against both validation reports, failing on any
+mismatch** before `agent/extracted-portfolio.json` is written. The manifest builder
+(`scripts/build-portfolio-manifest.mjs`) then merges that output with the legacy 15-product manifest and the
+canonical route/UX mapping. No manifest field is typed by hand.
+
+---
+
+## D-015 — Pricing fields parse only explicit Kit/Sprint/Pilot/workspace offers
+
+Commercial-entry strings are parsed verbatim: a price lands in `kitFromUsd`/`sprintFromUsd`/`pilotFromUsd`/
+`workspaceFromUsd` only when its label names that offer. Offers with other labels ("Diligence Evidence
+Pack", "One-Module Control Preflight", managed monthly environments) leave those fields `null` and keep the
+exact wording in `pricing.note` — nothing is coerced into a schema field it did not claim to be.
+
+---
+
+## D-016 — Demo endpoint speaks the canonical contract; legacy client fields ride along
+
+`POST /api/demo/run` now returns the required `DemoResponse` (uppercase statuses, `productId`, `runId`,
+`sourceRefs`, `validation{schema,provenance,safety}`, `limitations`, `actionsExecuted: []`) and resolves both
+canonical and legacy slugs. Legacy convenience fields (`message`, `output`, `model`, `validationErrors`)
+remain for the existing client. Input validation runs **before** engine gating so bad input reports
+`NEEDS_INPUT` even when no model key is configured. Suites and unfixtured entries return
+`NEEDS_EXTERNAL_VALIDATOR` with `validation: NOT_RUN` — a suite demo is never faked.
+
+---
+
+## D-017 — Browser title no longer says "Marketplace"
+
+`index.html` title changed from "AI Workflow Marketplace & Product Platform" to "Controlled Enterprise
+Workflow Products" — residual marketplace language would misrepresent the purged, catalogue-only platform.
+
+---
+
+## D-018 — Legacy `/products` pages removed; canonical pages own the UX
+
+`pages/ProductDetailPage.tsx`, `components/catalog/ProductCard.tsx` and `components/catalog/StatusBadge.tsx`
+are deleted (superseded by `WorkflowDetailPage`, `SuiteDetailPage`, the 36-entry `CataloguePage` and the
+portfolio `StatusChip`). Old URLs redirect (`/products/:slug → /tools/:slug`, `/products → /catalogue`) so
+no inbound link breaks. The legacy `catalog/product-manifest.json` stays byte-identical — it remains the
+demo schema/prompt/fixture source of record for the 15 workflows until the demo engine migrates fully.
