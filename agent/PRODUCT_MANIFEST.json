@@ -1,0 +1,616 @@
+{
+  "manifest": {
+    "name": "KONKRED Product Catalogue",
+    "version": "1.0.0",
+    "generatedAt": "2026-08-21",
+    "purpose": "Canonical manifest for the 15 KONKRED workflow products. Single source of truth for the catalogue, product detail pages, demo layer, and monetization CTAs.",
+    "statusLegend": {
+      "PUBLIC_DEMO": "Catalogue entry live; fixture-backed public demo available (non-production, decision-grade outputs NOT guaranteed).",
+      "STANDARD_KIT": "Workflow kit (prompt + schemas + runbook) offered for purchase; execution by the customer's own engineering team.",
+      "SUPERVISED_PILOT": "Offered as a supervised pilot with KONKRED validation engineers; requires scoping and approval.",
+      "ENTERPRISE_INTEGRATION": "Requires enterprise integration, security review, and a signed engagement.",
+      "HUMAN_APPROVAL_REQUIRED": "Model outputs are decision-support only; a qualified human owner must review and approve before any business/legal/financial action."
+    },
+    "integrityNote": "This manifest contains NO fabricated ratings, sales counts, review counts, certifications, accuracy rates, or ROI figures. Validation reports are recorded as pending until a validation sprint produces them. Prices are proposed list prices and require human confirmation.",
+    "statuses": ["PUBLIC_DEMO", "STANDARD_KIT", "SUPERVISED_PILOT", "ENTERPRISE_INTEGRATION"]
+  },
+  "products": [
+    {
+      "id": "contract-review-copilot",
+      "slug": "contract-review-copilot",
+      "name": "Contract Review Copilot",
+      "category": "Legal & Contracts",
+      "status": "PUBLIC_DEMO",
+      "risk": "high",
+      "humanApprovalRequired": true,
+      "shortDescription": "Flags high-risk clauses, missing obligations and unbalanced terms in draft contracts and vendor agreements.",
+      "description": "A structured review assistant that ingests a contract text, extracts key terms, identifies high-risk clauses (indemnity, liability caps, termination, auto-renewal, non-compete, data processing), and produces a clause-by-clause review with questions for counsel. It is a triage and drafting-support tool, not a substitute for legal advice.",
+      "buyer": "Legal ops teams, founders, procurement and finance teams reviewing NDAs, MSAs, DPAs and vendor terms.",
+      "prompt": "You are a contract review assistant. Extract and summarize key terms from the provided contract. For each clause, classify risk (LOW/MEDIUM/HIGH), quote the relevant text, and explain the exposure in plain language. Flag missing or unbalanced obligations, auto-renewal, indemnification and liability-cap issues, and data-processing obligations. Never state that a contract is 'compliant', 'binding' or 'enforceable'; always recommend review by qualified counsel. If the input is not contract text, respond with NEEDS_INPUT.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "contractText": { "type": "string", "minLength": 200 },
+          "jurisdiction": { "type": "string", "description": "Optional governing law / jurisdiction context" }
+        },
+        "required": ["contractText"]
+      },
+      "outputSchema": {
+        "type": "object",
+          "properties": {
+            "summary": { "type": "string" },
+            "keyTerms": { "type": "array", "items": { "type": "object", "properties": { "term": { "type": "string" }, "value": { "type": "string" } } } },
+            "clauseFindings": { "type": "array", "items": { "type": "object", "properties": { "clause": { "type": "string" }, "risk": { "type": "string", "enum": ["LOW", "MEDIUM", "HIGH"] }, "quote": { "type": "string" }, "explanation": { "type": "string" }, "recommendedAction": { "type": "string" } }, "required": ["clause", "risk", "quote", "explanation"] } },
+            "questionsForCounsel": { "type": "array", "items": { "type": "string" } },
+            "humanApprovalRequired": { "type": "boolean" }
+          },
+          "required": ["summary", "clauseFindings", "humanApprovalRequired"]
+      },
+      "fixture": { "path": "catalog/fixtures/contract-review-sample.json", "label": "Public synthetic NDA sample", "source": "synthetic-public" },
+      "demoStatus": { "available": true, "fixturePath": "catalog/fixtures/contract-review-sample.json", "note": "Runs against a synthetic public NDA sample only. Outputs are DEMO and NOT_FOR_PRODUCTION_DECISION." },
+      "validationReport": { "status": "pending", "path": null, "note": "No validation report exists yet; a validation sprint is required before production use." },
+      "pricing": { "kitUsd": 2490, "validationSprintUsd": 2900, "enterprisePilot": "contact", "currency": "USD", "proposed": true },
+      "limitations": [
+        "Not legal advice; final positions require qualified counsel review.",
+        "Accuracy depends on input quality; redacted or incomplete contracts reduce coverage.",
+        "Does not verify external registries, counterparty standing or e-signature validity.",
+        "No autonomous signing, sending, or filing actions are performed."
+      ]
+    },
+    {
+      "id": "iac-security-copilot",
+      "slug": "iac-security-copilot",
+      "name": "IaC Security Copilot",
+      "category": "Security & GRC",
+      "status": "SUPERVISED_PILOT",
+      "risk": "high",
+      "humanApprovalRequired": true,
+      "shortDescription": "Reviews Terraform, CloudFormation, Helm and Kubernetes manifests for security misconfigurations and policy violations.",
+      "description": "Static-analysis copilot that reviews infrastructure-as-code for exposed secrets, overly permissive IAM, public buckets, missing encryption, and dangerous defaults. Produces a prioritized findings list with remediation guidance. It never executes plans or applies changes.",
+      "buyer": "Platform engineering, DevOps and security teams maintaining Terraform/CloudFormation/K8s estates.",
+      "prompt": "You are an infrastructure security review assistant. Analyze the provided IaC manifests. Identify security findings only (misconfigurations, exposed credentials, excessive permissions, missing encryption, unsafe defaults). For each finding output the file, line reference if available, severity (LOW/MEDIUM/HIGH/CRITICAL), and a remediation recommendation. Do not execute, apply, or destroy anything. If the input is not IaC, respond with NEEDS_INPUT. If the input contains live credentials, redact them before analysis.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "manifests": { "type": "array", "items": { "type": "object", "properties": { "path": { "type": "string" }, "content": { "type": "string" } }, "required": ["path", "content"] } }
+        },
+        "required": ["manifests"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "findings": { "type": "array", "items": { "type": "object", "properties": { "path": { "type": "string" }, "resource": { "type": "string" }, "issue": { "type": "string" }, "severity": { "type": "string", "enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL"] }, "remediation": { "type": "string" } }, "required": ["path", "issue", "severity", "remediation"] } },
+          "summary": { "type": "string" },
+          "redactionPerformed": { "type": "boolean" },
+          "humanApprovalRequired": { "type": "boolean" }
+        },
+        "required": ["findings", "summary", "humanApprovalRequired"]
+      },
+      "fixture": { "path": "catalog/fixtures/iac-security-sample.json", "label": "Public synthetic Terraform sample", "source": "synthetic-public" },
+      "demoStatus": { "available": true, "fixturePath": "catalog/fixtures/iac-security-sample.json", "note": "Supervised pilot required for production use; public demo uses a synthetic sample only." },
+      "validationReport": { "status": "pending", "path": null, "note": "Static-analysis benchmark against public misconfiguration datasets is planned in the validation sprint." },
+      "pricing": { "kitUsd": 3490, "validationSprintUsd": 2900, "enterprisePilot": "contact", "currency": "USD", "proposed": true },
+      "limitations": [
+        "No terraform plan/apply/destroy is ever executed by the copilot.",
+        "Static review cannot prove runtime behavior; dynamic checks require a separate toolchain.",
+        "Coverage is limited to the file types and providers the prompt schema supports.",
+        "Severity is a model judgment and must be triaged by a security engineer."
+      ]
+    },
+    {
+      "id": "ma-due-diligence-workbench",
+      "slug": "ma-due-diligence-workbench",
+      "name": "M&A Due-Diligence Workbench",
+      "category": "M&A & Transactions",
+      "status": "ENTERPRISE_INTEGRATION",
+      "risk": "high",
+      "humanApprovalRequired": true,
+      "shortDescription": "Organizes and interrogates seller data rooms across contracts, financials, compliance and HR for due-diligence workflows.",
+      "description": "An enterprise workbench that indexes a structured data-room export, runs structured review playbooks across legal, financial, compliance and people domains, and produces an issue register with open questions for the deal team. Requires supervised integration with the buyer's data-room export and security review.",
+      "buyer": "Corporate development, PE/VC deal teams and M&A advisors running structured diligence on targets.",
+      "prompt": "You are an M&A due-diligence analyst assistant. Process the provided structured data-room documents and review playbook. For each document, extract facts relevant to the playbook categories, flag red flags and gaps, and output an issue register. Distinguish 'observed fact' from 'inference'. Never produce a valuation, purchase-price adjustment, or binding legal conclusion. If documents are missing or unreadable, output BLOCKED with the list of missing items.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "documents": { "type": "array", "items": { "type": "object", "properties": { "id": { "type": "string" }, "category": { "type": "string" }, "content": { "type": "string" } }, "required": ["id", "category", "content"] } },
+          "playbook": { "type": "array", "items": { "type": "string" } }
+        },
+        "required": ["documents", "playbook"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "issueRegister": { "type": "array", "items": { "type": "object", "properties": { "category": { "type": "string" }, "documentId": { "type": "string" }, "finding": { "type": "string" }, "evidence": { "type": "string" }, "type": { "type": "string", "enum": ["observed", "inference", "gap"] } }, "required": ["category", "finding", "type"] } },
+          "openQuestions": { "type": "array", "items": { "type": "string" } },
+          "blocked": { "type": "boolean" },
+          "blockedReasons": { "type": "array", "items": { "type": "string" } },
+          "humanApprovalRequired": { "type": "boolean" }
+        },
+        "required": ["issueRegister", "openQuestions", "humanApprovalRequired"]
+      },
+      "fixture": null,
+      "demoStatus": { "available": false, "fixturePath": null, "note": "No public fixture; enterprise pilot with a customer-provided redacted data-room subset is required." },
+      "validationReport": { "status": "pending", "path": null, "note": "Validation requires a controlled, redacted data-room test pack produced in the validation sprint." },
+      "pricing": { "kitUsd": null, "validationSprintUsd": null, "enterprisePilot": "contact", "currency": "USD", "proposed": true },
+      "limitations": [
+        "Requires structured, redacted data-room exports; unstructured or scanned material is out of scope for v1.",
+        "Never produces valuations, price adjustments or binding conclusions.",
+        "High sensitivity: requires enterprise security review and data-processing agreement before any data is ingested.",
+        "All findings require deal-team and counsel verification."
+      ]
+    },
+    {
+      "id": "incident-learning-postmortem",
+      "slug": "incident-learning-postmortem",
+      "name": "Incident Learning and Post-Mortem",
+      "category": "Security & GRC",
+      "status": "PUBLIC_DEMO",
+      "risk": "medium",
+      "humanApprovalRequired": false,
+      "shortDescription": "Turns incident timelines and chat logs into structured post-mortems with root-cause hypotheses and action items.",
+      "description": "Ingests a sanitized incident timeline, produces a structured timeline, root-cause hypotheses (with confidence qualifiers), impact assessment and action-item list. Designed for blameless review culture; outputs are a draft for the incident owner, not a final report.",
+      "buyer": "SRE, DevOps and security incident-response teams running blameless post-incident reviews.",
+      "prompt": "You are an incident post-mortem drafting assistant. From the provided sanitized timeline, produce a structured draft post-mortem: timeline of events, impact, root-cause hypotheses (each with a confidence qualifier), contributing factors, and action items with owners and due dates. Clearly mark hypotheses as hypotheses. If input lacks a timeline, respond NEEDS_INPUT.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "timeline": { "type": "array", "items": { "type": "object", "properties": { "time": { "type": "string" }, "event": { "type": "string" } }, "required": ["time", "event"] } },
+          "context": { "type": "string" }
+        },
+        "required": ["timeline"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string" },
+          "summary": { "type": "string" },
+          "timeline": { "type": "array", "items": { "type": "object", "properties": { "time": { "type": "string" }, "event": { "type": "string" } } } },
+          "impact": { "type": "string" },
+          "rootCauseHypotheses": { "type": "array", "items": { "type": "object", "properties": { "hypothesis": { "type": "string" }, "confidence": { "type": "string", "enum": ["LOW", "MEDIUM", "HIGH"] }, "evidence": { "type": "string" } }, "required": ["hypothesis", "confidence"] } },
+          "actionItems": { "type": "array", "items": { "type": "object", "properties": { "action": { "type": "string" }, "owner": { "type": "string" }, "dueDate": { "type": "string" } }, "required": ["action"] } }
+        },
+        "required": ["summary", "rootCauseHypotheses", "actionItems"]
+      },
+      "fixture": { "path": "catalog/fixtures/incident-sample.json", "label": "Public synthetic incident timeline", "source": "synthetic-public" },
+      "demoStatus": { "available": true, "fixturePath": "catalog/fixtures/incident-sample.json", "note": "Draft support only; final post-mortem requires incident-owner review." },
+      "validationReport": { "status": "pending", "path": null, "note": "Pending validation sprint; expected benchmark: hypothesis quality vs. real anonymized incident reviews." },
+      "pricing": { "kitUsd": 1490, "validationSprintUsd": 2900, "enterprisePilot": "contact", "currency": "USD", "proposed": true },
+      "limitations": [
+        "Draft only; incident owner must validate root-cause hypotheses.",
+        "Requires sanitized input; do not upload unredacted customer data or secrets.",
+        "Action items are suggestions, not assignments."
+      ]
+    },
+    {
+      "id": "grc-evidence-request-triage",
+      "slug": "grc-evidence-request-triage",
+      "name": "GRC Evidence Request Triage",
+      "category": "Security & GRC",
+      "status": "STANDARD_KIT",
+      "risk": "medium",
+      "humanApprovalRequired": true,
+      "shortDescription": "Classifies incoming audit/GRC evidence requests, maps them to control owners, and drafts evidence-response guidance.",
+      "description": "Triage assistant for audit and compliance evidence requests (SOC 2, ISO 27001, PCI, customer security questionnaires). Classifies each request, suggests the control mapping and evidence artifacts, and drafts a response outline. Acceptance of evidence remains with the compliance owner.",
+      "buyer": "GRC and security-compliance teams responding to audits and customer questionnaires.",
+      "prompt": "You are a GRC evidence triage assistant. For each evidence request, classify the domain and control family, map to likely artifacts, propose an owner, and draft a response outline. Never assert that evidence 'satisfies' a control or that the organization 'is compliant'. If requests are ambiguous, output NEEDS_INPUT with clarifying questions.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "requests": { "type": "array", "items": { "type": "object", "properties": { "id": { "type": "string" }, "text": { "type": "string" } }, "required": ["id", "text"] } }
+        },
+        "required": ["requests"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "classifications": { "type": "array", "items": { "type": "object", "properties": { "id": { "type": "string" }, "domain": { "type": "string" }, "controlFamily": { "type": "string" }, "suggestedArtifacts": { "type": "array", "items": { "type": "string" } }, "suggestedOwner": { "type": "string" }, "responseOutline": { "type": "string" } }, "required": ["id", "domain", "controlFamily"] } },
+          "ambiguousRequests": { "type": "array", "items": { "type": "string" } },
+          "humanApprovalRequired": { "type": "boolean" }
+        },
+        "required": ["classifications", "humanApprovalRequired"]
+      },
+      "fixture": { "path": "catalog/fixtures/grc-requests-sample.json", "label": "Public synthetic evidence requests", "source": "synthetic-public" },
+      "demoStatus": { "available": true, "fixturePath": "catalog/fixtures/grc-requests-sample.json", "note": "Public demo available; production use requires the standard kit with an internal control inventory." },
+      "validationReport": { "status": "pending", "path": null, "note": "Pending validation sprint against a public control-framework taxonomy." },
+      "pricing": { "kitUsd": 1990, "validationSprintUsd": 2900, "enterprisePilot": "contact", "currency": "USD", "proposed": true },
+      "limitations": [
+        "Never asserts compliance; only compliance owners may accept evidence.",
+        "Control mapping requires an up-to-date internal control inventory to be accurate.",
+        "Responses must be reviewed before external submission."
+      ]
+    },
+    {
+      "id": "reconciliation-copilot",
+      "slug": "reconciliation-copilot",
+      "name": "Cash/Bank/PSP Reconciliation Copilot",
+      "category": "Finance & Accounting",
+      "status": "STANDARD_KIT",
+      "risk": "high",
+      "humanApprovalRequired": true,
+      "shortDescription": "Matches bank and PSP transactions to ledger entries and explains variances for cash, bank and payment-provider reconciliation.",
+      "description": "Ingests bank/PSP statements and ledger exports, performs structured matching (amount, date window, reference), and explains variances with proposed dispositions. No journal entries are created automatically; every disposition requires accounting approval.",
+      "buyer": "Finance operations and accounting teams reconciling cash, bank accounts and payment processors.",
+      "prompt": "You are a reconciliation copilot. Match the provided bank/PSP transactions to ledger entries using amount and date proximity. Classify each item as MATCHED, TIMING_DIFFERENCE, MISSING_LEDGER, MISSING_BANK, or UNEXPLAINED. Explain variances and propose dispositions. Never post journal entries; every disposition must be approved by accounting. If required fields are missing, output NEEDS_INPUT.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "bankTransactions": { "type": "array", "items": { "type": "object", "properties": { "date": { "type": "string" }, "amount": { "type": "number" }, "reference": { "type": "string" } }, "required": ["date", "amount"] } },
+          "ledgerEntries": { "type": "array", "items": { "type": "object", "properties": { "date": { "type": "string" }, "amount": { "type": "number" }, "reference": { "type": "string" } }, "required": ["date", "amount"] } }
+        },
+        "required": ["bankTransactions", "ledgerEntries"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "matches": { "type": "array", "items": { "type": "object", "properties": { "bankReference": { "type": "string" }, "ledgerReference": { "type": "string" }, "amount": { "type": "number" }, "confidence": { "type": "string", "enum": ["LOW", "MEDIUM", "HIGH"] } }, "required": ["bankReference", "ledgerReference", "amount"] } },
+          "variances": { "type": "array", "items": { "type": "object", "properties": { "bankReference": { "type": "string" }, "classification": { "type": "string", "enum": ["TIMING_DIFFERENCE", "MISSING_LEDGER", "MISSING_BANK", "UNEXPLAINED"] }, "amount": { "type": "number" }, "explanation": { "type": "string" }, "proposedDisposition": { "type": "string" } }, "required": ["bankReference", "classification", "amount"] } },
+          "summary": { "type": "string" },
+          "humanApprovalRequired": { "type": "boolean" }
+        },
+        "required": ["matches", "variances", "summary", "humanApprovalRequired"]
+      },
+      "fixture": { "path": "catalog/fixtures/reconciliation-sample.json", "label": "Public synthetic bank/ledger sample", "source": "synthetic-public" },
+      "demoStatus": { "available": true, "fixturePath": "catalog/fixtures/reconciliation-sample.json", "note": "Public demo uses a synthetic sample; no real financial data is ever used in demos." },
+      "validationReport": { "status": "pending", "path": null, "note": "Pending validation sprint; matching accuracy benchmark against synthetic datasets required." },
+      "pricing": { "kitUsd": 3490, "validationSprintUsd": 2900, "enterprisePilot": "contact", "currency": "USD", "proposed": true },
+      "limitations": [
+        "No journal entries are ever posted automatically.",
+        "Matching quality depends on data quality and reference consistency.",
+        "Requires finance-owner approval for every proposed disposition."
+      ]
+    },
+    {
+      "id": "rfp-response-copilot",
+      "slug": "rfp-response-copilot",
+      "name": "Enterprise RFP Response Copilot",
+      "category": "Sales & Business Development",
+      "status": "SUPERVISED_PILOT",
+      "risk": "medium",
+      "humanApprovalRequired": true,
+      "shortDescription": "Drafts compliant RFP/RFI response sections from an approved capability library, with source citations for every claim.",
+      "description": "Assembles response drafts for enterprise RFP/RFI questions using an organization's approved content library. Every claim cites its source; no external submission is ever performed. Human review is required before submission.",
+      "buyer": "Sales engineering, proposal teams and BD organizations responding to enterprise RFPs.",
+      "prompt": "You are an RFP response drafting assistant. Answer each RFP question using only the provided approved content library. Cite the source item for every claim. Do not invent capabilities, certifications, customers, or metrics. If the library lacks support for a question, respond with BLOCKED and list the missing evidence. Never submit or send anything.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "questions": { "type": "array", "items": { "type": "object", "properties": { "id": { "type": "string" }, "question": { "type": "string" } }, "required": ["id", "question"] } },
+          "contentLibrary": { "type": "array", "items": { "type": "object", "properties": { "id": { "type": "string" }, "content": { "type": "string" } }, "required": ["id", "content"] } }
+        },
+        "required": ["questions", "contentLibrary"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "responses": { "type": "array", "items": { "type": "object", "properties": { "id": { "type": "string" }, "draft": { "type": "string" }, "citations": { "type": "array", "items": { "type": "string" } } }, "required": ["id", "draft", "citations"] } },
+          "blocked": { "type": "array", "items": { "type": "object", "properties": { "id": { "type": "string" }, "missingEvidence": { "type": "array", "items": { "type": "string" } } } } },
+          "humanApprovalRequired": { "type": "boolean" }
+        },
+        "required": ["responses", "humanApprovalRequired"]
+      },
+      "fixture": null,
+      "demoStatus": { "available": false, "fixturePath": null, "note": "Demo requires a customer-approved content library; supervised pilot is the entry path." },
+      "validationReport": { "status": "pending", "path": null, "note": "Pending validation sprint: citation fidelity and hallucination benchmark required." },
+      "pricing": { "kitUsd": 2490, "validationSprintUsd": 2900, "enterprisePilot": "contact", "currency": "USD", "proposed": true },
+      "limitations": [
+        "Never auto-submits responses.",
+        "Claims are limited to the approved content library; no invented capabilities or metrics.",
+        "Requires proposal-team review before submission."
+      ]
+    },
+    {
+      "id": "govcon-rfp-compliance-workbench",
+      "slug": "govcon-rfp-compliance-workbench",
+      "name": "GovCon RFP Compliance Workbench",
+      "category": "Sales & Business Development",
+      "status": "SUPERVISED_PILOT",
+      "risk": "high",
+      "humanApprovalRequired": true,
+      "shortDescription": "Parses government RFP requirements, builds a compliance matrix, and flags mandatory clauses and submission risks.",
+      "description": "Parses solicitation documents into a requirements/compliance matrix: mandatory clauses, deliverables, evaluation criteria, submission deadlines and risks. Outputs are a draft matrix for capture and legal review; it never signs, submits, or certifies anything.",
+      "buyer": "GovCon capture teams, proposal managers and small-business contractors responding to federal/state solicitations.",
+      "prompt": "You are a government contracting compliance assistant. Parse the solicitation excerpt into a requirements matrix. Include mandatory clauses, deliverables, evaluation criteria, deadlines, and compliance risks. Distinguish 'mandatory' from 'informational'. Do not assert eligibility, certifications, or compliance status; never sign, submit, or certify. If the excerpt is ambiguous, output NEEDS_INPUT.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "solicitationExcerpt": { "type": "string", "minLength": 300 }
+        },
+        "required": ["solicitationExcerpt"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "requirements": { "type": "array", "items": { "type": "object", "properties": { "requirement": { "type": "string" }, "type": { "type": "string", "enum": ["mandatory", "informational"] }, "section": { "type": "string" }, "risk": { "type": "string", "enum": ["LOW", "MEDIUM", "HIGH"] }, "note": { "type": "string" } }, "required": ["requirement", "type", "risk"] } },
+          "deliverables": { "type": "array", "items": { "type": "string" } },
+          "deadlines": { "type": "array", "items": { "type": "string" } },
+          "complianceRisks": { "type": "array", "items": { "type": "string" } },
+          "humanApprovalRequired": { "type": "boolean" }
+        },
+        "required": ["requirements", "complianceRisks", "humanApprovalRequired"]
+      },
+      "fixture": null,
+      "demoStatus": { "available": false, "fixturePath": null, "note": "No public solicitation fixture is bundled; pilot with a sanitized public solicitation excerpt is the entry path." },
+      "validationReport": { "status": "pending", "path": null, "note": "Pending validation sprint against public FAR/agency clause taxonomies." },
+      "pricing": { "kitUsd": 2990, "validationSprintUsd": 2900, "enterprisePilot": "contact", "currency": "USD", "proposed": true },
+      "limitations": [
+        "Never signs, submits, or certifies anything.",
+        "Not a substitute for counsel review of solicitation terms.",
+        "Requires the full solicitation text; excerpt-only analysis has gaps."
+      ]
+    },
+    {
+      "id": "fpa-variance-analysis",
+      "slug": "fpa-variance-analysis",
+      "name": "FP&A Monthly Variance Analysis",
+      "category": "Finance & Accounting",
+      "status": "STANDARD_KIT",
+      "risk": "medium",
+      "humanApprovalRequired": false,
+      "shortDescription": "Compares budget vs. actuals and drafts driver-based variance commentary for monthly FP&A close.",
+      "description": "Ingests budget vs. actual data by line item, quantifies variances, proposes drivers and drafts management commentary. Output is decision-support for the FP&A team; no financial statements are produced.",
+      "buyer": "FP&A teams preparing monthly budget-vs-actual commentary for management review.",
+      "prompt": "You are an FP&A variance analysis assistant. Compare budget to actuals for each line item. Quantify variance (absolute and %), propose likely drivers (with reasoning), and draft concise management commentary. Distinguish data-driven statements from hypotheses. If data is incomplete, respond NEEDS_INPUT listing missing lines.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "period": { "type": "string" },
+          "lines": { "type": "array", "items": { "type": "object", "properties": { "lineItem": { "type": "string" }, "budget": { "type": "number" }, "actual": { "type": "number" } }, "required": ["lineItem", "budget", "actual"] } }
+        },
+        "required": ["period", "lines"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "variances": { "type": "array", "items": { "type": "object", "properties": { "lineItem": { "type": "string" }, "variance": { "type": "number" }, "variancePercent": { "type": "number" }, "driverHypotheses": { "type": "array", "items": { "type": "string" } } }, "required": ["lineItem", "variance", "variancePercent"] } },
+          "managementCommentary": { "type": "string" },
+          "needsInput": { "type": "boolean" },
+          "missingLines": { "type": "array", "items": { "type": "string" } }
+        },
+        "required": ["variances", "managementCommentary"]
+      },
+      "fixture": { "path": "catalog/fixtures/fpa-sample.json", "label": "Public synthetic budget/actual sample", "source": "synthetic-public" },
+      "demoStatus": { "available": true, "fixturePath": "catalog/fixtures/fpa-sample.json", "note": "Public demo uses a synthetic sample only." },
+      "validationReport": { "status": "pending", "path": null, "note": "Pending validation sprint; driver-hypothesis quality review required." },
+      "pricing": { "kitUsd": 1990, "validationSprintUsd": 2900, "enterprisePilot": "contact", "currency": "USD", "proposed": true },
+      "limitations": [
+        "Decision-support only; not a financial statement or audit artifact.",
+        "Driver hypotheses must be confirmed by the finance team.",
+        "Requires consistent budget/actual line-item naming."
+      ]
+    },
+    {
+      "id": "executive-flash-brief",
+      "slug": "executive-flash-brief",
+      "name": "Executive Flash Brief",
+      "category": "Executive & Strategy",
+      "status": "PUBLIC_DEMO",
+      "risk": "low",
+      "humanApprovalRequired": false,
+      "shortDescription": "Compresses selected internal metrics and notes into a tight daily executive brief with cited sources.",
+      "description": "Turns a set of structured metrics, headlines and notes into a skimmable daily brief (what changed, why it matters, what to watch). All claims are traceable to the input items; no external news is fabricated.",
+      "buyer": "Founders, executives and operators who want a disciplined daily operating brief from their own data.",
+      "prompt": "You are an executive brief assistant. From the provided structured items, produce a tight daily brief: KEY MOVES (what changed), WHY IT MATTERS (one line each), WATCH LIST (one line each). Cite item IDs for every claim. Do not add facts not present in the input. If input is empty, respond NEEDS_INPUT.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "items": { "type": "array", "items": { "type": "object", "properties": { "id": { "type": "string" }, "category": { "type": "string" }, "metric": { "type": "string" }, "value": { "type": "string" }, "note": { "type": "string" } }, "required": ["id", "metric", "value"] } }
+        },
+        "required": ["items"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "keyMoves": { "type": "array", "items": { "type": "object", "properties": { "itemId": { "type": "string" }, "summary": { "type": "string" } } } },
+          "whyItMatters": { "type": "array", "items": { "type": "object", "properties": { "itemId": { "type": "string" }, "reason": { "type": "string" } } } },
+          "watchList": { "type": "array", "items": { "type": "string" } },
+          "needsInput": { "type": "boolean" }
+        },
+        "required": ["keyMoves", "whyItMatters"]
+      },
+      "fixture": { "path": "catalog/fixtures/executive-brief-sample.json", "label": "Public synthetic metrics sample", "source": "synthetic-public" },
+      "demoStatus": { "available": true, "fixturePath": "catalog/fixtures/executive-brief-sample.json", "note": "Public demo only; production integration pulls from customer metrics." },
+      "validationReport": { "status": "pending", "path": null, "note": "Pending validation sprint; citation-fidelity check required." },
+      "pricing": { "kitUsd": 990, "validationSprintUsd": 2900, "enterprisePilot": "contact", "currency": "USD", "proposed": true },
+      "limitations": [
+        "Only reflects input items; no external data is fetched.",
+        "Not investment or business advice."
+      ]
+    },
+    {
+      "id": "commercial-lease-abstraction",
+      "slug": "commercial-lease-abstraction",
+      "name": "Commercial Lease Abstraction",
+      "category": "Legal & Contracts",
+      "status": "STANDARD_KIT",
+      "risk": "medium",
+      "humanApprovalRequired": true,
+      "shortDescription": "Extracts key commercial lease terms (rent, escalations, options, obligations) into a structured abstract with page references.",
+      "description": "Abstraction assistant for commercial leases: extracts rent schedule, escalations, term/options, use restrictions, maintenance and insurance obligations, assignment/subletting, and termination rights into a structured abstract with page references. Outputs are a draft for real-estate counsel review.",
+      "buyer": "Real-estate portfolio managers, accounting and legal teams abstracting commercial lease portfolios.",
+      "prompt": "You are a commercial lease abstraction assistant. Extract the requested terms from the lease text into a structured abstract with page/section references. Flag ambiguous or missing terms as UNSPECIFIED. Do not state legal conclusions about enforceability. If input is not a lease, respond NEEDS_INPUT.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "leaseText": { "type": "string", "minLength": 300 }
+        },
+        "required": ["leaseText"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "abstract": { "type": "object", "properties": { "parties": { "type": "string" }, "premises": { "type": "string" }, "term": { "type": "string" }, "rent": { "type": "string" }, "escalations": { "type": "string" }, "options": { "type": "string" }, "useRestrictions": { "type": "string" }, "maintenanceObligations": { "type": "string" }, "insuranceObligations": { "type": "string" }, "assignmentSubletting": { "type": "string" }, "terminationRights": { "type": "string" } } },
+          "references": { "type": "array", "items": { "type": "string" } },
+          "unspecifiedTerms": { "type": "array", "items": { "type": "string" } },
+          "humanApprovalRequired": { "type": "boolean" }
+        },
+        "required": ["abstract", "unspecifiedTerms", "humanApprovalRequired"]
+      },
+      "fixture": null,
+      "demoStatus": { "available": false, "fixturePath": null, "note": "Public demo unavailable; standard kit includes an abstraction template and runbook." },
+      "validationReport": { "status": "pending", "path": null, "note": "Pending validation sprint against a public sample-lease corpus." },
+      "pricing": { "kitUsd": 1990, "validationSprintUsd": 2900, "enterprisePilot": "contact", "currency": "USD", "proposed": true },
+      "limitations": [
+        "Draft abstraction only; real-estate counsel must review.",
+        "Scanned PDFs require OCR preprocessing before input.",
+        "No enforceability or legal-conclusion statements."
+      ]
+    },
+    {
+      "id": "seo-content-opportunity-planner",
+      "slug": "seo-content-opportunity-planner",
+      "name": "SEO Content Opportunity Planner",
+      "category": "Marketing & Content",
+      "status": "PUBLIC_DEMO",
+      "risk": "low",
+      "humanApprovalRequired": false,
+      "shortDescription": "Prioritizes content opportunities from keyword lists using effort, relevance and intent heuristics.",
+      "description": "Takes a keyword/topic list and a content library summary, scores opportunities by relevance, search-intent fit and effort, and outputs a prioritized editorial plan with brief outlines. Rankings are heuristics, not guarantees.",
+      "buyer": "Content marketers and SEO teams planning editorial calendars from keyword research.",
+      "prompt": "You are an SEO content planning assistant. From the keyword list and content summary, score each opportunity for relevance, intent fit, and effort, then produce a prioritized plan with one-line briefs. Mark scores as heuristic estimates. Do not claim guaranteed rankings or traffic.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "keywords": { "type": "array", "items": { "type": "object", "properties": { "keyword": { "type": "string" }, "volume": { "type": "number" }, "difficulty": { "type": "number" } }, "required": ["keyword"] } },
+          "existingContent": { "type": "array", "items": { "type": "string" } }
+        },
+        "required": ["keywords"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "opportunities": { "type": "array", "items": { "type": "object", "properties": { "keyword": { "type": "string" }, "priority": { "type": "string", "enum": ["P1", "P2", "P3"] }, "rationale": { "type": "string" }, "brief": { "type": "string" } }, "required": ["keyword", "priority"] } },
+          "caveats": { "type": "array", "items": { "type": "string" } }
+        },
+        "required": ["opportunities"]
+      },
+      "fixture": { "path": "catalog/fixtures/seo-sample.json", "label": "Public synthetic keyword sample", "source": "synthetic-public" },
+      "demoStatus": { "available": true, "fixturePath": "catalog/fixtures/seo-sample.json", "note": "Public demo only; scores are heuristic, not guarantees." },
+      "validationReport": { "status": "pending", "path": null, "note": "Pending validation sprint; no ranking-performance claims are made." },
+      "pricing": { "kitUsd": 990, "validationSprintUsd": 2900, "enterprisePilot": "contact", "currency": "USD", "proposed": true },
+      "limitations": [
+        "Scores are heuristic estimates; no ranking or traffic guarantees.",
+        "Requires keyword volume/difficulty inputs to be meaningful."
+      ]
+    },
+    {
+      "id": "evidence-backed-prd-generator",
+      "slug": "evidence-backed-prd-generator",
+      "name": "Evidence-Backed PRD Generator",
+      "category": "Product & Engineering",
+      "status": "PUBLIC_DEMO",
+      "risk": "low",
+      "humanApprovalRequired": false,
+      "shortDescription": "Drafts product requirements documents where every requirement is traceable to supplied evidence.",
+      "description": "Builds a PRD draft from problem statements, user research notes, and constraints. Every requirement links to the evidence item it came from; unsupported requirements are flagged as assumptions. Draft only — product owners own the final document.",
+      "buyer": "Product managers drafting PRDs from research and stakeholder notes.",
+      "prompt": "You are a PRD drafting assistant. From the provided evidence items, draft a PRD: problem, users, goals, requirements (each linked to evidence item IDs), non-goals, open questions, and assumptions. Flag requirements without evidence as assumptions. Do not invent metrics or market data.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "evidence": { "type": "array", "items": { "type": "object", "properties": { "id": { "type": "string" }, "type": { "type": "string" }, "content": { "type": "string" } }, "required": ["id", "content"] } },
+          "productContext": { "type": "string" }
+        },
+        "required": ["evidence"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string" },
+          "problem": { "type": "string" },
+          "users": { "type": "array", "items": { "type": "string" } },
+          "goals": { "type": "array", "items": { "type": "string" } },
+          "requirements": { "type": "array", "items": { "type": "object", "properties": { "requirement": { "type": "string" }, "evidenceIds": { "type": "array", "items": { "type": "string" } }, "assumption": { "type": "boolean" } }, "required": ["requirement"] } },
+          "openQuestions": { "type": "array", "items": { "type": "string" } }
+        },
+        "required": ["problem", "requirements", "openQuestions"]
+      },
+      "fixture": { "path": "catalog/fixtures/prd-sample.json", "label": "Public synthetic research notes", "source": "synthetic-public" },
+      "demoStatus": { "available": true, "fixturePath": "catalog/fixtures/prd-sample.json", "note": "Public demo only; final PRD owned by the product team." },
+      "validationReport": { "status": "pending", "path": null, "note": "Pending validation sprint; traceability audit required." },
+      "pricing": { "kitUsd": 1490, "validationSprintUsd": 2900, "enterprisePilot": "contact", "currency": "USD", "proposed": true },
+      "limitations": [
+        "Draft only; requirements without evidence are flagged as assumptions.",
+        "No invented metrics, market sizing, or customer quotes."
+      ]
+    },
+    {
+      "id": "customer-health-churn-copilot",
+      "slug": "customer-health-churn-copilot",
+      "name": "Customer Health and Churn Copilot",
+      "category": "Customer Success",
+      "status": "SUPERVISED_PILOT",
+      "risk": "medium",
+      "humanApprovalRequired": true,
+      "shortDescription": "Scores account health from usage, support and sentiment signals and drafts risk briefs with recommended plays.",
+      "description": "Combines structured usage, support-ticket and sentiment signals into account health scores with risk briefs and suggested plays. All scores are model estimates requiring CSM validation; no automated outreach is performed.",
+      "buyer": "Customer success teams monitoring account health across usage, support and churn signals.",
+      "prompt": "You are a customer health analyst. From the provided signals, score each account's health (0-100) with a risk level, summarize the drivers, and recommend plays. Mark scores as estimates requiring CSM validation. Do not send any message. If signals are missing, output NEEDS_INPUT.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "accounts": { "type": "array", "items": { "type": "object", "properties": { "id": { "type": "string" }, "signals": { "type": "array", "items": { "type": "object", "properties": { "signal": { "type": "string" }, "value": { "type": "string" } } } } }, "required": ["id", "signals"] } }
+        },
+        "required": ["accounts"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "healthScores": { "type": "array", "items": { "type": "object", "properties": { "accountId": { "type": "string" }, "score": { "type": "number" }, "risk": { "type": "string", "enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL"] }, "drivers": { "type": "array", "items": { "type": "string" } }, "recommendedPlays": { "type": "array", "items": { "type": "string" } } }, "required": ["accountId", "score", "risk"] } },
+          "humanApprovalRequired": { "type": "boolean" }
+        },
+        "required": ["healthScores", "humanApprovalRequired"]
+      },
+      "fixture": { "path": "catalog/fixtures/customer-health-sample.json", "label": "Public synthetic account signals", "source": "synthetic-public" },
+      "demoStatus": { "available": true, "fixturePath": "catalog/fixtures/customer-health-sample.json", "note": "Public demo uses synthetic signals; production use is a supervised pilot." },
+      "validationReport": { "status": "pending", "path": null, "note": "Pending validation sprint; score calibration against historical churn data required." },
+      "pricing": { "kitUsd": 2490, "validationSprintUsd": 2900, "enterprisePilot": "contact", "currency": "USD", "proposed": true },
+      "limitations": [
+        "Scores are estimates and require CSM validation.",
+        "No automated outreach or escalation is performed.",
+        "Signal quality drives score quality."
+      ]
+    },
+    {
+      "id": "ab-experiment-interpretation",
+      "slug": "ab-experiment-interpretation",
+      "name": "A/B Experiment Interpretation Assistant",
+      "category": "Data & Experimentation",
+      "status": "PUBLIC_DEMO",
+      "risk": "low",
+      "humanApprovalRequired": false,
+      "shortDescription": "Explains A/B test results in plain language, including significance caveats and guardrail checks.",
+      "description": "Takes experiment summary statistics, checks them against stated assumptions, and produces a plain-language interpretation with significance caveats, guardrail checks and follow-up recommendations. It never declares a winner on its own.",
+      "buyer": "Growth, product and data teams interpreting A/B test results responsibly.",
+      "prompt": "You are an experiment interpretation assistant. From the provided test statistics and hypotheses, explain the results in plain language. State the significance caveats (sample size, multiple comparisons, novelty effects), check guardrail metrics, and suggest follow-ups. Do not declare a winner unless the evidence supports it; otherwise recommend further data collection.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "testName": { "type": "string" },
+          "hypothesis": { "type": "string" },
+          "metrics": { "type": "array", "items": { "type": "object", "properties": { "metric": { "type": "string" }, "controlValue": { "type": "number" }, "variantValue": { "type": "number" }, "pValue": { "type": "number" }, "sampleSize": { "type": "number" } }, "required": ["metric", "controlValue", "variantValue"] } }
+        },
+        "required": ["metrics"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "interpretation": { "type": "string" },
+          "significanceCaveats": { "type": "array", "items": { "type": "string" } },
+          "guardrailChecks": { "type": "array", "items": { "type": "string" } },
+          "recommendations": { "type": "array", "items": { "type": "string" } },
+          "declaredWinner": { "type": "boolean" }
+        },
+        "required": ["interpretation", "significanceCaveats"]
+      },
+      "fixture": { "path": "catalog/fixtures/ab-test-sample.json", "label": "Public synthetic A/B test statistics", "source": "synthetic-public" },
+      "demoStatus": { "available": true, "fixturePath": "catalog/fixtures/ab-test-sample.json", "note": "Public demo only; statistical conclusions require a qualified analyst." },
+      "validationReport": { "status": "pending", "path": null, "note": "Pending validation sprint; interpretation accuracy benchmark required." },
+      "pricing": { "kitUsd": 990, "validationSprintUsd": 2900, "enterprisePilot": "contact", "currency": "USD", "proposed": true },
+      "limitations": [
+        "Never declares a winner without statistical support.",
+        "Interprets provided statistics; it does not recompute p-values from raw data.",
+        "Requires an analyst to own the final read-out."
+      ]
+    }
+  ]
+}
