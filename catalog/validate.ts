@@ -126,6 +126,31 @@ export function validateManifest(manifest: ProductManifest): ValidationIssue[] {
 }
 
 /**
+ * Validate a product inquiry lead form (test-mode monetization).
+ * Returns a list of human-readable errors; empty array = valid.
+ */
+export interface InquiryFormValues {
+  name: string;
+  email: string;
+  company?: string;
+  message?: string;
+  acceptedTerms: boolean;
+}
+
+export function validateInquiryForm(values: InquiryFormValues): string[] {
+  const errors: string[] = [];
+  if (!values.name.trim()) errors.push('Name is required.');
+  if (!values.email.trim()) errors.push('Work email is required.');
+  else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email.trim())) {
+    errors.push('Work email is not a valid email address.');
+  }
+  if (!values.acceptedTerms) {
+    errors.push('You must accept the terms and privacy notice to continue.');
+  }
+  return errors;
+}
+
+/**
  * Validate a demo input payload against a product's input schema (JSON Schema subset).
  * Returns a list of missing/invalid field messages. Empty array = valid.
  */
@@ -200,6 +225,36 @@ export function validateDemoOutput(product: ProductRecord, output: unknown): str
     }
     if (prop.type === 'string' && Array.isArray(prop.enum) && !prop.enum.includes(value[key])) {
       errors.push(`Output field "${key}" has unsupported value.`);
+    }
+    // Recurse into array items using the item schema.
+    if (prop.type === 'array' && Array.isArray(value[key]) && prop.items && typeof prop.items === 'object') {
+      const itemSchema = prop.items as { type?: string; required?: string[]; properties?: Record<string, any>; enum?: unknown[] };
+      (value[key] as unknown[]).forEach((item, index) => {
+        if (typeof item !== 'object' || item === null) {
+          errors.push(`Output field "${key}[${index}]" must be an object.`);
+          return;
+        }
+        const itemValue = item as Record<string, unknown>;
+        for (const req of itemSchema.required || []) {
+          if (itemValue[req] === undefined || itemValue[req] === null || itemValue[req] === '') {
+            errors.push(`Output field "${key}[${index}].${req}" is required.`);
+          }
+        }
+        for (const [itemKey, itemProp] of Object.entries(itemSchema.properties || {})) {
+          const v = itemValue[itemKey];
+          if (v === undefined) continue;
+          if (itemProp.type === 'string' && typeof v !== 'string') {
+            errors.push(`Output field "${key}[${index}].${itemKey}" must be a string.`);
+          } else if (itemProp.type === 'number' && typeof v !== 'number') {
+            errors.push(`Output field "${key}[${index}].${itemKey}" must be a number.`);
+          } else if (itemProp.type === 'boolean' && typeof v !== 'boolean') {
+            errors.push(`Output field "${key}[${index}].${itemKey}" must be a boolean.`);
+          }
+          if (itemProp.type === 'string' && Array.isArray(itemProp.enum) && !itemProp.enum.includes(v)) {
+            errors.push(`Output field "${key}[${index}].${itemKey}" has unsupported value.`);
+          }
+        }
+      });
     }
   }
   return errors;

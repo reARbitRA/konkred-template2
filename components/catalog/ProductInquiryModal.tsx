@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Loader2, CheckCircle2, AlertTriangle, CreditCard, Info } from 'lucide-react';
 import { databaseService } from '../../services/database.ts';
+import { validateInquiryForm } from '../../catalog/validate.ts';
 
 export type InquiryIntent =
   | 'workflow_kit'
@@ -49,12 +50,9 @@ export const ProductInquiryModal: React.FC<ProductInquiryModalProps> = ({ intent
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !email.trim()) {
-      setError('Name and email are required.');
-      return;
-    }
-    if (!acceptedTerms) {
-      setError('You must accept the terms and privacy notice to continue.');
+    const validationErrors = validateInquiryForm({ name, email, company, message, acceptedTerms });
+    if (validationErrors.length > 0) {
+      setError(validationErrors[0]);
       return;
     }
     setIsSubmitting(true);
