@@ -89,6 +89,21 @@ Coverage includes: 15 product slugs + detail routes, catalogue search/filters, m
 2. If a problem appears after merge: `git revert <merge-commit>` on `main` (or redeploy the previous production SHA in Vercel — instant rollback, no code change).
 3. No data migrations were introduced; reverting restores the previous UI/routes fully.
 
+### 10.1 UX revision — product pages are sellable micro-tools (owner feedback, 2026-08-21)
+
+Per owner direction, the 15 product pages no longer display spec-sheet content:
+- **Removed from the public UI:** HUMAN_APPROVAL_REQUIRED banners, risk badges, the
+  written prompt, input/output schema blocks, and detailed limitation lists.
+- **Added:** an interactive micro-tool on every product page — form fields generated
+  from the product's input schema, "Load Sample Data" (synthetic public fixture),
+  Run → schema-validated output, and friendly NEEDS_INPUT / REQUEST_PILOT / error states.
+- Prompts, schemas, limitations, risk and approval metadata remain in the manifest
+  (backend/internal) and are delivered as part of the Workflow Kit — they are no longer
+  shown to customers.
+- All 15 products now include a public synthetic sample fixture (4 new fixtures added:
+  M&A DD, RFP Response, GovCon, Lease Abstraction) so every tool is loadable with sample data.
+- Catalogue cards: removed risk/approval chips; CTA renamed to "Launch Tool".
+
 ### 10. Human decisions still required
 1. Approve/merge this PR (agent will not merge itself).
 2. Confirm proposed Workflow Kit / Validation Sprint / All-Catalog Workspace pricing.
