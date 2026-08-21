@@ -1,0 +1,9 @@
+{
+  "sampleLabel": "SYNTHETIC PUBLIC DATA-ROOM SAMPLE",
+  "documents": [
+    { "id": "DOC-001", "category": "corporate", "content": "TargetCo Inc. is a Delaware C-corporation. Outstanding shares: 1,000,000 common. Board: five directors. No convertible notes outstanding as of the latest balance sheet date." },
+    { "id": "DOC-002", "category": "contracts", "content": "Master Services Agreement with Customer A: 24-month term, auto-renewal unless notice is given 90 days prior, termination for convenience with 60 days written notice." },
+    { "id": "DOC-003", "category": "financials", "content": "FY2025 revenue $4.2M, gross margin 61%, operating margin 12%. Recurring revenue share is 78% of total revenue." }
+  ],
+  "playbook": ["corporate structure and capitalization", "customer contracts and concentration", "financial statement quality"]
+}

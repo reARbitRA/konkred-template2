@@ -76,7 +76,7 @@ describe('no fake marketplace data in source', () => {
       'pages/CataloguePage.tsx',
       'pages/ProductDetailPage.tsx',
       'components/catalog/ProductCard.tsx',
-      'components/catalog/ProductDemo.tsx',
+      'components/catalog/MicroTool.tsx',
       'components/catalog/ProductInquiryModal.tsx',
       'pages/NotFoundPage.tsx',
     ];

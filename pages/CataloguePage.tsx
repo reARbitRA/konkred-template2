@@ -57,9 +57,9 @@ const CataloguePage: React.FC<CataloguePageProps> = ({ onNavigate }) => {
           Workflow Products
         </h1>
         <p className="text-sm sm:text-base text-zinc-400 max-w-3xl leading-relaxed">
-          Fifteen AI workflow products, each with its own canonical prompt, input/output schemas,
-          validation status and limitation statement. Status labels reflect actual maturity —
-          nothing here claims to be autonomous, certified or production-grade unless it is.
+          Fifteen AI workflow products, each delivered as an interactive micro-tool you can
+          load and run with sample data. Status labels show how each product is delivered —
+          kit, pilot or enterprise — so you always know what you're getting.
         </p>
       </div>
 
@@ -157,8 +157,8 @@ const CataloguePage: React.FC<CataloguePageProps> = ({ onNavigate }) => {
                 body: 'Every demo/model response is validated against the product output schema before it renders. Invalid output is rejected, not displayed.',
               },
               {
-                title: 'No Fabricated Proof',
-                body: 'The catalogue contains no invented ratings, sales counts, sellers, certificates, accuracy rates or ROI. Validation reports are marked pending until a validation sprint produces them.',
+                title: 'One Manifest, 15 Products',
+                body: 'A single canonical manifest drives every card, tool and schema — updates ship consistently across the entire catalogue.',
               },
             ].map(item => (
               <div key={item.title} className="bg-[#0E1319] border-2 border-black rounded-2xl p-6 space-y-3">

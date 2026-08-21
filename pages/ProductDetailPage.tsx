@@ -2,10 +2,9 @@ import React, { useState } from 'react';
 import { PageView } from '../types.ts';
 import { getProductBySlug } from '../catalog/products.ts';
 import { StatusBadge } from '../components/catalog/StatusBadge.tsx';
-import { RiskBadge, HumanApprovalNotice } from '../components/catalog/RiskBadge.tsx';
-import { ProductDemo } from '../components/catalog/ProductDemo.tsx';
+import { MicroTool } from '../components/catalog/MicroTool.tsx';
 import { ProductInquiryModal, type InquiryIntent } from '../components/catalog/ProductInquiryModal.tsx';
-import { ArrowLeft, FileText, ShoppingBag, FlaskConical, Rocket, LayoutGrid, ShieldCheck, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, ShoppingBag, FlaskConical, Rocket, LayoutGrid, Users } from 'lucide-react';
 
 interface ProductDetailPageProps {
   slug: string;
@@ -20,8 +19,9 @@ const CTA_STYLES: Record<InquiryIntent, string> = {
 };
 
 /**
- * Shared product-detail template. Renders every product from the manifest —
- * no per-product hardcoded pages.
+ * Shared product page — a customer-facing micro-tool.
+ * Prompt, schemas, limitations and approval metadata stay in the product
+ * manifest (backend); the UI shows only product copy, the tool and CTAs.
  */
 const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ slug, onNavigate }) => {
   const product = getProductBySlug(slug);
@@ -31,9 +31,8 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ slug, onNavigate 
     return (
       <div className="min-h-[60vh] bg-[#0B0F14] text-white flex items-center justify-center px-6 py-24">
         <div className="max-w-md text-center space-y-4">
-          <AlertTriangle size={28} className="mx-auto text-amber-500" />
           <p className="font-mono text-xs uppercase tracking-widest text-zinc-400">
-            Unknown product slug: {slug}
+            Product not found: {slug}
           </p>
           <button
             onClick={() => onNavigate('products')}
@@ -58,10 +57,7 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ slug, onNavigate 
           <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
           <span>BACK TO CATALOGUE</span>
         </button>
-        <div className="flex items-center gap-2">
-          <StatusBadge status={product.status} />
-          <RiskBadge risk={product.risk} humanApprovalRequired={product.humanApprovalRequired} />
-        </div>
+        <StatusBadge status={product.status} />
       </div>
 
       <div className="max-w-7xl mx-auto px-6 md:px-8 grid grid-cols-1 lg:grid-cols-12 gap-10 pt-10">
@@ -74,103 +70,37 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ slug, onNavigate 
             <h1 className="text-4xl sm:text-5xl font-black font-mono tracking-tight uppercase leading-tight">
               {product.name}
             </h1>
-            <p className="text-sm sm:text-base text-zinc-300 leading-relaxed max-w-3xl">
+            <p className="text-base sm:text-lg text-zinc-300 leading-relaxed max-w-3xl">
               {product.description}
             </p>
+            <div className="flex items-start gap-2.5 text-xs text-zinc-400 max-w-3xl">
+              <Users size={14} className="text-amber-500 shrink-0 mt-0.5" />
+              <p><span className="font-mono font-black uppercase tracking-widest text-zinc-300">Built for:</span> {product.buyer}</p>
+            </div>
           </div>
 
-          {product.humanApprovalRequired && <HumanApprovalNotice />}
-
-          <div className="space-y-6">
-            <section aria-label="Product details">
-              <h2 className="font-mono font-black uppercase tracking-widest text-sm text-white mb-3 flex items-center gap-2">
-                <FileText size={15} className="text-amber-500" /> Product Details
-              </h2>
-              <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="bg-[#0E1319] border-2 border-black rounded-xl p-4">
-                  <dt className="text-[9px] font-mono uppercase tracking-widest text-zinc-500 mb-1">Primary Buyer</dt>
-                  <dd className="text-xs text-zinc-300 leading-relaxed">{product.buyer}</dd>
-                </div>
-                <div className="bg-[#0E1319] border-2 border-black rounded-xl p-4">
-                  <dt className="text-[9px] font-mono uppercase tracking-widest text-zinc-500 mb-1">Validation Report</dt>
-                  <dd className="text-xs text-zinc-300">
-                    {product.validationReport.status === 'available' ? (
-                      <span className="text-emerald-400">Available</span>
-                    ) : (
-                      <span className="text-amber-400">Pending — produced by a validation sprint</span>
-                    )}
-                  </dd>
-                </div>
-              </dl>
-            </section>
-
-            {/* Prompt + schemas */}
-            <section aria-label="Prompt and schemas">
-              <h2 className="font-mono font-black uppercase tracking-widest text-sm text-white mb-3">
-                Canonical Prompt &amp; Schemas
-              </h2>
-              <div className="space-y-3">
-                <div className="bg-[#0E1319] border-2 border-black rounded-xl p-4">
-                  <p className="text-[9px] font-mono uppercase tracking-widest text-zinc-500 mb-2">PROMPT // v1</p>
-                  <p className="text-xs text-zinc-300 leading-relaxed font-mono">{product.prompt}</p>
-                </div>
-                <details className="bg-[#0E1319] border-2 border-black rounded-xl p-4 group">
-                  <summary className="text-[10px] font-mono uppercase tracking-widest text-amber-500 font-black cursor-pointer select-none">
-                    Input Schema (JSON)
-                  </summary>
-                  <pre className="mt-3 bg-black/60 rounded-lg p-3 text-[11px] font-mono text-zinc-300 overflow-x-auto">
-                    {JSON.stringify(product.inputSchema, null, 2)}
-                  </pre>
-                </details>
-                <details className="bg-[#0E1319] border-2 border-black rounded-xl p-4 group">
-                  <summary className="text-[10px] font-mono uppercase tracking-widest text-amber-500 font-black cursor-pointer select-none">
-                    Output Schema (JSON)
-                  </summary>
-                  <pre className="mt-3 bg-black/60 rounded-lg p-3 text-[11px] font-mono text-zinc-300 overflow-x-auto">
-                    {JSON.stringify(product.outputSchema, null, 2)}
-                  </pre>
-                </details>
-              </div>
-            </section>
-
-            {/* Public demo */}
-            <ProductDemo product={product} />
-
-            {/* Limitations */}
-            <section aria-label="Limitations">
-              <h2 className="font-mono font-black uppercase tracking-widest text-sm text-white mb-3 flex items-center gap-2">
-                <ShieldCheck size={15} className="text-amber-500" /> Limitations
-              </h2>
-              <ul className="space-y-2">
-                {product.limitations.map((limitation, i) => (
-                  <li key={i} className="flex items-start gap-2.5 bg-[#0E1319] border-2 border-black rounded-xl px-4 py-3">
-                    <span className="text-amber-500 font-mono text-xs mt-0.5">→</span>
-                    <span className="text-xs text-zinc-300 leading-relaxed">{limitation}</span>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          </div>
+          {/* The micro-tool */}
+          <MicroTool product={product} />
         </div>
 
-        {/* Sidebar: pricing + CTAs */}
+        {/* Sidebar: acquisition CTAs */}
         <aside className="lg:col-span-4 space-y-4" aria-label="Acquisition options">
-          <div className="bg-[#0E1319] border-2 border-black rounded-2xl p-6 space-y-4 sticky top-24">
+          <div className="bg-[#0E1319] border-2 border-black rounded-2xl p-6 space-y-4 sticky top-24 shadow-[4px_4px_0px_0px_#000000]">
             <div>
               <p className="text-[9px] font-mono uppercase tracking-widest text-zinc-500 mb-1">
-                Workflow Kit {price ? `· Proposed ${product.pricing.currency} ${price.toLocaleString('en-US')}` : ''}
+                Workflow Kit {price ? `· ${product.pricing.currency} ${price.toLocaleString('en-US')}` : ''}
               </p>
               <p className="text-xs text-zinc-400 leading-relaxed">
-                {product.status === 'PUBLIC_DEMO' && 'Catalogue entry with public demo. The kit is available on request.'}
-                {product.status === 'STANDARD_KIT' && 'Prompt + schemas + runbook for self-serve execution by your team.'}
-                {product.status === 'SUPERVISED_PILOT' && 'Supervised pilot with KONKRED validation engineers.'}
-                {product.status === 'ENTERPRISE_INTEGRATION' && 'Enterprise integration engagement with security review.'}
+                {product.status === 'PUBLIC_DEMO' && 'Catalogue entry with a runnable tool. The kit is available on request.'}
+                {product.status === 'STANDARD_KIT' && 'Prompt, schemas and runbook for self-serve execution by your team.'}
+                {product.status === 'SUPERVISED_PILOT' && 'Supervised pilot with KONKRED engineers, scoped to your data.'}
+                {product.status === 'ENTERPRISE_INTEGRATION' && 'Enterprise integration engagement, scoped with your team.'}
               </p>
             </div>
 
             {[
-              { intent: 'workflow_kit' as InquiryIntent, icon: ShoppingBag, label: 'Buy Workflow Kit', note: price ? `${product.pricing.currency} ${price.toLocaleString('en-US')} (proposed)` : 'Contact for pricing' },
-              { intent: 'validation_sprint' as InquiryIntent, icon: FlaskConical, label: 'Book Validation Sprint', note: 'Produces the validation report' },
+              { intent: 'workflow_kit' as InquiryIntent, icon: ShoppingBag, label: 'Buy Workflow Kit', note: price ? `${product.pricing.currency} ${price.toLocaleString('en-US')}` : 'Contact for pricing' },
+              { intent: 'validation_sprint' as InquiryIntent, icon: FlaskConical, label: 'Book Validation Sprint', note: 'Get the validation report' },
               { intent: 'enterprise_pilot' as InquiryIntent, icon: Rocket, label: 'Request Enterprise Pilot', note: 'Scoped + supervised' },
             ].map(({ intent, icon: Icon, label, note }) => (
               <button
@@ -193,8 +123,7 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ slug, onNavigate 
             </button>
 
             <p className="text-[9px] font-mono text-zinc-500 leading-relaxed">
-              All purchases and bookings are in TEST MODE — payment/CRM credentials are not
-              configured. Forms record leads only; nothing is charged.
+              Purchases and bookings are in test mode — forms record your inquiry, nothing is charged.
             </p>
           </div>
         </aside>

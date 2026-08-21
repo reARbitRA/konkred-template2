@@ -155,3 +155,20 @@ details recorded in the PR.
 `npm test` (vitest) ✅ 99/99 · `npm run build` ✅ · `npm run build:vercel` ✅ ·
 `npx playwright test` — 33 tests collected; browser binary download is blocked in this
 sandbox (network-restricted CDN), suite runs in CI/Vercel environments.
+
+---
+
+## 6. UX REVISION (owner feedback, 2026-08-21)
+
+Product pages converted from spec sheets into **sellable micro-tools**:
+- Removed from the customer-facing UI: HUMAN_APPROVAL_REQUIRED banners, risk badges,
+  full prompt text, input/output schema blocks, detailed limitation lists.
+- Each of the 15 workflows now renders an **interactive micro-tool**: form fields
+  generated from the product's input schema, "Load Sample Data" (synthetic public
+  fixture), Run → schema-validated output.
+- Prompts, schemas, limitations, risk and approval metadata remain in the manifest
+  (backend/internal) and in the Workflow Kit — they are no longer displayed on
+  public product pages.
+- Added public synthetic fixtures for the remaining 4 products (M&A DD, RFP Response,
+  GovCon, Lease Abstraction) so all 15 tools are loadable with sample data.
+- Catalogue cards: removed risk/approval chips; renamed CTA to "Launch Tool".

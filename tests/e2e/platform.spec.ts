@@ -24,11 +24,16 @@ test.describe('15 product catalogue', () => {
   });
 
   for (const product of PRODUCTS) {
-    test(`product detail page renders for ${product.slug}`, async ({ page }) => {
+    test(`product detail page renders as a micro-tool for ${product.slug}`, async ({ page }) => {
       await page.goto(`/products/${product.slug}`);
       await expect(page.getByRole('heading', { name: new RegExp(product.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i') })).toBeVisible();
-      // Limitations section is always present
-      await expect(page.getByText('Limitations', { exact: true })).toBeVisible();
+      // The interactive tool is present on every product page
+      await expect(page.getByRole('button', { name: /Run Tool/i })).toBeVisible();
+      await expect(page.getByRole('button', { name: /Load Sample Data/i })).toBeVisible();
+      // No self-critical spec-sheet content on the customer-facing page
+      await expect(page.getByText('Limitations', { exact: true })).toBeHidden();
+      await expect(page.getByText('PROMPT //', { exact: false })).toBeHidden();
+      await expect(page.getByText('HUMAN_APPROVAL_REQUIRED')).toBeHidden();
     });
   }
 

@@ -13,6 +13,10 @@ import seo from './fixtures/seo-sample.json';
 import prd from './fixtures/prd-sample.json';
 import customerHealth from './fixtures/customer-health-sample.json';
 import abTest from './fixtures/ab-test-sample.json';
+import maDueDiligence from './fixtures/ma-due-diligence-sample.json';
+import rfpResponse from './fixtures/rfp-response-sample.json';
+import govconRfp from './fixtures/govcon-rfp-sample.json';
+import commercialLease from './fixtures/commercial-lease-sample.json';
 
 export const FIXTURES: Record<string, unknown> = {
   'contract-review-copilot': contractReview,
@@ -26,4 +30,8 @@ export const FIXTURES: Record<string, unknown> = {
   'evidence-backed-prd-generator': prd,
   'customer-health-churn-copilot': customerHealth,
   'ab-experiment-interpretation': abTest,
+  'ma-due-diligence-workbench': maDueDiligence,
+  'rfp-response-copilot': rfpResponse,
+  'govcon-rfp-compliance-workbench': govconRfp,
+  'commercial-lease-abstraction': commercialLease,
 };

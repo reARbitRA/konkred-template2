@@ -406,9 +406,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                 <div className="space-y-2.5 mb-8">
                   {[
                     '→ Searchable catalogue with category and status filters',
-                    '→ Product detail pages with validation-report links',
+                    '→ One-click micro-tools with sample data',
                     '→ Workflow Kit / Validation Sprint / Enterprise Pilot CTAs',
-                    '→ No fake ratings, sellers, certificates or success claims'
+                    '→ Status labels on every product'
                   ].map((line, i) => (
                     <div key={i} className="font-mono text-xs md:text-sm bg-[#f5f5f5] text-black px-4 py-3 flex items-center justify-between border-r-4 border-[#D98A2E] hover:bg-black hover:text-white transition-colors duration-200 cursor-default">
                       <span>{line}</span>
