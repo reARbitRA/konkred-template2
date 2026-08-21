@@ -134,3 +134,24 @@ details recorded in the PR.
 - [ ] No secrets in GitHub or client bundles; lint, typecheck, unit tests, build, E2E pass.
 - [ ] Vercel preview reviewed; PR contains file summary, test evidence, limitations, rollback plan.
 - [ ] No merge/deploy without human approval.
+
+---
+
+## 5. EXECUTION STATUS (2026-08-21)
+
+| Stage | Status | Notes |
+| :--- | :--- | :--- |
+| 0 Audit | ✅ | `agent/REPOSITORY_AUDIT.md` (commit `00d332a`) |
+| 1 Purge | ✅ | commit `b508689` — mock marketplace/forge/K-Tools removed; audit/fullKONK route targets fixed; purged routes → 404/redirect |
+| 2 Shared platform | ✅ | commit `211e068` — manifest-driven catalogue, card, detail template, search/filters/status labels |
+| 3 15 products | ✅ | commit `211e068` — full manifest records + 11 public fixtures |
+| 4 Demo & AI layer | ✅ | commit `1579d65` — server-side `/api/demo/run`, schema validation, feature flag, REQUEST_PILOT |
+| 5 Monetization | ✅ | commit `1579d65` — test-mode lead forms + All-Catalog Workspace CTA |
+| 6 Testing | ✅ | commit `3650825` — vitest 99/99 pass; Playwright 33 tests CI-ready (browser download blocked in sandbox) |
+| 7 Preview & PR | ⏳ this step | push `arena/01a0246b-konkred-template2`, open PR vs `main`, await Vercel preview |
+| 8 Production handoff | ⛔ blocked | only after human approval — agent never merges/deploys unilaterally |
+
+**Baseline vs. current:** `npm ci` ✅ · `npm run lint` (tsc) ✅ · `npm run typecheck` ✅ ·
+`npm test` (vitest) ✅ 99/99 · `npm run build` ✅ · `npm run build:vercel` ✅ ·
+`npx playwright test` — 33 tests collected; browser binary download is blocked in this
+sandbox (network-restricted CDN), suite runs in CI/Vercel environments.
