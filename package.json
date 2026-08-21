@@ -1,11 +1,11 @@
 {
-  "name": "konkred-–-production-node",
+  "name": "konkred-\u2013-production-node",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "tsx start.ts",
-    "build:client": "vite build",
+    "build:client": "npm run validate:portfolio && vite build",
     "bundle:api": "esbuild server.ts --bundle --platform=node --format=cjs --minify --legal-comments=none --supported:template-literal=false --outfile=lib/fullkonk-server.cjs",
     "build:vercel": "npm run build:client && npm run bundle:api",
     "build": "npm run build:client && esbuild start.ts --bundle --platform=node --format=cjs --packages=external --sourcemap --outfile=dist/server.cjs",
@@ -13,7 +13,8 @@
     "lint": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "validate:portfolio": "tsx scripts/validate-portfolio.mjs"
   },
   "dependencies": {
     "@codesandbox/sandpack-react": "^2.20.0",
