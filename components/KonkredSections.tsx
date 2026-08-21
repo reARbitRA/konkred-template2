@@ -1,26 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
-  Shield, Code, Cpu, Filter, Search, ArrowRight, Award, Flame,
-  CheckCircle, HelpCircle, FileText, Upload, Terminal, BookOpen, 
-  ChevronRight, Sparkles, Send, DollarSign, Wallet, ArrowUpRight
+  Shield, Code, Upload, Terminal, 
+  CheckCircle, Send, Mail, ArrowRight
 } from 'lucide-react';
 import { useToast } from '../contexts/ToastContext.tsx';
+import { databaseService } from '../services/database.ts';
 import DOMPurify from 'dompurify';
 
 // ==========================================
 // 1. DATASETS & STATIC MODELS
 // ==========================================
-
-export interface ToolItem {
-  id: string;
-  category: 'security' | 'automation' | 'creative';
-  title: string;
-  tag: 'Active' | 'Free' | 'Custom';
-  problem: string;
-  solution: string;
-  codeSnippet: string;
-}
 
 export interface BlogPost {
   id: string;
@@ -33,474 +23,6 @@ export interface BlogPost {
 }
 
 // Exactly 51 real developer-focused AI tools
-export const SYSTEM_TOOLS: ToolItem[] = [
-  // SECURITY & THREAT HUNTING (17 tools)
-  {
-    id: 'sec-01',
-    category: 'security',
-    title: 'Prompt Injection Sandbox Audits',
-    tag: 'Active',
-    problem: 'External user inputs override system guardrails, forcing LLMs to output prohibited system prompts.',
-    solution: 'Simulates 40 adversarial inputs synchronously to detect drift and shield system alignment.',
-    codeSnippet: 'const response = await sandboxAudit.testInput(userInput, systemPrompt);'
-  },
-  {
-    id: 'sec-02',
-    category: 'security',
-    title: 'LLM Firewall Rules Configurator',
-    tag: 'Free',
-    problem: 'Raw API outputs might contain sensitive internal infrastructure coordinates.',
-    solution: 'Inspects outgoing payloads against regex banks and high-entropy hashes in real-time.',
-    codeSnippet: 'const cleanOutput = firewall.sanitize(llmResponse, ["ip_address", "api_key"]);'
-  },
-  {
-    id: 'sec-03',
-    category: 'security',
-    title: 'Sensitive Data Leak Blocker',
-    tag: 'Active',
-    problem: 'Users unknowingly upload internal source code containing API tokens and PII to public models.',
-    solution: 'Pre-filters file inputs before sending to third-party APIs to redact API hashes.',
-    codeSnippet: 'const securePayload = sensitiveFilter.scrub(fileBuffer);'
-  },
-  {
-    id: 'sec-04',
-    category: 'security',
-    title: 'Model Poisoning Detector',
-    tag: 'Custom',
-    problem: 'Corrupted fine-tuning feedback loops cause catastrophic alignment failure.',
-    solution: 'Compares vector embeddings of new training queries against established reference baselines.',
-    codeSnippet: 'const healthScore = await poisonDetector.analyzeEmbeddings(feedbackDataset);'
-  },
-  {
-    id: 'sec-05',
-    category: 'security',
-    title: 'Reverse Prompt Engineer Prevention',
-    tag: 'Active',
-    problem: 'Rival builders retrieve your proprietary system context via simple phrasing tricks.',
-    solution: 'Appends customized defensive prompt preambles that trap recursive extraction attempts.',
-    codeSnippet: 'const dynamicPrompt = reversePreventionLayer.compile(myProprietaryPrompt);'
-  },
-  {
-    id: 'sec-06',
-    category: 'security',
-    title: 'AI Output Sanctification Layer',
-    tag: 'Free',
-    problem: 'LLMs can output invalid JSON structures or malicious script tags during structured query mode.',
-    solution: 'Binds outputs to strict TS interfaces and strips browser executable scripts.',
-    codeSnippet: 'const validJson = sanctify.parseJsonSchema(rawText, userTargetInterface);'
-  },
-  {
-    id: 'sec-07',
-    category: 'security',
-    title: 'Semantic Attack Vector Scanner',
-    tag: 'Active',
-    problem: 'Multi-turn conversations can slowly drift toward malicious or unauthorized tool usage.',
-    solution: 'Maintains a running semantic tensor distance log to catch slow adversarial drift.',
-    codeSnippet: 'const deviation = semanticScanner.calculateTurnDistance(dialogueHistory);'
-  },
-  {
-    id: 'sec-08',
-    category: 'security',
-    title: 'Model Privilege Escalation Analyzer',
-    tag: 'Custom',
-    problem: 'Connected tools receive unredacted access, enabling users to purge tables via LLM actions.',
-    solution: 'Enforces strict scope walls around tool execution pathways with granular authorization checkups.',
-    codeSnippet: 'const isGranted = privilegeAnalyzer.validateToolPermissions(assignedAgentID, toolAction);'
-  },
-  {
-    id: 'sec-09',
-    category: 'security',
-    title: 'Secure Context Integrity Validator',
-    tag: 'Free',
-    problem: 'Memory buffer compression compromises contextual parameters in ongoing chat sessions.',
-    solution: 'Recalls and pins absolute truth assertions back into active memory window buffers.',
-    codeSnippet: 'const reinforcedContext = integrityValidator.synthesize(keyStates, currentContext);'
-  },
-  {
-    id: 'sec-10',
-    category: 'security',
-    title: 'Decentralized Jailbreak Oracle',
-    tag: 'Active',
-    problem: 'Dynamic zero-day jailbreaks bypass standard offline guardrail definitions.',
-    solution: 'Pulls the latest known exploit signatures from a decentralized security ledger.',
-    codeSnippet: 'const isFlagged = await jailbreakOracle.checkLiveExploits(newPromptPattern);'
-  },
-  {
-    id: 'sec-11',
-    category: 'security',
-    title: 'Input Token Noise Purifier',
-    tag: 'Free',
-    problem: 'Invisible unicode or hidden control tokens trick model pre-processors into ignoring safety rules.',
-    solution: 'Normalizes character encoding and strips harmful control markers from API vectors.',
-    codeSnippet: 'const cleanTokens = tokenPurifier.stripControlCharacters(rawTokenSeq);'
-  },
-  {
-    id: 'sec-12',
-    category: 'security',
-    title: 'Zero-Trust Multi-agent Gatekeeper',
-    tag: 'Custom',
-    problem: 'Nested agent-to-agent talk could trigger a recursive loop of unauthorized API calls.',
-    solution: 'Intercepts internal queries using strict payload signing protocols.',
-    codeSnippet: 'const signature = gatekeeper.signPayload(sourceAgentId, targetAgentId, actionPayload);'
-  },
-  {
-    id: 'sec-13',
-    category: 'security',
-    title: 'Behavioral Drift Monitor',
-    tag: 'Active',
-    problem: 'Frequent server-side engine updates cause live outputs to lose alignment or turn hostile.',
-    solution: 'Runs background regression tests against a golden dataset hourly and tracks metric variance.',
-    codeSnippet: 'const testResults = await driftMonitor.runAutomatedRegressionTests(apiRef);'
-  },
-  {
-    id: 'sec-14',
-    category: 'security',
-    title: 'API Credentials Leakage Watchdog',
-    tag: 'Free',
-    problem: 'AI diagnostic output might accidentally trace raw webhook secret tokens to log files.',
-    solution: 'Actively monitors dev-server outputs to purge leaked environment variables.',
-    codeSnippet: 'const parsedLogs = loggerWatchdog.scrubAPISecrets(serverTraceBuffer);'
-  },
-  {
-    id: 'sec-15',
-    category: 'security',
-    title: 'Model Overreliance Assessor',
-    tag: 'Custom',
-    problem: 'Agents execute critical commands without human loops, relying heavily on low-probability outputs.',
-    solution: 'Intercepts any output with confidence metrics below 92% and routes to human reviewer.',
-    codeSnippet: 'const approved = overrelianceAssessor.assessAndRoute(outputProbability, payload);'
-  },
-  {
-    id: 'sec-16',
-    category: 'security',
-    title: 'Cross-Site Prompt Scripting Analyzer',
-    tag: 'Active',
-    problem: 'Imported web browser sources insert instructions that trigger the LLM to send history to external endpoints.',
-    solution: 'Strips out semantic script directives during the fetching and chunking stages.',
-    codeSnippet: 'const sanitizedHTML = xpsAnalyzer.filterExternalDirectives(webSourceText);'
-  },
-  {
-    id: 'sec-17',
-    category: 'security',
-    title: 'Decentralized Audit Trail Sync',
-    tag: 'Custom',
-    problem: 'Model decisions are stored in mutable tables, creating trace audits that are vulnerable to tampering.',
-    solution: 'Commits hashes of key AI decisions onto a secure blockchain ledger for unalterable records.',
-    codeSnippet: 'const blockReceipt = await auditTrail.commitDecision(decisionPayloadHash);'
-  },
-
-  // BUSINESS & WORKFLOW AUTOMATION (17 tools)
-  {
-    id: 'bus-01',
-    category: 'automation',
-    title: 'Structured SQL-to-API Sync',
-    tag: 'Active',
-    problem: 'Direct database reads require slow multi-line SQL formatting that often break under edge states.',
-    solution: 'Converts unstructured questions into raw, verified DB queries, caching valid syntax.',
-    codeSnippet: 'const apiPayload = await sqlSync.exec(userRequestText, databaseSchema);'
-  },
-  {
-    id: 'bus-02',
-    category: 'automation',
-    title: 'Autonomous Receipt Ledger Parser',
-    tag: 'Free',
-    problem: 'Manually auditing dynamic receipts with skewed angles causes parsing mismatches.',
-    solution: 'Utilizes Vision AI structures to align and extract line items from raw images.',
-    codeSnippet: 'const lineItems = await receiptParser.extractAndFormat(imageBuffer);'
-  },
-  {
-    id: 'bus-03',
-    category: 'automation',
-    title: 'Multi-tier Email Auto-responder Agent',
-    tag: 'Active',
-    problem: 'Client email systems are clogged with inquiries requiring identical support triage operations.',
-    solution: 'Drafts tailored answers and hooks them into native IMAP servers for real-time dispatch.',
-    codeSnippet: 'const draftedEmail = await responder.generateResponseDraft(clientMessage);'
-  },
-  {
-    id: 'bus-04',
-    category: 'automation',
-    title: 'PDF Document Chunking Optimizer',
-    tag: 'Free',
-    problem: 'Naive chunk split algorithms cut off paragraphs mid-word, hurting search accuracy.',
-    solution: 'Splits source documents at absolute semantic boundaries to maintain target embeddings.',
-    codeSnippet: 'const optimizedChunks = chunker.splitBySemanticParagraphs(pdfRawText);'
-  },
-  {
-    id: 'bus-05',
-    category: 'automation',
-    title: 'Google Workspace Schema Generator',
-    tag: 'Active',
-    problem: 'Custom sheet schemas get unsynced when team members write inconsistent cells.',
-    solution: 'Autogenerates and locks Workspace cell schemas using strict validation patterns.',
-    codeSnippet: 'const schemaNode = workspaceSchema.compile(activeSheetHeaders);'
-  },
-  {
-    id: 'bus-06',
-    category: 'automation',
-    title: 'Automated Technical Spec Synthesizer',
-    tag: 'Custom',
-    problem: 'Converting lengthy conversation audio files into robust technical specs is tedious.',
-    solution: 'Compiles transcripts into beautifully structured specifications with complete functional steps.',
-    codeSnippet: 'const specDoc = specSynthesizer.generateSpecMarkdown(transcriptRawText);'
-  },
-  {
-    id: 'bus-07',
-    category: 'automation',
-    title: 'Dynamic API Schema Mapping Hook',
-    tag: 'Free',
-    problem: 'Integrating contrasting upstream APIs requires writing heavy map wrappers manually.',
-    solution: 'Dynamically adapts parameters, bridging distinct APIs on the fly without breaking systems.',
-    codeSnippet: 'const matchedMap = dynamicMapper.mapPayloads(upstreamJson, downstreamJson);'
-  },
-  {
-    id: 'bus-08',
-    category: 'automation',
-    title: 'Legacy Excel to Clean JSON Converter',
-    tag: 'Active',
-    problem: 'Legacy spreadsheets use merged cells and complex formatting that standard JSON parsers break on.',
-    solution: 'Normalizes and structure messy Excel workbooks into pristine clean objects.',
-    codeSnippet: 'const cleanDoc = await excelConverter.parseBuffer(rawWorkbookArray);'
-  },
-  {
-    id: 'bus-09',
-    category: 'automation',
-    title: 'Legal Terms Mutation Checker',
-    tag: 'Custom',
-    problem: 'Comparing dynamic legal mutations across multi-page contract revisions causes blind spots.',
-    solution: 'Highlights even the most subtle syntax updates and categorizes risk index.',
-    codeSnippet: 'const diffReport = contractParser.compareAndAssess(v1Contract, v2Contract);'
-  },
-  {
-    id: 'bus-10',
-    category: 'automation',
-    title: 'Jira Ticket Priority Arbitrator',
-    tag: 'Free',
-    problem: 'Overwhelmed support queues suffer from manual, biased ticket assessment loops.',
-    solution: 'Triage ticket requests using semantic priority analysis and live developer workloads.',
-    codeSnippet: 'const ticketPriority = priorityArbitrator.evaluateTicket(ticketData);'
-  },
-  {
-    id: 'bus-11',
-    category: 'automation',
-    title: 'AI-to-Slack Response Arbiter',
-    tag: 'Active',
-    problem: 'Direct model output hooks send unfiltered text blocks into client-facing company channels.',
-    solution: 'Forces a multi-layer evaluation gate to secure content prior to publishing.',
-    codeSnippet: 'const validatedMsg = await slackArbiter.vetOutput(agentProposedResponse);'
-  },
-  {
-    id: 'bus-12',
-    category: 'automation',
-    title: 'Invoicing Reconciliation Bot',
-    tag: 'Custom',
-    problem: 'Mismatched line rates and fractional math disparities complicate accounts receivable audits.',
-    solution: 'Reconciles bank statement ledgers against generated invoices with zero error margins.',
-    codeSnippet: 'const isBalanced = reconcileBot.matchLedgers(invoiceRecord, bankRecord);'
-  },
-  {
-    id: 'bus-13',
-    category: 'automation',
-    title: 'Multilingual Speech-to-Document Agent',
-    tag: 'Active',
-    problem: 'On-site technical meetings in mixed dialects are extremely difficult to transcribe.',
-    solution: 'Bespoke translation modules segment meeting dialogues into clean, multi-language reports.',
-    codeSnippet: 'const meetingDoc = speechAgent.transcribeMultiLanguage(audioStream);'
-  },
-  {
-    id: 'bus-14',
-    category: 'automation',
-    title: 'Cron-trigger Database Backup Sync',
-    tag: 'Free',
-    problem: 'Standard timed backups fail to run when dev-enclaves exceed capacity limits.',
-    solution: 'Pre-checks volume state and compresses backup datasets recursively.',
-    codeSnippet: 'const syncReport = cronBackupSync.execBackup(targetVolumeRef);'
-  },
-  {
-    id: 'bus-15',
-    category: 'automation',
-    title: 'Client Onboarding Telemetry Parser',
-    tag: 'Active',
-    problem: 'Client setup forms yield random unstructured answers that delay integration steps.',
-    solution: 'Normalizes input schemas and matches them with active integration checklists.',
-    codeSnippet: 'const checklist = onboardingParser.extractMilestones(userTextResponse);'
-  },
-  {
-    id: 'bus-16',
-    category: 'automation',
-    title: 'Semantic CRM Lead Enricher',
-    tag: 'Custom',
-    problem: 'Standard CRM pipelines provide stale profile data, leaving salespeople running on partial metrics.',
-    solution: 'Grabs public news and tech stacks to generate elegant lead updates.',
-    codeSnippet: 'const profile = await crmEnrichor.compileProfiles(targetDomainName);'
-  },
-  {
-    id: 'bus-17',
-    category: 'automation',
-    title: 'Smart Inventory Reorder Predictor',
-    tag: 'Active',
-    problem: 'Seasonal delays and supply chain shocks cause costly operational blockages.',
-    solution: 'Analyzes shipment datasets to dynamically plan reorder triggers.',
-    codeSnippet: 'const reorderPoint = predictor.calculateReorderMetrics(shipmentData);'
-  },
-
-  // CREATIVE CONTENT TOOLS (17 tools)
-  {
-    id: 'cre-01',
-    category: 'creative',
-    title: 'Direct Response Copy Generator',
-    tag: 'Active',
-    problem: 'Standard LLM copywriting sounds robotic, bloated, and misses target pain-points.',
-    solution: 'Applies rigid AIDA structures and uses precise direct-response principles exclusively.',
-    codeSnippet: 'const adCopy = directResponseCopy.build(audienceAche, solutionAnchor);'
-  },
-  {
-    id: 'cre-02',
-    category: 'creative',
-    title: 'Ad Headline Variation Multi-tool',
-    tag: 'Free',
-    problem: 'Writing fifty conversion-focused hooks for multivariate paid testing eats up developer hours.',
-    solution: 'Produces high-converting headline layouts mapped to distinct demographic hooks.',
-    codeSnippet: 'const variations = adHeadlineGener.create(productBio, targetAngles);'
-  },
-  {
-    id: 'cre-03',
-    category: 'creative',
-    title: 'Semantic SEO Sitemap Builder',
-    tag: 'Active',
-    problem: 'Standard sitemap aggregators rely on keyword counts, completely missing context relevance.',
-    solution: 'Generates sitemaps directly mapped to search intent and topic clusters.',
-    codeSnippet: 'const seoClusters = sitemapBuilder.analyzeSemanticClusters(nicheTerms);'
-  },
-  {
-    id: 'cre-04',
-    category: 'creative',
-    title: 'Social Thread Outline Composer',
-    tag: 'Free',
-    problem: 'Lengthy whitepapers are hard to segment into highly engaging social posts.',
-    solution: 'Converts complex whitepapers into crisp, readable social updates with key takeaways.',
-    codeSnippet: 'const threadData = outlineComposer.summarizeToThread(whitepaperText);'
-  },
-  {
-    id: 'cre-05',
-    category: 'creative',
-    title: 'Visual Storyboarding Prompt Crafter',
-    tag: 'Custom',
-    problem: 'Writing detailed graphic generation parameters with consistent style tags is difficult.',
-    solution: 'Outputs balanced parameter schemas detailing depth, lens types, and color matrices.',
-    codeSnippet: 'const imagePrompt = promptComposer.compileImageParams(sceneScriptText);'
-  },
-  {
-    id: 'cre-06',
-    category: 'creative',
-    title: 'CSS-Tailwind Component Synth',
-    tag: 'Active',
-    problem: 'Designing responsive interactive layouts requires writing repetitive class code.',
-    solution: 'Produces accessible, responsive CSS models using pristine utility structures.',
-    codeSnippet: 'const tailwindCode = await componentSynth.generateLayout(wireframeDescription);'
-  },
-  {
-    id: 'cre-07',
-    category: 'creative',
-    title: 'Readme and Repo Metadata Draftsman',
-    tag: 'Free',
-    problem: 'Clean open-source repositories often lack clear user setup guidelines.',
-    solution: 'Inspects your source workspace to design structured setup files with copyable commands.',
-    codeSnippet: 'const readmeStr = repoDraftsman.documentSourceCode(dirStructureMap);'
-  },
-  {
-    id: 'cre-08',
-    category: 'creative',
-    title: 'Micro-copy UX Value Writer',
-    tag: 'Active',
-    problem: 'Web apps display clumsy, dry warning fields that confuse first-time operators.',
-    solution: 'Refines notifications into friendly, clear directions that guide users.',
-    codeSnippet: 'const friendlyNotice = uxWriter.softenAlert(diagnosticCrashDump);'
-  },
-  {
-    id: 'cre-09',
-    category: 'creative',
-    title: 'Email Newsletter Segment Crafter',
-    tag: 'Custom',
-    problem: 'Sending identical email blasts to cold and warm lists drives up unsubscribe rates.',
-    solution: 'Tailors newsletters based on customer tag metrics and historic open patterns.',
-    codeSnippet: 'const customizedBody = segmentWriter.segmentNewsletter(rawCopy, segmentMetrics);'
-  },
-  {
-    id: 'cre-10',
-    category: 'creative',
-    title: 'Interactive Fiction Branching Generator',
-    tag: 'Free',
-    problem: 'Drafting consistent plot paths for branching storylines is prone to continuity bugs.',
-    solution: 'Tracks logical state paths across a centralized story coordinate database.',
-    codeSnippet: 'const nextScene = branchingGen.generatePath(storyState, userAction);'
-  },
-  {
-    id: 'cre-11',
-    category: 'creative',
-    title: 'Video Script Slate-board Director',
-    tag: 'Active',
-    problem: 'Video scripts written in plain text fail to guide motion and transition points.',
-    solution: 'Segments script lines alongside specific, actionable visual queues.',
-    codeSnippet: 'const videoSlatBoard = scriptSlatBoard.convertScriptToVisualSlices(textScript);'
-  },
-  {
-    id: 'cre-12',
-    category: 'creative',
-    title: 'Podcast Transcription Transcompiler',
-    tag: 'Custom',
-    problem: 'Auto-transcriptions output long, formatting-free walls of text that are impossible to skim.',
-    solution: 'Cleans speech vocal noise and structures transcripts into readable dialogues with speaker headers.',
-    codeSnippet: 'const formattedDoc = podcastTranscompiler.beautifyTranscription(rawText);'
-  },
-  {
-    id: 'cre-13',
-    category: 'creative',
-    title: 'Brand Tone Voice Consistency Scorer',
-    tag: 'Free',
-    problem: 'Marketing materials written by different teams quickly lose their unified brand identity.',
-    solution: 'Grades active copy proposals against configured brand-voice blueprints in real-time.',
-    codeSnippet: 'const alignmentReport = brandScorer.auditText(proposedCopy, voiceGuide);'
-  },
-  {
-    id: 'cre-14',
-    category: 'creative',
-    title: 'SEO Title Optimizer Matrix',
-    tag: 'Active',
-    problem: 'Clickbait titles damage brand credit, while descriptive titles limit organic reach.',
-    solution: 'Simulates target human CTR rates to design balanced headline options.',
-    codeSnippet: 'const proposals = seoMatrix.optimize(articleAbstract);'
-  },
-  {
-    id: 'cre-15',
-    category: 'creative',
-    title: 'Dynamic SaaS Pricing Lyricist',
-    tag: 'Custom',
-    problem: 'Explaining tiered pricing tiers requires clean, relatable value hooks.',
-    solution: 'Structures pricing sheets, using simple highlights to emphasize core features.',
-    codeSnippet: 'const pricingPage = saasPricingLyr.renderPricingTiers(featureArray);'
-  },
-  {
-    id: 'cre-16',
-    category: 'creative',
-    title: 'Frictionless FAQ Structurer',
-    tag: 'Free',
-    problem: 'Handling repetitive customer support tickets drains manual developer energy.',
-    solution: 'Aggregates support tickets into semantic, clear self-serve FAQ documentation.',
-    codeSnippet: 'const FAQOutput = faqBuilder.gatherQuestions(ticketDataset);'
-  },
-  {
-    id: 'cre-17',
-    category: 'creative',
-    title: 'AI Prompt Boilerplate Builder',
-    tag: 'Active',
-    problem: 'Rewriting default system preambles for standard projects leads to inconsistent output styles.',
-    solution: 'Compiles clean template prompt matrices tailored specifically for modern LLM models.',
-    codeSnippet: 'const finalPrompt = promptBoilerplate.buildTemplate(targetScopeRules);'
-  }
-];
-
-// Preseeded beautiful high-fidelity Blogs representing Raw HTML articles
 export const PRESEEDED_BLOGS: BlogPost[] = [
   {
     id: 'blog-1',
@@ -579,338 +101,6 @@ export function trimContextPayload(rawQuery) {
 // 2. HERO & INTRO COMPONENT
 // ==========================================
 
-export const HeroSection: React.FC<{ onNavigate: (page: any) => void }> = ({ onNavigate }) => {
-  return (
-    <section className="relative pt-32 pb-24 px-6 md:px-12 max-w-7xl mx-auto flex flex-col items-center justify-center text-center overflow-hidden border-b-4 border-black bg-void">
-      {/* Heavy grid pattern background overlay */}
-      <div className="absolute inset-0 bg-grid-pattern opacity-10 pointer-events-none" />
-      
-      <motion.div
-        initial={{ opacity: 0, y: 15 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-        className="space-y-6 max-w-4xl relative z-10"
-      >
-        {/* Glow status dot */}
-        <div className="inline-flex items-center gap-2 bg-black border-2 border-zinc-800 px-4 py-1.5 rounded-none text-[10px] font-mono tracking-widest text-signal">
-          <span className="w-2.5 h-2.5 bg-signal rounded-none animate-pulse" />
-          AVAILABLE FOR DIRECT INTEGRATION & CONSULTING_
-        </div>
-
-        <h1 className="text-4xl md:text-6xl lg:text-7xl font-display font-black uppercase tracking-tight text-white leading-[1.05]">
-          Production-ready AI agents <br />
-          <span className="text-signal">
-            built to solve actual problems_
-          </span>
-        </h1>
-
-        <p className="text-xs md:text-sm text-void-500 max-w-2xl mx-auto font-mono leading-relaxed uppercase">
-          Access a curated library of over 50 working developer-centric utilities or secure custom high-end prompt architecture and autonomous pipelines tailored for your system.
-        </p>
-
-        <div className="flex flex-col sm:flex-row gap-4 pt-6 justify-center">
-          <button
-            onClick={() => {
-              const el = document.getElementById('tool-library');
-              if (el) el.scrollIntoView({ behavior: 'smooth' });
-            }}
-            className="px-6 py-3.5 bg-signal hover:bg-signal-hover text-black font-black text-xs font-mono uppercase tracking-widest rounded-none border-4 border-black shadow-brutalist hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-brutalist-hover transition-all cursor-pointer"
-          >
-            View The Tools_
-          </button>
-          <a
-            href="https://calendly.com/konkred"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-6 py-3.5 bg-void-100 hover:bg-void-200 border-4 border-black text-white font-black text-xs font-mono uppercase tracking-widest rounded-none hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-brutalist transition-all flex items-center justify-center gap-2 cursor-pointer"
-          >
-            Book a Custom Design Call_ <ArrowUpRight size={13} />
-          </a>
-        </div>
-      </motion.div>
-    </section>
-  );
-};
-
-// ==========================================
-// 3. BESPOKE FILTERABLE TOOL LIBRARY
-// ==========================================
-
-export const ToolLibrarySection: React.FC = () => {
-  const [activeCategory, setActiveCategory] = useState<'all' | 'security' | 'automation' | 'creative'>('all');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [viewSnippetId, setViewSnippetId] = useState<string | null>(null);
-  const [testingTool, setTestingTool] = useState<ToolItem | null>(null);
-  const [testInput, setTestInput] = useState('');
-  const [testResult, setTestResult] = useState<string | null>(null);
-  const [isTesting, setIsTesting] = useState(false);
-  const { showToast } = useToast();
-
-  const handleRunLiveTool = async () => {
-    if (!testingTool) return;
-    setIsTesting(true);
-    setTestResult(null);
-    try {
-      const res = await fetch('/api/ai/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          provider: 'google',
-          messages: [
-            {
-              role: 'user',
-              content: `Tool Module: ${testingTool.title}\nCategory: ${testingTool.category}\nProblem Baseline: ${testingTool.problem}\nSolution Mechanism: ${testingTool.solution}\nUser Query/Payload: ${testInput || testingTool.problem}\n\nExecute this tool live and return a structured analysis, operational recommendations, and actionable code result.`
-            }
-          ],
-          config: { defaultModel: 'gemini-2.5-flash' }
-        })
-      });
-      if (!res.ok) throw new Error('Tool execution service unavailable.');
-      const data = await res.json();
-      setTestResult(data.text || 'Execution complete.');
-      showToast(`${testingTool.title} live run finished successfully!`, 'success');
-    } catch (err: any) {
-      setTestResult(`Execution Error: ${err.message || 'Failed to reach AI service'}`);
-      showToast('Tool execution failed', 'error');
-    } finally {
-      setIsTesting(false);
-    }
-  };
-
-  const filteredTools = SYSTEM_TOOLS.filter(tool => {
-    const matchesCategory = activeCategory === 'all' || tool.category === activeCategory;
-    const matchesSearch = tool.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          tool.problem.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          tool.solution.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
-
-  const handleCopyCode = (code: string) => {
-    navigator.clipboard.writeText(code);
-    showToast('Code snippet copied to clipboard', 'success');
-  };
-
-  return (
-    <section id="tool-library" className="py-24 px-6 md:px-12 max-w-7xl mx-auto border-b-4 border-black scroll-mt-20">
-      <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
-        <div className="space-y-3">
-          <span className="text-[10px] font-mono tracking-[0.2em] text-signal uppercase">STOREFRONT CATALOG</span>
-          <h2 className="text-3xl md:text-5xl font-display font-black text-white uppercase tracking-tight">Filterable Tool Library</h2>
-          <p className="text-xs text-void-500 max-w-lg font-mono uppercase leading-relaxed">
-            Exactly 51 practical, focused tool blueprints engineered without fluff or buzzwords. Explore operational methods instantly.
-          </p>
-        </div>
-
-        {/* Counter indicator */}
-        <div className="bg-void-100 border-4 border-black p-4 rounded-none text-center md:text-right font-mono min-w-[150px] shadow-brutalist">
-          <span className="text-void-600 block text-[9px] uppercase tracking-wider font-bold">Total Blueprint Nodes</span>
-          <span className="text-base font-black text-signal">{SYSTEM_TOOLS.length} Active Modules</span>
-        </div>
-      </div>
-
-      {/* Control Bar: Search and Filters */}
-      <div className="flex flex-col lg:flex-row items-center justify-between gap-4 bg-void-200 p-4 rounded-none border-4 border-black mb-10 shadow-brutalist">
-        {/* Category triggers */}
-        <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
-          {(['all', 'security', 'automation', 'creative'] as const).map(cat => (
-            <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              className={`px-4 py-2.5 rounded-none text-xs font-mono uppercase tracking-wider transition-all cursor-pointer border-2 ${
-                activeCategory === cat 
-                  ? 'bg-signal text-black border-black font-black shadow-[2px_2px_0px_#000]' 
-                  : 'text-void-500 hover:text-white border-transparent bg-transparent hover:bg-void-300'
-              }`}
-            >
-              {cat === 'all' ? 'All Modules_' : `${cat}_`}
-            </button>
-          ))}
-        </div>
-
-        {/* Search input field */}
-        <div className="relative w-full lg:w-80">
-          <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-void-500" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search matching tools..."
-            className="w-full bg-void-100 border-2 border-void-300 rounded-none py-2.5 pl-9 pr-4 text-xs font-mono text-white focus:outline-none focus:border-signal transition-colors"
-          />
-        </div>
-      </div>
-
-      {/* Grid Layout of Tools */}
-      {filteredTools.length === 0 ? (
-        <div className="py-20 text-center border-4 border-black bg-void-100 rounded-none">
-          <Terminal size={24} className="text-void-600 mx-auto mb-3" />
-          <p className="text-xs font-mono text-void-550">No active tools match your criteria.</p>
-        </div>
-      ) : (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredTools.map(tool => (
-            <div
-              key={tool.id}
-              className="group relative flex flex-col justify-between p-6 bg-void-100 border-4 border-black rounded-none shadow-brutalist hover:translate-x-[-4px] hover:translate-y-[-4px] hover:shadow-brutalist-hover transition-all duration-150 overflow-hidden"
-            >
-              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-signal/5 to-transparent pointer-events-none" />
-
-              <div className="space-y-4">
-                {/* Card Header Tag & Category Indicator */}
-                <div className="flex items-center justify-between">
-                  {/* Small tag badge */}
-                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-none text-[9px] font-mono tracking-wider uppercase font-black border ${
-                    tool.tag === 'Active' ? 'bg-black text-signal border-signal' :
-                    tool.tag === 'Free' ? 'bg-black text-clinical border-void-300' :
-                    'bg-black text-white border-void-300'
-                  }`}>
-                    {tool.tag}
-                  </span>
-                  <span className="text-[10px] font-mono text-void-500 uppercase tracking-widest font-bold">{tool.category}</span>
-                </div>
-
-                {/* Title */}
-                <h3 className="text-sm font-mono font-black text-white uppercase tracking-tight group-hover:text-signal transition-colors">
-                  {tool.title}
-                </h3>
-
-                {/* Direct No-Buzzword Explanations */}
-                <div className="space-y-3 text-xs pt-2 border-t border-void-300">
-                  <div>
-                    <span className="text-void-500 font-mono text-[9px] uppercase block mb-0.5 font-bold">THE PROBLEM_</span>
-                    <p className="text-void-500 font-mono leading-relaxed text-[11px]">{tool.problem}</p>
-                  </div>
-                  <div>
-                    <span className="text-signal font-mono text-[9px] uppercase block mb-0.5 font-bold">THE SOLUTION_</span>
-                    <p className="text-clinical font-mono leading-relaxed text-[11px]">{tool.solution}</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Action tray for code preview / interactive usage */}
-              <div className="flex items-center justify-between pt-4 mt-5 border-t border-dashed border-void-300 gap-2">
-                <button
-                  onClick={() => setViewSnippetId(viewSnippetId === tool.id ? null : tool.id)}
-                  className="text-[10px] font-mono uppercase tracking-widest text-[#22d3ee] hover:text-white flex items-center gap-1.5 transition-colors font-bold"
-                >
-                  <Terminal size={11} /> 
-                  {viewSnippetId === tool.id ? 'Hide code_' : 'Code_'}
-                </button>
-                <button
-                  onClick={() => {
-                    setTestingTool(tool);
-                    setTestInput(tool.problem);
-                    setTestResult(null);
-                  }}
-                  className="px-2.5 py-1 bg-signal hover:bg-signal-hover text-black font-mono text-[10px] font-black uppercase tracking-wider border border-black shadow-[2px_2px_0px_#000] hover:shadow-none transition-all cursor-pointer flex items-center gap-1"
-                >
-                  <Sparkles size={11} />
-                  <span>Run Live Test_</span>
-                </button>
-              </div>
-
-              {/* Collapsible integration code container */}
-              <AnimatePresence>
-                {viewSnippetId === tool.id && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    className="overflow-hidden mt-3"
-                  >
-                    <div className="bg-black rounded-none p-3 border-2 border-black text-[10px] font-mono text-zinc-300 relative">
-                       <pre className="overflow-x-auto whitespace-pre-wrap">{tool.codeSnippet}</pre>
-                      <button
-                        onClick={() => handleCopyCode(tool.codeSnippet)}
-                        className="absolute right-2 top-2 px-1.5 py-0.5 bg-signal hover:bg-signal-hover text-black font-semibold rounded-none border border-black text-[9px]"
-                      >
-                        Copy
-                      </button>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Interactive Live Tool Runner Modal */}
-      <AnimatePresence>
-        {testingTool && (
-          <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 sm:p-6">
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-void-100 border-4 border-black w-full max-w-3xl rounded-none shadow-brutalist p-6 space-y-6 max-h-[90vh] overflow-y-auto"
-            >
-              <div className="flex items-center justify-between border-b-2 border-void-300 pb-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-signal text-black font-black font-mono text-xs uppercase">
-                    LIVE MODULE RUNNER
-                  </div>
-                  <div>
-                    <h3 className="text-base font-mono font-black text-white uppercase">{testingTool.title}</h3>
-                    <span className="text-[10px] font-mono text-signal uppercase tracking-wider font-bold">Category: {testingTool.category}</span>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setTestingTool(null)}
-                  className="px-3 py-1 bg-void-300 hover:bg-void-400 text-white font-mono text-xs uppercase border border-black font-bold cursor-pointer"
-                >
-                  ✕ CLOSE
-                </button>
-              </div>
-
-              <div className="space-y-4 font-mono text-xs">
-                <div>
-                  <label className="text-void-500 block mb-1 font-bold uppercase text-[10px]">Test Scenario / Input Query:</label>
-                  <textarea
-                    value={testInput}
-                    onChange={(e) => setTestInput(e.target.value)}
-                    rows={4}
-                    className="w-full bg-black border-2 border-void-300 p-3 text-white focus:outline-none focus:border-signal text-xs leading-relaxed"
-                    placeholder="Enter test payload..."
-                  />
-                </div>
-
-                <button
-                  onClick={handleRunLiveTool}
-                  disabled={isTesting}
-                  className="w-full py-3 bg-signal hover:bg-signal-hover text-black font-black text-xs uppercase tracking-widest border-2 border-black shadow-brutalist hover:shadow-none transition-all cursor-pointer flex items-center justify-center gap-2"
-                >
-                  <Sparkles size={14} className={isTesting ? 'animate-spin' : ''} />
-                  <span>{isTesting ? 'EXECUTING LIVE AGENT PIPELINE...' : 'EXECUTE TOOL VIA GEMINI_'}</span>
-                </button>
-
-                {testResult && (
-                  <div className="mt-4 p-4 bg-black border-2 border-signal/40 text-xs font-mono space-y-2">
-                    <div className="flex items-center justify-between border-b border-void-300 pb-2">
-                      <span className="text-signal font-bold uppercase text-[10px]">● GEMINI NEURAL EXECUTION RESULT:</span>
-                      <button
-                        onClick={() => handleCopyCode(testResult)}
-                        className="text-[9px] text-void-500 hover:text-white uppercase font-bold"
-                      >
-                        Copy Result
-                      </button>
-                    </div>
-                    <pre className="whitespace-pre-wrap text-clinical leading-relaxed overflow-x-auto max-h-80">{testResult}</pre>
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-    </section>
-  );
-};
-
-// ==========================================
-// 4. PREMIUM SERVICES DETAIL (2-COLUMN VISUAL SPLIT)
-// ==========================================
-
 export const PremiumServicesSection: React.FC = () => {
   return (
     <section id="services" className="py-24 px-6 md:px-12 max-w-7xl mx-auto border-b-4 border-black bg-void">
@@ -936,7 +126,7 @@ export const PremiumServicesSection: React.FC = () => {
             </div>
 
             <p className="text-void-500 text-xs font-mono leading-relaxed uppercase">
-              Secure your system intelligence profiles against injection risks, alignment drift, and data extraction vectors. Utilizing our proprietary structured testing environment, we score prompt parameters for deterministic output safety.
+              Secure your system intelligence profiles against injection risks, alignment drift, and data extraction vectors. Using a structured testing approach, we evaluate prompt parameters and flag output-safety risks for your review.
             </p>
           </div>
 
@@ -1330,7 +520,7 @@ export const ContactSection: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { showToast } = useToast();
 
-  const handleSubmitContactForm = (e: React.FormEvent) => {
+  const handleSubmitContactForm = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !email || !desc) {
       showToast('Please fulfill all contact field inputs', 'error');
@@ -1338,14 +528,18 @@ export const ContactSection: React.FC = () => {
     }
 
     setIsSubmitting(true);
-    // Mimic real-world secure api storage dispatch
-    setTimeout(() => {
-      setIsSubmitting(false);
-      showToast('Project proposal compiled! I will response via email in 2 hours.', 'success');
+    try {
+      await databaseService.submitContactMessage({ name, email, subject: 'Landing contact', message: desc });
+      showToast('Message stored. We will reply via email.', 'success');
       setName('');
       setEmail('');
       setDesc('');
-    }, 1200);
+    } catch (error) {
+      console.error('Contact form write failed:', error);
+      showToast('Message could not be stored right now. Email ari@konkred.xyz directly.', 'error');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -1359,9 +553,9 @@ export const ContactSection: React.FC = () => {
       </div>
 
       <div className="bg-zinc-900/10 border border-zinc-900 rounded-3xl p-6 md:p-10 relative overflow-hidden">
-        {/* Soft layout security tags */}
+        {/* Honest contact note */}
         <div className="absolute top-4 right-4 text-[8px] font-mono text-zinc-600 uppercase select-none tracking-widest">
-          SYSTEM_PORTAL: LIVE_SECURE
+          DIRECT MESSAGE
         </div>
 
         <form onSubmit={handleSubmitContactForm} className="space-y-5 text-left">
@@ -1417,19 +611,19 @@ export const ContactSection: React.FC = () => {
           </button>
         </form>
 
-        {/* Global Crypto-Friendly Settlement Callout */}
+        {/* Contact fallback */}
         <div className="mt-8 pt-8 border-t border-zinc-900/60 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-emerald-950/40 p-[1px] flex items-center justify-center border border-emerald-900/20">
-              <Wallet size={14} className="text-emerald-400 animate-pulse" />
+            <div className="w-8 h-8 rounded-lg bg-zinc-900 p-[1px] flex items-center justify-center border border-zinc-800">
+              <Mail size={14} className="text-amber-500" />
             </div>
             <div className="text-left">
-              <span className="text-[11px] font-bold text-white block uppercase tracking-wide">Stablecoin Audited Payments</span>
-              <p className="text-[9px] text-zinc-500 tracking-wide font-light">Settlements received globally via USDT over Tron networks.</p>
+              <span className="text-[11px] font-bold text-white block uppercase tracking-wide">Direct line</span>
+              <p className="text-[9px] text-zinc-500 tracking-wide font-light">ari@konkred.xyz — plain-text responses, no hype.</p>
             </div>
           </div>
-          <div className="flex items-center gap-1.5 bg-emerald-950/20 border border-emerald-900/30 px-3 py-1 rounded-full text-[9px] font-mono text-emerald-400 font-bold uppercase tracking-widest">
-            <CheckCircle size={10} /> Fast & Sanction-Free
+          <div className="flex items-center gap-1.5 bg-zinc-900/60 border border-zinc-800 px-3 py-1 rounded-full text-[9px] font-mono text-zinc-400 font-bold uppercase tracking-widest">
+            <CheckCircle size={10} /> Human Reviewed
           </div>
         </div>
       </div>

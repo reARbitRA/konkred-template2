@@ -1,63 +1,30 @@
 
-import React, { createContext, useContext, useState, useCallback } from 'react';
-import { ModalType, ModalState } from '../types';
+import React, { createContext, useContext } from 'react';
 
-// Components
-import ProtocolDetails from '../components/ProtocolDetails.tsx';
-import DemoView from '../components/DemoView.tsx';
-import NewFolderModal from '../components/modals/NewFolderModal.tsx';
-import AddFileModal from '../components/modals/AddFileModal.tsx';
-import NewNoteModal from '../components/modals/NewNoteModal.tsx';
-import AddMemberModal from '../components/modals/AddMemberModal.tsx';
-import UpgradePromptModal from '../components/modals/UpgradePromptModal.tsx';
+/**
+ * Modal context retained as a minimal, honest provider.
+ * The marketplace/enclave modal catalogue (ProtocolDetails, DemoView,
+ * UpgradePrompt, NewFolder/AddFile/NewNote/AddMember) was purged with the
+ * mock marketplace. The provider is kept so existing consumers keep a stable
+ * API; it currently renders no modals.
+ */
 
 interface ModalContextValue {
-  openModal: (type: ModalType, props?: any) => void;
+  openModal: (type: string, props?: any) => void;
   closeModal: () => void;
 }
 
 const ModalContext = createContext<ModalContextValue | null>(null);
 
 export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [modal, setModal] = useState<ModalState>({ type: null, props: {} });
-
-  const openModal = useCallback((type: ModalType, props: any = {}) => {
-    setModal({ type, props });
-    document.body.style.overflow = 'hidden';
-  }, []);
-
-  const closeModal = useCallback(() => {
-    setModal({ type: null, props: {} });
-    document.body.style.overflow = 'unset';
-  }, []);
-
-  const renderModal = () => {
-    if (!modal.type) return null;
-
-    switch (modal.type) {
-      case 'ProtocolDetails':
-        return <ProtocolDetails {...modal.props} onClose={closeModal} />;
-      case 'DemoView':
-        return <DemoView onClose={closeModal} />;
-      case 'NewFolder':
-        return <NewFolderModal onClose={closeModal} />;
-      case 'AddFile':
-        return <AddFileModal onClose={closeModal} />;
-      case 'NewNote':
-        return <NewNoteModal onClose={closeModal} />;
-      case 'AddMember':
-        return <AddMemberModal onClose={closeModal} />;
-      case 'UpgradePrompt':
-        return <UpgradePromptModal onClose={closeModal} />;
-      default:
-        return null;
-    }
+  const openModal = () => {
+    console.warn('openModal called but no modal catalogue is configured.');
   };
+  const closeModal = () => undefined;
 
   return (
     <ModalContext.Provider value={{ openModal, closeModal }}>
       {children}
-      {renderModal()}
     </ModalContext.Provider>
   );
 };

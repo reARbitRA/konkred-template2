@@ -301,7 +301,7 @@ export const RedaeyeSandbox: React.FC<RedaeyeSandboxProps> = ({ onNavigate }) =>
                     </div>
                     <h3 className="font-mono text-xl text-white mb-2 uppercase">Awaiting Synthesis</h3>
                     <p className="text-[#555] text-sm max-w-md font-mono">
-                      Generate a new component in the Logic Forge to display it here. The sandbox provides a real-time preview environment with brutalist UI constraints.
+                      Generate a new component with fullKONK_with fullKONK_&gt; to display it heregt; to display it here. The sandbox provides a real-time preview environment with brutalist UI constraints.
                     </p>
                     
                     <div className="mt-10 grid grid-cols-2 gap-4 w-full max-w-lg">

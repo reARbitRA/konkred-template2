@@ -42,8 +42,8 @@ interface BlogPost {
   date: string;
   readTime: string;
   desc: string;
-  views: string;
-  comments: number;
+  views?: string;
+  comments?: number;
   htmlContent: string;
   authorId?: string;
   isUserUploaded?: boolean;
@@ -57,8 +57,7 @@ const DEFAULT_POSTS: BlogPost[] = [
     date: 'NOV 22, 2024', 
     readTime: '8 min', 
     desc: 'Why enterprise value is shifting from raw compute power to verified logic maps and deterministic operating procedures.', 
-    views: '2.4k', 
-    comments: 12,
+
     htmlContent: `
       <div class="space-y-8">
         <p class="text-lg leading-relaxed text-neutral-300 font-light">
@@ -99,8 +98,7 @@ const DEFAULT_POSTS: BlogPost[] = [
     date: 'NOV 20, 2024', 
     readTime: '12 min', 
     desc: 'A deep dive into the KONKRED AUDIT v4.0 scoring system. How we measure logic, safety, and operational efficiency.', 
-    views: '1.8k', 
-    comments: 24,
+
     htmlContent: `
       <div class="space-y-8">
         <p class="text-lg leading-relaxed text-neutral-300 font-light">
@@ -142,9 +140,8 @@ const DEFAULT_POSTS: BlogPost[] = [
     category: 'Finance', 
     date: 'NOV 18, 2024', 
     readTime: '15 min', 
-    desc: 'Predicting acquisition trends for agentic architectures in 2025. Why buyers are paying a premium for verified logic.', 
-    views: '3.1k', 
-    comments: 48,
+    desc: 'Why buyers increasingly pay for documented, trusted AI workflows and what that means for enterprise purchasing in 2025.',
+
     htmlContent: `
       <div class="space-y-8">
         <p class="text-lg leading-relaxed text-neutral-300 font-light">
@@ -163,7 +160,7 @@ const DEFAULT_POSTS: BlogPost[] = [
         </blockquote>
 
         <p class="text-neutral-300 leading-relaxed font-light">
-          This report analyzes why verified listings are consistently trading at a premium compared to traditional, manual software models, and projects transaction telemetry patterns for 2025.
+          This analysis examines why buyers increasingly favor documented, auditable AI workflows over undocumented models, and what purchasing teams should look for in 2025.
         </p>
       </div>
     `
@@ -344,9 +341,8 @@ const BlogHub: React.FC<{ onNavigate: (page: PageView) => void }> = ({ onNavigat
         title: title || 'Strategic Executive Digest',
         category: category || 'Strategy',
         readTime: readTime || '5 min',
-        desc: desc || 'Briefing with verified computational protocols.',
-        views: '1',
-        comments: 0,
+        desc: desc || 'Briefing with documented computational workflows.',
+
         htmlContent: htmlFileText,
         createdAt: serverTimestamp()
       };
@@ -901,7 +897,6 @@ const BlogHub: React.FC<{ onNavigate: (page: PageView) => void }> = ({ onNavigat
                             </span>
                             <div className="flex items-center gap-3 text-[10px] text-text-secondary font-mono tracking-wider">
                               <span className="flex items-center gap-1 text-neutral-400"><Clock size={11} className="text-neon-cyan" /> {post.readTime}</span>
-                              <span className="flex items-center gap-1 text-neutral-400"><Eye size={11} className="text-neon-cyan" /> {post.views}</span>
                             </div>
                           </div>
                           

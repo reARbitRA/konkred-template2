@@ -3,22 +3,27 @@ import { PageView } from '../types.ts';
 export interface RouteMatch {
   page: PageView;
   listingId?: string;
+  slug?: string;
 }
 
+/**
+ * Route map for the KONKRED platform (post-purge).
+ *
+ * Purged legacy routes (marketplace, listing, wallet, seller/buyer dashboards,
+ * checkout, wizard, affiliate, admin, dispute, metrics, ktools, forge tools,
+ * playgrounds, intel-report, pricing) intentionally redirect to a real page or
+ * resolve to the 404 page — they never render fake pages.
+ */
 export const PAGE_ROUTES: Record<PageView, string> = {
   landing: '/',
-  marketplace: '/marketplace',
-  listing_detail: '/listing',
-  wizard: '/wizard',
   forge_audit: '/forge-audit',
-  forge: '/forge',
+  audit: '/audit',
   fullkonk: '/fullkonk',
-  playgrounds: '/playgrounds',
-  intel_report: '/intel-report',
-  wallet: '/wallet',
-  usage: '/enclave',
-  seller_dashboard: '/seller-dashboard',
-  account: '/account',
+  redaeye: '/redaeye',
+  redaeye_sandbox: '/redaeye-sandbox',
+  products: '/products',
+  product_detail: '/products/:slug',
+  not_found: '/404',
   academy: '/academy',
   intel: '/intel',
   network: '/network',
@@ -26,74 +31,101 @@ export const PAGE_ROUTES: Record<PageView, string> = {
   documentation: '/docs',
   career: '/career',
   resources: '/resources',
-  ktools: '/ktools',
-  pricing: '/pricing',
-  checkout: '/checkout',
   enter: '/login',
   join_network: '/join',
-  verify_email: '/verify-email',
+  account: '/account',
   contact: '/contact',
-  usage_metrics: '/metrics',
-  affiliate: '/affiliate',
-  admin: '/admin',
-  dispute: '/dispute',
   style_guide: '/style-guide',
-  redaeye: '/redaeye',
-  redaeye_sandbox: '/redaeye-sandbox',
+  verify_email: '/verify-email',
 };
 
 /**
- * Get clean URL path for a given page and optional listing ID.
+ * Intentional redirect map for purged routes.
+ * Maps a legacy pathname to the PageView it should resolve to.
  */
-export function getPathForPage(page: PageView, listingId?: string): string {
-  if (page === 'listing_detail' && listingId) {
-    return `/listing/${encodeURIComponent(listingId)}`;
+const REDIRECTS: Record<string, PageView> = {
+  '/marketplace': 'products', // replaced by the real product catalogue
+  '/catalogue': 'products',
+  '/ktools': 'products',
+  '/pricing': 'products',
+  '/forge': 'fullkonk', // The Forge merged into fullKONK_>
+  '/forge-audit-old': 'forge_audit',
+  '/redaeye_sandbox': 'redaeye', // dev alias -> canonical
+  '/sell': 'products',
+  '/wizard': 'not_found',
+  '/checkout': 'not_found',
+  '/wallet': 'not_found',
+  '/enclave': 'not_found',
+  '/library': 'not_found',
+  '/usage': 'not_found',
+  '/seller-dashboard': 'not_found',
+  '/buyer-dashboard': 'not_found',
+  '/affiliate': 'not_found',
+  '/admin': 'not_found',
+  '/dispute': 'not_found',
+  '/metrics': 'not_found',
+  '/usage-metrics': 'not_found',
+  '/playgrounds': 'not_found',
+  '/intel-report': 'not_found',
+  '/listing': 'not_found',
+};
+
+/**
+ * Get clean URL path for a given page and optional parameters.
+ */
+export function getPathForPage(page: PageView, slug?: string): string {
+  if (page === 'product_detail' && slug) {
+    return `/products/${encodeURIComponent(slug)}`;
   }
-  if (page === 'checkout' && listingId) {
-    return `/checkout/${encodeURIComponent(listingId)}`;
-  }
+  if (page === 'forge_audit') return '/forge-audit';
   return PAGE_ROUTES[page] || '/';
 }
 
 /**
  * Parse pathname into PageView and optional parameters.
+ * Redirects for purged routes are resolved here; callers should replace the
+ * URL with the resolved path when a redirect is returned.
  */
-export function getPageFromPath(path: string): RouteMatch {
+export function getPageFromPath(path: string): RouteMatch & { redirectedFrom?: string } {
   const cleanPath = path.split('?')[0].toLowerCase().replace(/\/$/, '') || '/';
 
   if (cleanPath === '' || cleanPath === '/') {
     return { page: 'landing' };
   }
 
-  // Listing details: /listing/:id
+  // Product detail: /products/:slug
+  if (cleanPath.startsWith('/products/')) {
+    const slug = decodeURIComponent(cleanPath.replace('/products/', '').split('/')[0]);
+    if (!slug) return { page: 'products' };
+    return { page: 'product_detail', slug };
+  }
+
+  // Purged marketplace listing details: /listing/:id -> 404 (replaced by products)
   if (cleanPath.startsWith('/listing/')) {
-    const id = decodeURIComponent(cleanPath.replace('/listing/', '').split('/')[0]);
-    return { page: 'listing_detail', listingId: id };
+    return { page: 'not_found', redirectedFrom: cleanPath };
   }
 
-  // Checkout: /checkout/:id or /checkout
-  if (cleanPath.startsWith('/checkout/')) {
-    const id = decodeURIComponent(cleanPath.replace('/checkout/', '').split('/')[0]);
-    return { page: 'checkout', listingId: id };
-  }
-
-  // Match against PAGE_ROUTES
+  // Exact route match
   for (const [pageKey, routePath] of Object.entries(PAGE_ROUTES)) {
     if (cleanPath === routePath) {
       return { page: pageKey as PageView };
     }
   }
 
-  // Fallback aliases
-  if (cleanPath === '/sell') return { page: 'wizard' };
-  if (cleanPath === '/library' || cleanPath === '/usage') return { page: 'usage' };
+  // Aliases
+  if (cleanPath === '/audit' || cleanPath === '/auditor') return { page: 'forge_audit' };
   if (cleanPath === '/forum') return { page: 'network' };
   if (cleanPath === '/consulting') return { page: 'advisory' };
   if (cleanPath === '/documentation') return { page: 'documentation' };
   if (cleanPath === '/enter') return { page: 'enter' };
   if (cleanPath === '/join-network') return { page: 'join_network' };
-  if (cleanPath === '/usage-metrics') return { page: 'usage_metrics' };
-  if (cleanPath === '/redaeye_sandbox') return { page: 'redaeye_sandbox' };
 
-  return { page: 'landing' };
+  // Intentional redirects for purged routes
+  const redirect = REDIRECTS[cleanPath];
+  if (redirect) {
+    return { page: redirect, redirectedFrom: cleanPath };
+  }
+
+  // Unknown -> 404
+  return { page: 'not_found' };
 }

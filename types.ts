@@ -2,12 +2,10 @@
 // Unified types for the KONKRED platform - PRODUCTION GRADE
 
 export type PageView = 
-    | 'landing' | 'marketplace' | 'listing_detail' | 'wizard' | 'forge_audit' 
-    | 'wallet' | 'usage' | 'seller_dashboard' | 'academy' | 'intel' 
-    | 'network' | 'advisory' | 'documentation' | 'career' | 'resources' 
-    | 'pricing' | 'enter' | 'join_network' | 'account' | 'checkout'
-    | 'usage_metrics' | 'affiliate' | 'admin' | 'dispute' | 'style_guide'
-    | 'verify_email' | 'playgrounds' | 'intel_report' | 'forge' | 'contact' | 'ktools' | 'redaeye' | 'redaeye_sandbox' | 'fullkonk';
+    | 'landing' | 'forge_audit' | 'audit' | 'fullkonk' | 'redaeye' | 'redaeye_sandbox'
+    | 'products' | 'product_detail' | 'not_found'
+    | 'academy' | 'intel' | 'network' | 'advisory' | 'documentation' | 'career'
+    | 'resources' | 'enter' | 'join_network' | 'account' | 'contact' | 'style_guide' | 'verify_email';
 
 export type AIProviderID = 
   | 'openai' | 'anthropic' | 'google' | 'openrouter' | 'groq' 

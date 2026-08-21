@@ -5,15 +5,16 @@ import Badge from '../components/common/Badge.tsx';
 import { PageView } from '../types.ts';
 
 const docCategories = [
-    { id: 'start', name: 'Getting Started', items: ['Node Installation', 'Account Setup', 'Security Enclaves', 'First Acquisition'] },
-    { id: 'api', name: 'API Reference', items: ['Authentication', 'Marketplace Stream', 'Forge Audit API', 'Wallet Integration'] },
-    { id: 'protocol', name: 'Protocol Specs', items: ['Logic Map v4.0', 'Deterministic Prompting', 'Escrow Lifecycle', 'NowPayments Hook'] },
+    { id: 'start', name: 'Getting Started', items: ['Platform Overview', 'Account Setup', 'Server-Side AI', 'Product Catalogue'] },
+    { id: 'api', name: 'API Reference', items: ['Authentication', 'AI Generate Proxy', 'fullKONK_> API', 'Demo Run API'] },
+    { id: 'product', name: 'Product Specs', items: ['Manifest Schema', 'Input/Output Schemas', 'Validation Status', 'Fixture Policy'] },
 ];
 
 const docs = [
-  { id: 1, title: 'KONKRED API Reference v2.1', category: 'API', date: 'DEC 01, 2024', status: 'LIVE', desc: 'Comprehensive guide to integrating with the KONKRED backend, streaming data packets, and managing decentralized settlements.' },
-  { id: 2, title: 'Forge Audit Protocol v4.0', category: 'AUDIT', date: 'NOV 28, 2024', status: 'UPDATED', desc: 'Detailed methodological explanation of the autonomous audit process, scoring benchmarks, and neural validation layers.' },
-  { id: 3, title: 'Executive Workflow SDK', category: 'SDK', date: 'NOV 15, 2024', status: 'BETA', desc: 'Technical libraries for building high-fidelity AI workflows, autonomous agent state-machines, and structural capital payloads.' },
+  { id: 1, title: 'KONKRED AI Proxy API v2', category: 'API', date: 'AUG 2026', status: 'CURRENT', desc: 'Server-side multi-provider AI proxy: authentication, request/response contracts, and error semantics. Credentials never leave the server.' },
+  { id: 2, title: 'AUDITOR Neural Audit Guide', category: 'AUDIT', date: 'AUG 2026', status: 'CURRENT', desc: 'How the neural audit engine scores logical integrity, safety/compliance and execution efficiency, and how to interpret results as decision support.' },
+  { id: 3, title: 'fullKONK_> Product Builder API', category: 'SDK', date: 'AUG 2026', status: 'CURRENT', desc: 'Streaming generate endpoint, provider failover, session persistence and GitHub export for the fullKONK_> pipeline.' },
+  { id: 4, title: 'Product Manifest & Schemas', category: 'SPEC', date: 'AUG 2026', status: 'CURRENT', desc: 'The canonical 15-product manifest: prompt versions, input/output JSON schemas, statuses, fixtures and limitation statements.' },
 ];
 
 const DocumentationPage: React.FC<{ onNavigate: (page: PageView) => void }> = ({ onNavigate }) => {

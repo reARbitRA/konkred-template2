@@ -129,19 +129,19 @@ const AcademyPage: React.FC<{ onNavigate: (page: PageView) => void }> = ({ onNav
             <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-neon-purple/5 to-transparent pointer-events-none" />
             <div className="flex flex-col lg:flex-row items-center justify-between gap-12 relative z-10">
                 <div className="max-w-xl">
-                    <Badge variant="purple" className="mb-6">Elite Certification</Badge>
-                    <h2 className="text-4xl font-display font-bold text-white mb-6">Become a <span className="text-neon-purple">Certified Architect</span></h2>
-                    <p className="text-ghost-light text-lg font-light leading-relaxed mb-8">Pass the rigorous KONKRED technical examination to unlock premium seller badges, reduced commission rates, and exclusive Forge modules.</p>
+                    <Badge variant="purple" className="mb-6">KONKRED Academy</Badge>
+                    <h2 className="text-4xl font-display font-bold text-white mb-6">Become a <span className="text-neon-purple">KONKRED Architect</span></h2>
+                    <p className="text-ghost-light text-lg font-light leading-relaxed mb-8">Work through the KONKRED technical curriculum to unlock advanced platform access and exclusive fullKONK_exclusive fullKONK_&gt; modulesgt; modules.</p>
                     <button className="btn-primary py-4 px-10 text-xs font-black tracking-widest uppercase flex items-center gap-3">
-                        Initialize Exam <ChevronRight size={16} />
+                        Start Coursework <ChevronRight size={16} />
                     </button>
                 </div>
                 <div className="grid grid-cols-2 gap-6 w-full lg:w-auto">
                     {[
-                        { label: 'Certified Assets', value: '1.2k+', icon: Shield },
-                        { label: 'Total Graduates', value: '430', icon: Award },
-                        { label: 'Avg Rating', value: '4.9/5', icon: Star },
-                        { label: 'Exams Locked', value: '12', icon: Lock },
+                        { label: 'Courses', value: '6', icon: Shield },
+                        { label: 'Modules', value: '24', icon: Award },
+                        { label: 'Hands-On Labs', value: '8', icon: Star },
+                        { label: 'Completion Badges', value: '12', icon: Lock },
                     ].map((stat, i) => (
                         <div key={i} className="concrete-card p-8 rounded-2xl flex flex-col items-center text-center">
                             <stat.icon className="text-neon-purple mb-4" size={24} />

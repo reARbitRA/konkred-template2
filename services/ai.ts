@@ -68,37 +68,6 @@ class UnifiedAIService {
   }
 
   /**
-   * Executes a highly structured enterprise-grade agent logic sequence.
-   */
-  async runGenericAgent(prompt: string, schema: any, userId: string): Promise<any> {
-    const response = await fetch('/api/ai/generate', {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        provider: "google",
-        messages: [{
-          role: "user",
-          content: prompt
-        }],
-        config: {
-          defaultModel: "gemini-3.1-pro-preview",
-          responseMimeType: "application/json",
-          responseSchema: schema
-        }
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error("Enterprise Agent execution failed.");
-    }
-
-    const resultData = await response.json();
-    return JSON.parse(resultData.text?.trim() || '{}');
-  }
-
-  /**
    * Executes a chat completion using the user's preferred external provider.
    */
   async executiveChat(userId: string, messages: ChatMessage[]) {

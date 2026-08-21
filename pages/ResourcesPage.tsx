@@ -5,7 +5,7 @@ import Badge from '../components/common/Badge.tsx';
 import { PageView } from '../types.ts';
 
 const resourceCategories = [
-  { id: 'templates', name: 'Logic Templates', icon: Layers, desc: 'Verified structures for prompts, agents, and complex state-machine workflows.', color: 'blue' },
+  { id: 'templates', name: 'Logic Templates', icon: Layers, desc: 'Documented structures for prompts, agents, and complex state-machine workflows.', color: 'blue' },
   { id: 'guides', name: 'Architect Guides', icon: Book, desc: 'Detailed methodologies for AI asset creation, valuation, and security auditing.', color: 'purple' },
   { id: 'tools', name: 'Utility Modules', icon: Lightbulb, desc: 'Recommended software, kernels, and SDKs for high-fidelity AI development.', color: 'cyan' },
 ];
@@ -55,7 +55,7 @@ const ResourcesPage: React.FC<{ onNavigate: (page: PageView) => void }> = ({ onN
           <div className="flex justify-between items-end border-b border-white/5 pb-8">
             <div>
                 <h2 className="text-3xl font-display font-bold text-white mb-2">Technical Payloads</h2>
-                <p className="text-ghost-light text-sm uppercase tracking-widest">Verified downloads for immediate deployment</p>
+                <p className="text-ghost-light text-sm uppercase tracking-widest">Documented resources — review before use</p>
             </div>
             <button className="text-[10px] font-mono text-neon-cyan uppercase tracking-[0.2em] font-black flex items-center gap-3 hover:gap-5 transition-all mb-2">
               BROWSE ALL ARCHIVES <ArrowUpRight size={16} />
@@ -95,7 +95,7 @@ const ResourcesPage: React.FC<{ onNavigate: (page: PageView) => void }> = ({ onN
             <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.05)_0%,transparent_70%)] opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
             <h2 className="text-4xl font-display font-bold text-white mb-6 relative z-10">Logic Contribution</h2>
             <p className="text-ghost-light text-xl max-w-3xl mx-auto mb-10 font-light leading-relaxed relative z-10">
-                Architects are encouraged to submit high-fidelity templates and guides. Verified contributions receive structural capital credits and network status upgrades.
+                Architects are encouraged to submit high-fidelity templates and guides. Contributions are reviewed before publication.
             </p>
             <button className="btn-primary py-5 px-12 text-sm font-black tracking-[0.3em] uppercase flex items-center gap-4 mx-auto relative z-10">
                 Submit Payload <ArrowUpRight size={18} />
