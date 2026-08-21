@@ -172,3 +172,54 @@ Product pages converted from spec sheets into **sellable micro-tools**:
 - Added public synthetic fixtures for the remaining 4 products (M&A DD, RFP Response,
   GovCon, Lease Abstraction) so all 15 tools are loadable with sample data.
 - Catalogue cards: removed risk/approval chips; renamed CTA to "Launch Tool".
+
+---
+
+# PART II — 36-ENTRY PORTFOLIO MISSION (started 2026-08-22)
+
+New mission: expand the platform from 15 workflow products to the **full KONKRED portfolio of 36
+separately discoverable entries** — 21 canonical ARB **suites** (`/suites/*`) and the 15 validated
+**workflows** (`/tools/*`) as child products — each with a unique page, unique URL, unique UI/UX
+interaction pattern, public validation evidence, honest monetization states and supervised execution.
+
+Companion documents: `agent/DECISIONS.md`, `agent/BASELINE_TEST_RESULTS.md`, `agent/ROUTE_MATRIX.md`,
+`agent/UIUX_MATRIX.md`, `agent/ACCEPTANCE_TESTS.md`.
+
+## II.0 Blocking input — source-of-truth documents are not in the workspace
+
+The brief lists nine document sets to be read before implementation. **None of them exist in this
+sandbox or in the repository** (verified: `/home/user/uploads/` absent, whole-filesystem search returns
+zero matches, GitHub code search returns zero hits). See `agent/DECISIONS.md#D-003`.
+
+Consequence, and the rule this plan follows: **no suite content is invented.** Fields whose only source
+is a missing document are emitted as `null` / `NOT_RUN` with `sourceStatus: "AWAITING_SOURCE_DOCUMENT"`,
+and the UI renders an explicit "evidence not yet published" state instead of a number or a badge.
+When the documents are supplied they are imported under `content/source/` and
+`content/validation/{arb_merged_validation,konkred_validation}/`, the manifest is backfilled, and
+`agent/SOURCE_IMPORT.md` records file → field provenance for every value.
+
+## II.1 Stage table
+
+| Stage | Scope | Status |
+| :--- | :--- | :--- |
+| II-0 Baseline audit | Fresh baseline at `724f729`; env, scripts, routes, flagships, API surface, env var names | ✅ `agent/BASELINE_TEST_RESULTS.md` |
+| II-1 Plan & matrices | Decisions, route matrix (36 + legacy + platform), UI/UX differentiation matrix, acceptance tests | ✅ this commit |
+| II-2 Manifest | `content/catalogue/portfolio-36.json` (36 entries) + typed loader + build-time validator (fails on duplicate id/slug/route, missing parent, missing validation link, controlled-pilot without approver, non-empty `autonomousActions`) | ⏳ |
+| II-3 Purge re-verification | Re-run the no-fakes sweep against the enlarged surface; retire 15-product-era copy that becomes inaccurate at 36 entries; keep Audit / REDAEYE / fullKONK untouched | ⏳ |
+| II-4 Shared platform | Design tokens + `ProductShell`, `EvidencePanel`, `SourceLedger`, `ValidationBadge`, `DesignScore`, `ApprovalGate`, `CtaRail`, `DemoRunner`; catalogue index with type/category/status filters; suite ⇄ workflow relationship display; loading/empty/error/mobile states | ⏳ |
+| II-5 36 unique pages | 21 suite layouts + 15 workflow layouts, each with its own layout component and signature interaction per `agent/UIUX_MATRIX.md` | ⏳ |
+| II-6 Demos & evidence | `DemoResponse` contract (`COMPLETE / NEEDS_INPUT / BLOCKED / INCOMPLETE_SOURCE_SET / NEEDS_EXTERNAL_VALIDATOR / ERROR`), stored reference outputs labelled as preflight, source/limitation panels | ⏳ |
+| II-7 Commerce & analytics | `/pricing`, `/kits/:slug`, `/sprint`, `/enterprise`, `/partners`, `/validation`; provider abstraction in test mode; consent + honest states; 12 analytics events with a non-sensitive property allow-list | ⏳ |
+| II-8 Tests | Extend vitest suites (portfolio, routes, demo contract, no-fakes, secrets) and the Playwright suite to all 36 routes | ⏳ |
+| II-9 PR & preview | Push staged commits, update PR #13 with the full 14-section report, verify all 36 URLs on the Vercel Preview | ⏳ |
+| II-10 Production | ⛔ blocked — requires explicit human approval; the agent never merges its own PR and never deploys production |
+
+## II.2 Invariants carried forward from Part I
+
+- Flagships preserved: Audit/AUDITOR/Neural Audit, REDAEYE, fullKONK_>.
+- Purged routes return a real 404 or an intentional redirect — never a fake page.
+- No fabricated ratings, sales, sellers, customers, certifications, ROI or accuracy claims.
+- All model calls server-side; no key or secret in client code or bundles.
+- Owner UX direction (2026-08-21) still binds: pages are sellable working tools, not spec sheets.
+  Mandatory disclosures (approver, "what this tool does not do") are rendered as a compact, neutral,
+  secondary panel below the tool — see `agent/DECISIONS.md#D-009`.
