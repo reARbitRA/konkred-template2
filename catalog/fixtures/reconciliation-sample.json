@@ -1,0 +1,14 @@
+{
+  "sampleLabel": "SYNTHETIC PUBLIC RECONCILIATION SAMPLE",
+  "bankTransactions": [
+    { "date": "2026-05-01", "amount": 1200.0, "reference": "BANK-TXN-001" },
+    { "date": "2026-05-01", "amount": -340.5, "reference": "BANK-TXN-002" },
+    { "date": "2026-05-02", "amount": 900.0, "reference": "BANK-TXN-003" },
+    { "date": "2026-05-03", "amount": 250.0, "reference": "BANK-TXN-004" }
+  ],
+  "ledgerEntries": [
+    { "date": "2026-05-01", "amount": 1200.0, "reference": "GL-2026-0501-1" },
+    { "date": "2026-05-02", "amount": 899.75, "reference": "GL-2026-0502-1" },
+    { "date": "2026-05-04", "amount": 250.0, "reference": "GL-2026-0504-1" }
+  ]
+}

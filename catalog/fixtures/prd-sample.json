@@ -1,0 +1,10 @@
+{
+  "sampleLabel": "SYNTHETIC PUBLIC PRD RESEARCH NOTES",
+  "productContext": "Internal analytics product used by growth teams. Exploring a new 'experiment snapshot' feature.",
+  "evidence": [
+    { "id": "E1", "type": "user-interview", "content": "Growth analyst: 'I spend 30 minutes rebuilding the same chart after each experiment ends.'" },
+    { "id": "E2", "type": "support-ticket", "content": "Ticket #4821: 'Can I export experiment results to a shareable link?'" },
+    { "id": "E3", "type": "internal-metric", "content": "52% of experiments never get a written read-out within 5 business days." },
+    { "id": "E4", "type": "stakeholder-note", "content": "VP Growth: 'A snapshot should capture hypothesis, metrics, guardrails and a conclusion area.'" }
+  ]
+}

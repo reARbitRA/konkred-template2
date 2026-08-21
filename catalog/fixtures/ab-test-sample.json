@@ -1,0 +1,10 @@
+{
+  "sampleLabel": "SYNTHETIC PUBLIC A/B TEST SAMPLE",
+  "testName": "Pricing page hero copy test",
+  "hypothesis": "Changing the hero headline to emphasize ROI improves conversion.",
+  "metrics": [
+    { "metric": "conversion_rate", "controlValue": 2.1, "variantValue": 2.4, "pValue": 0.09, "sampleSize": 48200 },
+    { "metric": "bounce_rate", "controlValue": 44.0, "variantValue": 42.5, "pValue": 0.21, "sampleSize": 48200 },
+    { "metric": "signup_quality_gate", "controlValue": 18.0, "variantValue": 17.6, "pValue": 0.55, "sampleSize": 48200 }
+  ]
+}
