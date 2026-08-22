@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAMPLE B — Kinetic Slabs · konkred.xyz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0c0c0e; --paper:#f2efe9; --amber:#ffb400; --cyan:#19d3c5; --violet:#7c5cff; --lime:#b8f53d; --red:#ff5252;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:'Space Grotesk',system-ui,sans-serif;overflow-x:hidden}
+::selection{background:var(--amber)}
+
+/* ── top bar ── */
+.top{position:sticky;top:0;z-index:40;background:var(--ink);color:var(--paper);
+  display:flex;justify-content:space-between;align-items:center;padding:12px clamp(14px,4vw,44px)}
+.brand{display:flex;align-items:center;gap:10px;font-family:'Archivo Black',sans-serif;letter-spacing:.2em;font-size:14px}
+.kb{width:32px;height:32px;background:var(--amber);color:var(--ink);display:grid;place-items:center;transform:rotate(-4deg);
+  transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
+.brand:hover .kb{transform:rotate(4deg) scale(1.1)}
+.burger{display:flex;gap:5px}
+.burger i{display:block;width:26px;height:4px;background:var(--paper)}
+
+/* ── marquee hero ── */
+.mq{overflow:hidden;background:var(--amber);border-bottom:4px solid var(--ink);white-space:nowrap}
+.mq-in{display:inline-flex;animation:mq 18s linear infinite;padding:10px 0;
+  font-family:'Archivo Black',sans-serif;font-size:15px;letter-spacing:.12em}
+@keyframes mq{to{transform:translateX(-50%)}}
+.hero{padding:clamp(36px,6vw,80px) clamp(14px,4vw,44px) 10px;position:relative}
+.kicker{display:inline-block;background:var(--ink);color:var(--lime);font-size:10px;letter-spacing:.3em;
+  padding:6px 12px;transform:rotate(-2deg);margin-bottom:22px;font-weight:700}
+h1{font-family:'Archivo Black',sans-serif;font-size:clamp(40px,9vw,120px);line-height:.9;text-transform:uppercase;letter-spacing:-.02em}
+h1 .o{color:transparent;-webkit-text-stroke:2.5px var(--ink)}
+h1 .hi{position:relative;display:inline-block}
+h1 .hi::after{content:"";position:absolute;left:-4%;bottom:8%;width:108%;height:.16em;background:var(--cyan);z-index:-1;
+  transform:scaleX(0);transform-origin:left;animation:swipe .7s .5s cubic-bezier(.2,.9,.2,1) forwards}
+@keyframes swipe{to{transform:scaleX(1)}}
+.sub{max-width:520px;font-size:15px;line-height:1.65;margin:26px 0 8px;font-weight:500}
+.stats{display:flex;gap:26px;flex-wrap:wrap;margin:26px 0 10px}
+.stat b{font-family:'Archivo Black',sans-serif;font-size:clamp(26px,4vw,44px);display:block}
+.stat:nth-child(1) b{color:var(--amber)}.stat:nth-child(2) b{color:var(--violet)}.stat:nth-child(3) b{color:var(--cyan)}
+.stat span{font-size:10px;letter-spacing:.25em;font-weight:700}
+
+/* ── slab grid ── */
+.wrap{padding:clamp(24px,4vw,50px) clamp(14px,4vw,44px) 110px}
+.slab-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:clamp(14px,2.5vw,26px)}
+.slab{grid-column:span 4;background:#fff;border:4px solid var(--ink);padding:22px;cursor:pointer;position:relative;
+  transition:transform .25s cubic-bezier(.34,1.56,.64,1),box-shadow .25s cubic-bezier(.34,1.56,.64,1);
+  opacity:0;transform:translateY(40px) rotate(0);animation:pop .55s cubic-bezier(.34,1.56,.64,1) forwards}
+.slab:nth-child(1){--sh:var(--amber);transform:translateY(40px) rotate(-1.2deg)}
+.slab:nth-child(2){--sh:var(--violet);transform:translateY(40px) rotate(1deg);animation-delay:.08s}
+.slab:nth-child(3){--sh:var(--cyan);transform:translateY(40px) rotate(-.8deg);animation-delay:.16s}
+.slab:nth-child(4){--sh:var(--lime);grid-column:span 4;transform:translateY(40px) rotate(1.2deg);animation-delay:.24s}
+.slab:nth-child(5){--sh:var(--red);transform:translateY(40px) rotate(-1deg);animation-delay:.32s}
+.slab:nth-child(6){--sh:var(--amber);transform:translateY(40px) rotate(.9deg);animation-delay:.4s}
+@keyframes pop{to{opacity:1}}
+.slab{box-shadow:10px 10px 0 var(--sh)}
+.slab:hover{transform:rotate(0) scale(1.03) translateY(-6px);box-shadow:16px 18px 0 var(--sh);z-index:2}
+.slab.wide{grid-column:span 8;background:var(--ink);color:var(--paper)}
+.slab .no{font-family:'Archivo Black',sans-serif;font-size:44px;line-height:1;color:var(--sh);-webkit-text-stroke:0}
+.slab.wide .no{-webkit-text-stroke:2px var(--sh);color:transparent}
+.slab .tp{display:inline-block;font-size:9px;font-weight:700;letter-spacing:.28em;padding:5px 10px;border:2px solid var(--ink);margin:14px 0 10px}
+.slab.wide .tp{border-color:var(--paper)}
+.slab h3{font-family:'Archivo Black',sans-serif;font-size:clamp(17px,2vw,24px);text-transform:uppercase;line-height:1.05;margin-bottom:10px}
+.slab p{font-size:13px;line-height:1.6;opacity:.75;min-height:44px}
+.slab .foot{display:flex;justify-content:space-between;align-items:center;margin-top:18px;font-weight:700;font-size:12px}
+.slab .pr{background:var(--ink);color:#fff;padding:6px 10px}
+.slab.wide .pr{background:var(--amber);color:var(--ink)}
+.slab .go{letter-spacing:.15em}
+.slab:hover .go::after{content:" →";animation:nudge .3s ease infinite alternate}
+@keyframes nudge{to{transform:translateX(4px)}}
+
+/* ── modal flip ── */
+.modal{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;padding:18px}
+.modal.on{display:flex}
+.modal .bg{position:absolute;inset:0;background:rgba(12,12,14,.6);backdrop-filter:blur(4px)}
+.box{position:relative;width:min(640px,100%);background:#fff;border:4px solid var(--ink);box-shadow:14px 14px 0 var(--amber);
+  padding:28px;animation:flip .4s cubic-bezier(.34,1.56,.64,1) both;transform-style:preserve-3d}
+@keyframes flip{0%{transform:rotateX(60deg) translateY(60px);opacity:0}100%{transform:none;opacity:1}}
+.box .head{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:4px solid var(--ink);padding-bottom:14px;margin-bottom:18px}
+.box h2{font-family:'Archivo Black',sans-serif;text-transform:uppercase;font-size:clamp(20px,3vw,30px);line-height:1}
+.x{border:3px solid var(--ink);background:none;font-family:inherit;font-weight:700;padding:8px 14px;cursor:pointer;transition:all .15s}
+.x:hover{background:var(--red);color:#fff;border-color:var(--red)}
+.steps{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}
+.steps span{flex:1;min-width:130px;border:3px solid var(--ink);padding:12px;font-size:12px;font-weight:700}
+.steps span b{display:block;font-size:20px;font-family:'Archivo Black',sans-serif;color:var(--violet)}
+.magnet{display:inline-block;background:var(--ink);color:var(--paper);font-weight:700;letter-spacing:.2em;font-size:13px;
+  padding:16px 34px;border:none;cursor:pointer;transition:transform .1s}
+
+/* walkthrough */
+.walk{position:fixed;left:0;right:0;bottom:0;z-index:45;background:var(--ink);color:var(--paper);
+  display:flex;flex-wrap:wrap;border-top:4px solid var(--amber)}
+.walk .st{flex:1;min-width:190px;padding:16px clamp(10px,2vw,26px);border-right:1px solid #26262b;display:flex;gap:12px}
+.walk .st:last-child{border-right:0}
+.walk b{display:block;font-family:'Archivo Black',sans-serif;font-size:12px;letter-spacing:.1em;color:var(--amber)}
+.walk span{font-size:11px;opacity:.7}
+.note{position:fixed;bottom:86px;right:14px;z-index:44;font-size:9px;letter-spacing:.2em;opacity:.5;font-weight:700}
+
+@media(max-width:900px){.slab,.slab.wide{grid-column:span 6}}
+@media(max-width:640px){
+  .slab,.slab.wide{grid-column:span 12}
+  .slab:hover{transform:none}
+  .walk .st{min-width:46%}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand"><div class="kb">K</div>KONKRED</div>
+  <nav class="burger"><i></i><i></i><i></i></nav>
+</header>
+
+<div class="mq"><div class="mq-in" id="mq"></div></div>
+
+<section class="hero">
+  <span class="kicker">DESIGN SAMPLE B — KINETIC SLABS</span>
+  <h1>WORK<br>THAT<br><span class="hi">PROVES</span> <span class="o">ITSELF.</span></h1>
+  <p class="sub">Neo-brutalist motion museum. Tilted slabs with hard colored shadows, magnetic buttons, marquee energy. Every card is a physical object you can shove around.</p>
+  <div class="stats">
+    <div class="stat"><b>36</b><span>PRODUCTS</span></div>
+    <div class="stat"><b>21</b><span>SUITES</span></div>
+    <div class="stat"><b>15</b><span>TOOLS</span></div>
+  </div>
+</section>
+
+<main class="wrap">
+  <div class="slab-grid" id="grid"></div>
+</main>
+
+<div class="modal" id="modal">
+  <div class="bg" onclick="closeModal()"></div>
+  <div class="box" id="box">
+    <div class="head"><h2 id="mT"></h2><button class="x" onclick="closeModal()">CLOSE</button></div>
+    <div class="steps">
+      <span><b>01</b>Load your document</span>
+      <span><b>02</b>Watch the tool work</span>
+      <span><b>03</b>Approve the output</span>
+    </div>
+    <p style="font-size:13px;line-height:1.7;opacity:.8" id="mD"></p>
+    <br><button class="magnet" id="magnet">GET THE KIT →</button>
+  </div>
+</div>
+
+<footer class="walk">
+  <div class="st"><b>01 — SCAN</b><span>Tilted slabs with colored hard shadows. Hover: they straighten and lift.</span></div>
+  <div class="st"><b>02 — SLAP</b><span>Click a slab — it flips open as a physical panel with the 3-step flow.</span></div>
+  <div class="st"><b>03 — SNAP</b><span>Magnetic CTA pulls toward your cursor before you commit.</span></div>
+</footer>
+<div class="note">SAMPLE ONLY — NOT THE LIVE APP</div>
+
+<script>
+const mq=document.getElementById("mq");
+const words="36 CONTROLLED WORKFLOWS /// EVIDENCE-LINKED /// ZERO FAKE CLAIMS /// HUMAN-SUPERVISED /// ";
+mq.innerHTML=`<span style="padding-right:40px">${(words).repeat(4)}</span>`.repeat(2);
+const P=[
+ {t:"Contract Review Copilot",n:"01",tp:"TOOL · PUBLIC DEMO",d:"First-pass review with playbook risk flags and exact quotes.",p:"$497",sh:"--amber"},
+ {t:"IaC Security Copilot",n:"02",tp:"TOOL · SUPERVISED",d:"Finding matrix on real Terraform. Read-only, always.",p:"$497",sh:"--violet"},
+ {t:"Reconciliation Copilot",n:"03",tp:"TOOL · KIT",d:"Exact / ambiguous / unmatched lanes. No auto-posting.",p:"$497",sh:"--cyan"},
+ {t:"Incident Post-Mortem",n:"04",tp:"TOOL · PUBLIC DEMO",d:"Scrubable timeline. Blameless causal lanes.",p:"$297",sh:"--lime"},
+ {t:"Customer Support Control",n:"05",tp:"SUITE · SUPERVISED",d:"Ticket queue, policy diff, SLA clock, account health.",p:"$2.5K+",sh:"--red",wide:true},
+ {t:"Finance Close & Reporting",n:"06",tp:"SUITE · SUPERVISED",d:"Close checklist, exceptions table, controller drawer.",p:"$3.5K+",sh:"--amber"},
+];
+const g=document.getElementById("grid");
+P.forEach(x=>{
+  const c=document.createElement("div");
+  c.className="slab"+(x.wide?" wide":"");
+  c.innerHTML=`<div class="no">${x.n}</div><span class="tp">${x.tp}</span><h3>${x.t}</h3><p>${x.d}</p>
+   <div class="foot"><span class="pr">FROM ${x.p}</span><span class="go">OPEN</span></div>`;
+  c.onclick=()=>{
+    document.getElementById("mT").textContent=x.t;
+    document.getElementById("mD").textContent=x.d+" Output is a draft for human review — nothing executes automatically.";
+    document.getElementById("modal").classList.add("on");
+  };
+  g.appendChild(c);
+});
+function closeModal(){document.getElementById("modal").classList.remove("on")}
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal()});
+/* magnetic button */
+const m=document.getElementById("magnet");
+document.addEventListener("mousemove",e=>{
+  const r=m.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;
+  const dx=e.clientX-cx,dy=e.clientY-cy,d=Math.hypot(dx,dy);
+  m.style.transform=d<120?`translate(${dx*.25}px,${dy*.25}px)`:"none";
+});
+</script>
+</body>
+</html>
