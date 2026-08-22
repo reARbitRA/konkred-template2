@@ -140,16 +140,47 @@
    Shared theme tokens (dark default, light = B paper mode)
    ============================================================ */
 
+/* ── disciplined token system ─────────────────────────────
+   --k-bg / --k-floor / --k-panel  : surfaces (theme-varied)
+   --k-ink / --k-mut / --k-line    : text + hairlines (theme-varied)
+   accents (amber/cyan/violet/lime/red/ph) : CONSTANTS, never themed —
+   text sitting ON an accent is always #0b0d10. A foreground token is
+   never used as a background for colored text.
+   ──────────────────────────────────────────────────────── */
 :root{
-  --k-bg:#101014; --k-floor:#121319; --k-panel:#17171d; --k-line:#26262e;
-  --k-ink:#f2efe9; --k-mut:#8a8a99; --k-amber:#ffb400; --k-cyan:#19d3c5;
-  --k-violet:#8b6bff; --k-lime:#b8f53d; --k-red:#ff5252; --k-ph:#3dff9a;
-  --k-slab-shadow:rgba(0,0,0,.5);
+  --k-bg:#101014; --k-floor:#121319; --k-panel:#17171d; --k-line:#2b2b34;
+  --k-ink:#f2efe9; --k-mut:#8a8a99;
+  --k-amber:#ffb400; --k-cyan:#19d3c5; --k-violet:#8b6bff; --k-lime:#a9e838;
+  --k-red:#ff5252; --k-ph:#3dff9a;
+  --k-on-acc:#0b0d10;                       /* text on any accent */
+  --k-hard:rgba(0,0,0,.5);                  /* hard shadow, dark mode */
+  --k-edge:#0b0d10;                         /* border edge, dark mode */
 }
 html.theme-light{
   --k-bg:#efece5; --k-floor:#f4f1ea; --k-panel:#ffffff; --k-line:#d8d2c4;
-  --k-ink:#14161b; --k-mut:#5d6672; --k-amber:#e08900; --k-slab-shadow:rgba(20,20,25,.22);
+  --k-ink:#14161b; --k-mut:#5d6672;
+  --k-hard:rgba(20,20,25,.22);
+  --k-edge:#14161b;
 }
+/* selection + focus */
+::selection{background:var(--k-amber);color:var(--k-on-acc)}
+html.theme-light ::selection{background:var(--k-ink);color:var(--k-bg)}
+:focus-visible{outline:3px solid var(--k-amber);outline-offset:2px}
+
+/* primitives */
+.k-badge{display:inline-block;background:var(--k-amber);color:var(--k-on-acc);
+  font-weight:700;font-size:10px;letter-spacing:.28em;padding:6px 12px;border:2px solid var(--k-edge)}
+.k-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  font-weight:800;font-size:11px;letter-spacing:.2em;text-transform:uppercase;
+  padding:13px 26px;border:3px solid var(--k-edge);cursor:pointer;
+  box-shadow:6px 6px 0 var(--k-hard);transition:transform .06s steps(2),box-shadow .06s steps(2)}
+.k-btn:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--k-hard)}
+.k-btn-acc{background:var(--k-amber);color:var(--k-on-acc)}
+.k-btn-ghost{background:var(--k-panel);color:var(--k-ink)}
+.k-title{font-family:'Archivo Black','IBM Plex Mono',ui-monospace,monospace;
+  text-transform:uppercase;letter-spacing:-.01em;line-height:.95}
+.k-mono{font-family:'IBM Plex Mono',ui-monospace,monospace}
+.k-hair{border:2px solid var(--k-line)}
 
 /* B-style slab */
 .k-slab{background:var(--k-panel);border:4px solid var(--k-ink);color:var(--k-ink);

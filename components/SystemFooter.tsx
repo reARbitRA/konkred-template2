@@ -19,7 +19,8 @@ const SystemFooter: React.FC = () => {
   ];
 
   return (
-    <footer className="border-t-4 border-black w-full bg-[#030712] text-[10px] font-mono text-void-500 py-12 mt-auto select-none relative">
+    <footer className="border-t-4 w-full text-[10px] font-mono py-12 mt-auto select-none relative"
+      style={{ borderColor: 'var(--k-edge)', background: 'var(--k-bg)', color: 'var(--k-mut)' }}>
       <div className="max-w-7xl mx-auto px-6 md:px-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-10 pb-10 border-b-2 border-void-300">
 

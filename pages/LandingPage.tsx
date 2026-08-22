@@ -34,7 +34,7 @@ const Slab: React.FC<{
     className={`k-slab brutal-rise text-left p-6 flex flex-col gap-3 cursor-pointer ${wide ? 'sm:col-span-2' : ''}`}
     style={{ ['--slab-c' as string]: color, transform: `rotate(${tilt}deg)`, animationDelay: `${delay}s` }}
   >
-    <span className="font-black text-4xl sm:text-5xl leading-none" style={{ WebkitTextStroke: `2px ${color}`, color: 'transparent' }}>{n}</span>
+    <span className="font-black text-4xl sm:text-5xl leading-none" style={{ WebkitTextStroke: `2.5px ${color}`, color: 'transparent' }}>{n}</span>
     <span className="text-[9px] font-bold tracking-[0.28em] border-2 inline-block self-start px-2.5 py-1 border-[var(--k-ink)]">{cta}</span>
     <h3 className="font-black uppercase leading-[1.02] text-xl sm:text-2xl tracking-tight" style={{ fontFamily: "'Archivo Black',ui-monospace,monospace" }}>{title}</h3>
     <p className="text-[13px] leading-relaxed opacity-75">{desc}</p>
@@ -53,9 +53,9 @@ const LandingPage: React.FC<Props> = ({ onNavigate }) => {
   return (
     <div className="min-h-screen w-full overflow-x-hidden" style={{ background: 'var(--k-bg)', color: 'var(--k-ink)' }} data-testid="landing-b">
       {/* top bar */}
-      <header className="sticky top-0 z-40 flex items-center justify-between px-5 sm:px-10 py-3" style={{ background: 'var(--k-panel)', borderBottom: '4px solid var(--k-ink)' }}>
+      <header className="sticky top-0 z-40 flex items-center justify-between px-5 sm:px-10 py-3" style={{ background: 'var(--k-panel)', borderBottom: '4px solid var(--k-edge)' }}>
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 grid place-items-center font-black text-lg rotate-[-4deg] transition-transform duration-300 hover:rotate-[6deg] hover:scale-110" style={{ background: 'var(--k-amber)', color: 'var(--k-bg)' }}>K</div>
+          <div className="w-8 h-8 grid place-items-center font-black text-lg rotate-[-4deg] transition-transform duration-300 hover:rotate-[6deg] hover:scale-110" style={{ background: 'var(--k-amber)', color: 'var(--k-on-acc)' }}>K</div>
           <b className="tracking-[0.25em] text-sm" style={{ fontFamily: "'Archivo Black',ui-monospace,monospace" }}>KONKRED</b>
         </div>
         <nav className="flex items-center gap-2 sm:gap-3 text-[10px] font-bold tracking-[0.2em]">
@@ -67,10 +67,10 @@ const LandingPage: React.FC<Props> = ({ onNavigate }) => {
       </header>
 
       {/* marquee */}
-      <div className="overflow-hidden whitespace-nowrap" style={{ background: 'var(--k-amber)', borderBottom: '4px solid var(--k-ink)' }} aria-hidden="true">
+      <div className="overflow-hidden whitespace-nowrap" style={{ background: 'var(--k-amber)', borderBottom: '4px solid var(--k-edge)' }} aria-hidden="true">
         <div className="brutal-marquee py-1.5">
           {[0, 1].map((k) => (
-            <span key={k} className="flex shrink-0 font-black uppercase tracking-[0.25em] text-[11px] py-1" style={{ color: 'var(--k-bg)', fontFamily: "'Archivo Black',ui-monospace,monospace" }}>
+            <span key={k} className="flex shrink-0 font-black uppercase tracking-[0.25em] text-[11px] py-1" style={{ color: 'var(--k-on-acc)', fontFamily: "'Archivo Black',ui-monospace,monospace" }}>
               {marquee.map((w, i) => <span key={i} className="mx-4">{w}</span>)}
             </span>
           ))}
@@ -79,7 +79,7 @@ const LandingPage: React.FC<Props> = ({ onNavigate }) => {
 
       {/* hero + typewriter */}
       <section className="px-5 sm:px-10 pt-12 sm:pt-20 pb-8 max-w-6xl mx-auto">
-        <span className="inline-block font-bold text-[10px] tracking-[0.3em] px-3 py-1.5 rotate-[-1.5deg] mb-8" style={{ background: 'var(--k-ink)', color: 'var(--k-lime)' }}>
+        <span className="k-badge inline-block rotate-[-1.5deg] mb-8">
           EVIDENCE-LINKED WORKFLOW PRODUCTS
         </span>
         <Typewriter
@@ -147,7 +147,7 @@ const LandingPage: React.FC<Props> = ({ onNavigate }) => {
       </section>
 
       {/* footer strip */}
-      <footer className="px-5 sm:px-10 py-8 flex flex-wrap items-center justify-between gap-4 text-[10px] font-bold tracking-[0.25em]" style={{ borderTop: '4px solid var(--k-ink)', color: 'var(--k-mut)' }}>
+      <footer className="px-5 sm:px-10 py-8 flex flex-wrap items-center justify-between gap-4 text-[10px] font-bold tracking-[0.25em]" style={{ borderTop: '4px solid var(--k-edge)', color: 'var(--k-mut)' }}>
         <span>KONKRED.XYZ — {ENTRIES.length} CONTROLLED WORKFLOW PRODUCTS</span>
         <div className="flex gap-5">
           <button onClick={() => onNavigate('validation')} className="cursor-pointer hover:underline">VALIDATION RECORD</button>

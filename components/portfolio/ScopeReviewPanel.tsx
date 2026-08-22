@@ -23,17 +23,17 @@ function doesNotDo(entry: PortfolioEntry): string[] {
 const shortApprover = (a: string) => a.split(/[;.]| plus /)[0].trim();
 
 export const ScopeReviewPanel: React.FC<{ entry: PortfolioEntry }> = ({ entry }) => (
-  <footer aria-label="Scope and review" className="border-t border-white/5 pt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5">
-    <span className="text-[10px] text-zinc-500">
-      Reviewed by <span className="text-zinc-400">{entry.humanApprover ? shortApprover(entry.humanApprover) : 'a named owner in your team'}</span>
+  <footer aria-label="Scope and review" className="border-t-2 pt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5" style={{ borderColor: 'var(--k-line)' }}>
+    <span className="text-[10px]" style={{ color: 'var(--k-mut)' }}>
+      Reviewed by <span style={{ color: 'var(--k-ink)' }}>{entry.humanApprover ? shortApprover(entry.humanApprover) : 'a named owner in your team'}</span>
     </span>
-    <span className="text-[10px] text-zinc-600">·</span>
-    <span className="text-[10px] text-zinc-500">Outputs are drafts — nothing sends, posts, signs or pays automatically</span>
+    <span className="text-[10px]">·</span>
+    <span className="text-[10px]" style={{ color: 'var(--k-mut)' }}>Outputs are drafts — nothing sends, posts, signs or pays automatically</span>
     <details className="group">
-      <summary className="text-[10px] text-zinc-600 hover:text-zinc-400 cursor-pointer list-none font-mono">what this {entry.type === 'SUITE' ? 'suite' : 'tool'} doesn't do ▸</summary>
+      <summary className="text-[10px] cursor-pointer list-none font-mono uppercase tracking-[0.15em]" style={{ color: 'var(--k-mut)' }}>what this {entry.type === 'SUITE' ? 'suite' : 'tool'} doesn't do ▸</summary>
       <ul className="mt-1.5 space-y-1">
         {doesNotDo(entry).map((d, i) => (
-          <li key={i} className="text-[10px] text-zinc-600 leading-relaxed">— {d.replace(/\.$/, '')}.</li>
+          <li key={i} className="text-[10px] leading-relaxed" style={{ color: 'var(--k-mut)' }}>— {d.replace(/\.$/, '')}.</li>
         ))}
       </ul>
     </details>

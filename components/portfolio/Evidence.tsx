@@ -79,14 +79,12 @@ export const ValidationBadge: React.FC<{ status: 'PASS' | 'CONDITIONAL' | 'NOT_R
 
 /* ── one-line trust footer for product pages ── */
 export const EvidenceLine: React.FC<{ entry: PortfolioEntry; onOpenValidation: () => void }> = ({ entry, onOpenValidation }) => (
-  <p className="font-mono text-[10px] text-zinc-500 flex flex-wrap items-center gap-x-2 gap-y-1">
+  <p className="font-mono text-[10px] flex flex-wrap items-center gap-x-2 gap-y-1" style={{ color: 'var(--k-mut)' }}>
     {entry.validationStatus === 'PASS' || entry.validationStatus === 'CONDITIONAL' ? (
       <>
-        <span className="text-emerald-500">✓</span>
-        <span>
-          Validated on public data — preflight {entry.validationStatus}
-        </span>
-        <button onClick={onOpenValidation} className="text-cyan-400/90 hover:text-cyan-300 underline decoration-cyan-500/30 underline-offset-2 cursor-pointer">
+        <span style={{ color: 'var(--k-amber)' }}>✓</span>
+        <span>Validated on public data — preflight {entry.validationStatus}</span>
+        <button onClick={onOpenValidation} className="underline underline-offset-2 cursor-pointer" style={{ color: 'var(--k-amber)' }}>
           validation record
         </button>
       </>

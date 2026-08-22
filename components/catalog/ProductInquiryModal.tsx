@@ -83,14 +83,14 @@ export const ProductInquiryModal: React.FC<ProductInquiryModalProps> = ({ intent
     <div className="fixed inset-0 z-[90] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label={INTENT_TITLES[intent]}>
       <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose} />
 
-      <div className="relative w-full max-w-lg bg-[#0E1319] border-2 border-black rounded-2xl shadow-2xl max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 sticky top-0 bg-[#0E1319] z-10">
+      <div className="relative w-full max-w-lg border-4 max-h-[90vh] overflow-y-auto" style={{ background: 'var(--k-panel)', borderColor: 'var(--k-edge)', boxShadow: '12px 12px 0 var(--k-hard)' }} data-testid="inquiry-modal">
+        <div className="flex items-center justify-between px-6 py-4 border-b-2 sticky top-0 z-10" style={{ borderColor: 'var(--k-line)', background: 'var(--k-panel)' }}>
           <div>
-            <h3 className="font-mono font-black uppercase tracking-widest text-sm text-white">
+            <h3 className="k-mono font-black uppercase tracking-widest text-sm" style={{ color: 'var(--k-ink)' }}>
               {INTENT_TITLES[intent]}
             </h3>
             {productName && (
-              <p className="text-[10px] font-mono uppercase tracking-widest text-amber-500 mt-0.5">
+              <p className="text-[10px] k-mono uppercase tracking-widest mt-0.5" style={{ color: 'var(--k-amber)' }}>
                 {productName}
               </p>
             )}
@@ -98,7 +98,7 @@ export const ProductInquiryModal: React.FC<ProductInquiryModalProps> = ({ intent
           <button
             onClick={onClose}
             aria-label="Close"
-            className="p-2 border border-white/10 rounded-lg hover:bg-white/5 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+            className="p-2 border-2 cursor-pointer" style={{ borderColor: 'var(--k-line)', color: 'var(--k-mut)' }}
           >
             <X size={16} />
           </button>
@@ -106,13 +106,13 @@ export const ProductInquiryModal: React.FC<ProductInquiryModalProps> = ({ intent
 
         <div className="p-6 space-y-4">
           {/* TEST MODE notice — payment is NOT processed */}
-          <div className="flex items-start gap-3 border border-amber-500/40 bg-amber-500/10 rounded-xl px-4 py-3">
-            <CreditCard size={16} className="text-amber-400 shrink-0 mt-0.5" />
+          <div className="flex items-start gap-3 border-2 px-4 py-3" style={{ borderColor: 'var(--k-amber)', background: 'var(--k-amber)', color: 'var(--k-on-acc)' }}>
+            <CreditCard size={16} className="shrink-0 mt-0.5" />
             <div>
-              <p className="font-mono font-black uppercase tracking-widest text-[10px] text-amber-400">
+              <p className="k-mono font-black uppercase tracking-widest text-[10px]">
                 TEST MODE // NO PAYMENT PROCESSED
               </p>
-              <p className="text-[11px] text-zinc-300 leading-relaxed mt-1">
+              <p className="text-[11px] leading-relaxed mt-1">
                 Payment and CRM credentials are not configured in this environment. This form
                 records your inquiry as a lead only — nothing is charged. A KONKRED contact will
                 follow up to arrange payment, booking or scoping.
@@ -120,17 +120,17 @@ export const ProductInquiryModal: React.FC<ProductInquiryModalProps> = ({ intent
             </div>
           </div>
 
-          <p className="text-xs text-zinc-400 leading-relaxed">{INTENT_BODIES[intent]}</p>
+          <p className="text-xs leading-relaxed" style={{ color: 'var(--k-mut)' }}>{INTENT_BODIES[intent]}</p>
 
           {submitted ? (
             <div className="space-y-4 py-4">
-              <div className="flex items-start gap-3 bg-emerald-500/10 border border-emerald-500/40 rounded-xl px-4 py-4">
-                <CheckCircle2 size={18} className="text-emerald-400 shrink-0 mt-0.5" />
+              <div className="flex items-start gap-3 border-2 px-4 py-4" style={{ borderColor: 'var(--k-line)', background: 'var(--k-bg)' }}>
+                <CheckCircle2 size={18} className="shrink-0 mt-0.5" style={{ color: 'var(--k-ph)' }} />
                 <div>
-                  <p className="font-mono font-black uppercase tracking-widest text-[11px] text-emerald-400">
+                  <p className="k-mono font-black uppercase tracking-widest text-[11px]" style={{ color: 'var(--k-ph)' }}>
                     INQUIRY RECEIVED
                   </p>
-                  <p className="text-xs text-zinc-300 leading-relaxed mt-1">
+                  <p className="text-xs leading-relaxed mt-1" style={{ color: 'var(--k-ink)' }}>
                     Your {INTENT_TITLES[intent].toLowerCase()} inquiry was stored. A KONKRED contact
                     will follow up at {email}. No payment was processed.
                   </p>
@@ -138,7 +138,7 @@ export const ProductInquiryModal: React.FC<ProductInquiryModalProps> = ({ intent
               </div>
               <button
                 onClick={onClose}
-                className="w-full py-3 bg-white hover:bg-zinc-200 text-black font-mono font-black text-xs uppercase tracking-widest rounded-xl transition-colors cursor-pointer"
+                className="k-btn k-btn-ghost w-full"
               >
                 Close
               </button>

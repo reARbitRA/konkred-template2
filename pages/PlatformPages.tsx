@@ -18,19 +18,19 @@ interface PageProps {
 }
 
 const Shell: React.FC<{ eyebrow: string; title: string; lead: string; back?: () => void; children: React.ReactNode }> = ({ eyebrow, title, lead, back, children }) => (
-  <div className="min-h-screen bg-[#0B0F14] text-white font-sans pb-24 pt-6">
-    <div className="max-w-6xl mx-auto px-6 md:px-8">
+  <div className="min-h-screen pb-24 pt-6" style={{ background: 'var(--k-bg)', color: 'var(--k-ink)' }}>
+    <div className="max-w-6xl mx-auto px-5 sm:px-10">
       {back && (
-        <button onClick={back} className="inline-flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-amber-500 hover:text-white transition-colors cursor-pointer mb-8">
+        <button onClick={back} className="inline-flex items-center gap-2 k-mono text-[11px] font-bold uppercase tracking-[0.2em] cursor-pointer mb-8" style={{ color: 'var(--k-amber)' }}>
           <ArrowLeft size={16} /> BACK
         </button>
       )}
-      <div className="pb-8 border-b border-white/10 space-y-3">
-        <p className="text-[10px] font-mono uppercase tracking-widest text-amber-500 font-bold">{eyebrow}</p>
-        <h1 className="text-3xl sm:text-4xl font-black font-mono tracking-tight uppercase">{title}</h1>
-        <p className="text-sm text-zinc-400 leading-relaxed max-w-3xl">{lead}</p>
+      <div className="pb-8 border-b-4 space-y-4 brutal-rise" style={{ borderColor: 'var(--k-edge)' }}>
+        <span className="k-badge">{eyebrow}</span>
+        <h1 className="k-title text-4xl sm:text-6xl max-w-3xl">{title}</h1>
+        <p className="text-[14px] leading-relaxed max-w-2xl" style={{ color: 'var(--k-mut)' }}>{lead}</p>
       </div>
-      <div className="pt-8">{children}</div>
+      <div className="pt-9">{children}</div>
     </div>
   </div>
 );
@@ -41,7 +41,7 @@ const InquiryButton: React.FC<{ intent: InquiryIntent; label: string; event: Par
     <>
       <button
         onClick={() => { track(event, product); if (event === 'kit_cta_click') track('checkout_start', product); setOpen(true); }}
-        className="bg-amber-500 text-black font-mono font-black text-xs uppercase tracking-widest px-6 py-3.5 border-2 border-black hover:bg-black hover:text-amber-400 hover:border-amber-500 transition-all cursor-pointer"
+        className="k-btn k-btn-acc"
       >
         {label}
       </button>
@@ -70,12 +70,12 @@ export const PricingPage: React.FC<PageProps> = ({ onNavigate }) => {
     <Shell eyebrow="Pricing" title="Offer ladder" lead="Planning ranges from the published packaging reference. Price includes model/tool usage, review time, support and governance. Exact quotes come from a scoping call — nothing is charged on this site.">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {ladder.map((l) => (
-          <div key={l.name} className="border-2 border-black bg-[#0E1319] rounded-2xl p-5 shadow-[3px_3px_0px_0px_#000000] space-y-2">
-            <div className="flex items-baseline justify-between gap-3">
-              <h3 className="font-mono font-black text-sm text-white uppercase">{l.name}</h3>
-              <span className="font-mono font-black text-amber-400 text-sm">{l.range}</span>
+          <div key={l.name} className="k-slab p-5 space-y-2" style={{ ['--slab-c' as string]: 'var(--k-amber)', transform: 'rotate(0deg)' }}>
+            <div className="flex items-baseline justify-between gap-3 flex-wrap">
+              <h3 className="k-title text-[15px]">{l.name}</h3>
+              <span className="k-mono font-black text-[14px]" style={{ color: 'var(--k-amber)' }}>{l.range}</span>
             </div>
-            <p className="text-[11px] text-zinc-400 leading-relaxed">{l.note}</p>
+            <p className="text-[11.5px] leading-relaxed" style={{ color: 'var(--k-mut)' }}>{l.note}</p>
           </div>
         ))}
       </div>
@@ -83,9 +83,9 @@ export const PricingPage: React.FC<PageProps> = ({ onNavigate }) => {
         <h3 className="font-mono font-black uppercase tracking-widest text-xs">Workflow kit prices (catalogue)</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
           {WORKFLOWS.filter((w) => w.pricing.kitFromUsd != null).map((w) => (
-            <button key={w.slug} onClick={() => onNavigate('kit_detail', w.slug)} className="flex items-center justify-between gap-2 border border-zinc-800 rounded-xl px-3.5 py-2.5 bg-[#0E1319] hover:border-amber-500/50 cursor-pointer">
-              <span className="text-[11px] text-zinc-300 truncate">{w.title}</span>
-              <span className="font-mono font-black text-[11px] text-amber-400 shrink-0">${w.pricing.kitFromUsd?.toLocaleString()}</span>
+            <button key={w.slug} onClick={() => onNavigate('kit_detail', w.slug)} className="flex items-center justify-between gap-2 border-2 px-3.5 py-2.5 cursor-pointer hover:underline" style={{ borderColor: 'var(--k-line)', background: 'var(--k-panel)' }}>
+              <span className="text-[11px] truncate">{w.title}</span>
+              <span className="k-mono font-black text-[11px] shrink-0" style={{ color: 'var(--k-amber)' }}>${w.pricing.kitFromUsd?.toLocaleString()}</span>
             </button>
           ))}
         </div>
@@ -106,9 +106,9 @@ export const SprintPage: React.FC<PageProps> = ({ onNavigate }) => {
     <Shell eyebrow="Engagement" title="Validation Sprint" lead="Fixed scope: one workflow, one sample, one approver, one acceptance definition — and one fixed deliverable pack.">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="space-y-2.5">
-          <h3 className="font-mono font-black uppercase tracking-widest text-xs">You receive</h3>
+          <h3 className="k-title text-lg">You receive</h3>
           {deliverables.map((d) => (
-            <p key={d} className="text-[12px] text-zinc-300 flex items-start gap-2.5"><CheckCircle2 size={14} className="text-emerald-400 shrink-0 mt-0.5" />{d}</p>
+            <p key={d} className="text-[12px] flex items-start gap-2.5"><CheckCircle2 size={14} className="shrink-0 mt-0.5" style={{ color: 'var(--k-amber)' }} />{d}</p>
           ))}
         </div>
         <div className="space-y-3">
@@ -117,7 +117,7 @@ export const SprintPage: React.FC<PageProps> = ({ onNavigate }) => {
             <div className="space-y-1.5">
               {[...SUITES.filter((s) => s.pricing.sprintFromUsd).map((s) => [s.title, s.pricing.sprintFromUsd] as const),
                 ...WORKFLOWS.filter((w) => w.pricing.sprintFromUsd).map((w) => [w.title, w.pricing.sprintFromUsd] as const)].slice(0, 12).map(([t, p]) => (
-                <div key={t} className="flex justify-between text-[11px]"><span className="text-zinc-400 truncate">{t}</span><span className="font-mono text-amber-400 shrink-0 ml-2">${p?.toLocaleString()}</span></div>
+                <div key={t} className="flex justify-between text-[11px] gap-3"><span className="truncate" style={{ color: 'var(--k-mut)' }}>{t}</span><span className="k-mono shrink-0 ml-2 font-bold" style={{ color: 'var(--k-amber)' }}>${p?.toLocaleString()}</span></div>
               ))}
             </div>
           </div>
@@ -135,14 +135,14 @@ export const EnterprisePage: React.FC<PageProps> = () => {
   return (
     <Shell eyebrow="For organizations" title="Enterprise integration" lead="The governance layer around the workflows: identity, isolation, policy packs, retention and review queues. High-impact products ship as controlled pilots only.">
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
-        {caps.map((c) => <div key={c} className="border border-zinc-800 rounded-xl px-3.5 py-3 bg-[#0E1319] text-[11px] text-zinc-300 font-mono">{c}</div>)}
+        {caps.map((c) => <div key={c} className="border-2 px-3.5 py-3 k-mono text-[11px]" style={{ borderColor: 'var(--k-line)', background: 'var(--k-panel)' }}>{c}</div>)}
       </div>
       <div className="mt-8 border border-zinc-800 rounded-2xl p-5 bg-[#0E1319] space-y-2">
-        <h3 className="font-mono font-black uppercase tracking-widest text-xs">Controlled-pilot catalogue</h3>
+        <h3 className="k-title text-lg">Controlled-pilot catalogue</h3>
         <p className="text-[11px] text-zinc-400 leading-relaxed">These products run only with a named human approver and a controlled environment:</p>
         <div className="flex flex-wrap gap-2 pt-1">
           {ENTRIES.filter((e) => e.status === 'INTERNAL_CONTROLLED_PILOT' || e.status === 'CONDITIONAL_VALIDATION').map((e) => (
-            <span key={e.slug} className="text-[10px] font-mono text-orange-300 border border-orange-500/30 bg-orange-500/5 rounded-lg px-2 py-1">{e.title}</span>
+            <span key={e.slug} className="text-[10px] k-mono border-2 px-2 py-1" style={{ borderColor: 'var(--k-line)' }}>{e.title}</span>
           ))}
         </div>
       </div>
@@ -157,10 +157,10 @@ export const PartnersPage: React.FC<PageProps> = () => {
   return (
     <Shell eyebrow="Channel" title="Partners & OEM" lead="KONKRED workflows embed into existing advisory and platform relationships.">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-        {sectors.map((s) => <div key={s} className="border border-zinc-800 rounded-xl px-3.5 py-4 bg-[#0E1319] text-[11px] text-zinc-300 font-mono text-center">{s}</div>)}
+        {sectors.map((s) => <div key={s} className="border-2 px-3.5 py-4 k-mono text-[11px] text-center" style={{ borderColor: 'var(--k-line)', background: 'var(--k-panel)' }}>{s}</div>)}
       </div>
       <div className="mt-8 border border-zinc-800 rounded-2xl p-5 bg-[#0E1319]">
-        <h3 className="font-mono font-black uppercase tracking-widest text-xs mb-2">What partners get</h3>
+        <h3 className="k-title text-lg mb-2">What partners get</h3>
         <p className="text-[11px] text-zinc-400 leading-relaxed">Workflow kits at partner terms, joint validation sprints, and supervised pilots inside your delivery envelope. Partner contracts and margins are agreed directly — nothing automatic on this page.</p>
       </div>
       <div className="mt-8"><InquiryButton intent="enterprise_pilot" label="Start a partner conversation" event="enterprise_request" product="KONKRED Partners" /></div>
@@ -177,21 +177,22 @@ export const ValidationPage: React.FC<PageProps> = ({ onNavigate }) => {
     <Shell eyebrow="Evidence" title="Validation record" lead="Every entry carries a public-data preflight — a narrow reference test on public documents or datasets. PASS is not model accuracy and not certification.">
       <div className="grid grid-cols-3 gap-3 mb-8">
         {[['preflight PASS', pass], ['CONDITIONAL', cond], ['total entries', ENTRIES.length]].map(([k, v]) => (
-          <div key={k as string} className="border-2 border-black bg-[#0E1319] rounded-2xl p-4 shadow-[3px_3px_0px_0px_#000000]">
-            <p className="font-mono font-black text-2xl text-amber-400">{v as number}</p>
-            <p className="font-mono uppercase tracking-widest text-[9px] text-zinc-500 mt-1">{k as string}</p>
+          <div key={k as string} className="k-slab p-4" style={{ ['--slab-c' as string]: 'var(--k-amber)', transform: 'rotate(0deg)' }}>
+            <p className="k-title text-3xl" style={{ color: 'var(--k-amber)' }}>{v as number}</p>
+            <p className="k-mono uppercase tracking-[0.25em] text-[9px] mt-1" style={{ color: 'var(--k-mut)' }}>{k as string}</p>
           </div>
         ))}
       </div>
       <div className="space-y-2">
         {ENTRIES.map((e) => (
           <button key={e.slug} onClick={() => onNavigate(e.type === 'SUITE' ? 'suite_detail' : 'workflow_detail', e.slug)}
-            className="w-full text-left border border-zinc-800 rounded-xl px-4 py-3 bg-[#0E1319] hover:border-amber-500/50 cursor-pointer flex flex-wrap items-center gap-3">
-            <span className={`font-mono text-[8px] uppercase tracking-widest font-black border rounded px-1.5 py-0.5 ${e.type === 'SUITE' ? 'text-amber-400 border-amber-500/30' : 'text-cyan-400 border-cyan-500/30'}`}>{e.type}</span>
-            <span className="text-[12px] text-zinc-200 flex-1 min-w-40">{e.title}</span>
+            className="w-full text-left border-2 px-4 py-3 cursor-pointer flex flex-wrap items-center gap-3 hover:underline"
+            style={{ borderColor: 'var(--k-line)', background: 'var(--k-panel)' }}>
+            <span className={`k-mono text-[8px] uppercase tracking-widest font-black border-2 px-1.5 py-0.5`} style={{ color: e.type === 'SUITE' ? 'var(--k-amber)' : 'var(--k-cyan)', borderColor: 'var(--k-line)' }}>{e.type}</span>
+            <span className="text-[12px] flex-1 min-w-40">{e.title}</span>
             <DesignScore score={e.staticDesignScore} compact />
             <ValidationBadge status={e.validationStatus} />
-            <span className="font-mono text-[9px] text-zinc-600">{e.publicValidation.sources.length} source{e.publicValidation.sources.length === 1 ? '' : 's'} · {e.publicValidation.runDate}</span>
+            <span className="k-mono text-[9px]" style={{ color: 'var(--k-mut)' }}>{e.publicValidation.sources.length} source{e.publicValidation.sources.length === 1 ? '' : 's'} · {e.publicValidation.runDate}</span>
           </button>
         ))}
       </div>
@@ -219,17 +220,17 @@ export const KitDetailPage: React.FC<PageProps & { slug: string }> = ({ onNaviga
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="space-y-2.5">
           <h3 className="font-mono font-black uppercase tracking-widest text-xs">Kit includes</h3>
-          {includes.map((i) => <p key={i} className="text-[12px] text-zinc-300 flex items-start gap-2.5"><CheckCircle2 size={14} className="text-emerald-400 shrink-0 mt-0.5" />{i}</p>)}
+          {includes.map((i) => <p key={i} className="text-[12px] flex items-start gap-2.5"><CheckCircle2 size={14} className="shrink-0 mt-0.5" style={{ color: 'var(--k-amber)' }} />{i}</p>)}
           <div className="pt-3"><StatusChip status={entry.status} /></div>
         </div>
         <div className="space-y-4">
-          <div className="border-2 border-black bg-[#0E1319] rounded-2xl p-5 shadow-[3px_3px_0px_0px_#000000] space-y-2">
-            <p className="font-mono uppercase tracking-widest text-[9px] text-zinc-500">Kit price</p>
-            <p className="font-mono font-black text-3xl text-amber-400">
-              {entry.pricing.kitFromUsd != null ? `$${entry.pricing.kitFromUsd.toLocaleString()}` : 'On request'}
+          <div className="k-slab p-5 space-y-2" style={{ ['--slab-c' as string]: 'var(--k-amber)', transform: 'rotate(0.6deg)' }}>
+            <p className="k-mono uppercase tracking-[0.3em] text-[9px] font-bold" style={{ color: 'var(--k-mut)' }}>KIT PRICE</p>
+            <p className="k-title text-3xl" style={{ color: 'var(--k-amber)' }}>
+              {entry.pricing.kitFromUsd != null ? `$${entry.pricing.kitFromUsd.toLocaleString()}` : 'ON REQUEST'}
             </p>
-            {entry.pricing.note && <p className="text-[9px] font-mono text-zinc-600">{entry.pricing.note}</p>}
-            <p className="text-[10px] font-mono text-zinc-500 pt-1">Test mode — the form records your order; payment is arranged manually, nothing is charged now.</p>
+            {entry.pricing.note && <p className="text-[9px] k-mono" style={{ color: 'var(--k-mut)' }}>{entry.pricing.note}</p>}
+            <p className="text-[10px] k-mono pt-1" style={{ color: 'var(--k-mut)' }}>Test mode — the form records your order; payment is arranged manually, nothing is charged now.</p>
           </div>
           <InquiryButton intent="workflow_kit" label={`Order the ${entry.title} kit`} event="kit_cta_click" product={entry.title} />
         </div>

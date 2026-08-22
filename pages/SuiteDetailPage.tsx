@@ -1,19 +1,19 @@
 /**
- * Canonical ARB suite page (/suites/:slug).
- * Owner direction: sellable page, not a spec sheet. Preview → workflows inside
- * → price/CTA. Modules, contracts, validators and full evidence stay in the
- * manifest (backend); one quiet evidence line remains on the page.
+ * Suite page (/suites/:slug) — brutalist panel.
+ * Preview → workflows inside → price/CTA. Kicker badges on amber, slabs with
+ * hard shadows, mono microtype. Honesty lines at the bottom.
  */
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import type { PageView } from '../types.ts';
 import { getEntryBySlug, getChildren } from '../content/catalogue/portfolio.ts';
 import type { PortfolioEntry } from '../content/catalogue/types.ts';
 import { Pattern } from '../components/portfolio/patterns/index.tsx';
-import { StatusChip, EvidenceLine } from '../components/portfolio/Evidence.tsx';
 import { ScopeReviewPanel } from '../components/portfolio/ScopeReviewPanel.tsx';
-import { CtaRail } from '../components/portfolio/CtaRail.tsx';
+import { EvidenceLine } from '../components/portfolio/Evidence.tsx';
+import { Typewriter } from '../components/brand/Typewriter.tsx';
 import { track } from '../utils/analytics.ts';
-import { ArrowLeft, ArrowRight, Layers, Wrench } from 'lucide-react';
+import { ProductInquiryModal, type InquiryIntent } from '../components/catalog/ProductInquiryModal.tsx';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 
 interface Props {
   slug: string;
@@ -23,88 +23,113 @@ interface Props {
 const SuiteDetailPage: React.FC<Props> = ({ slug, onNavigate }) => {
   const entry: PortfolioEntry | undefined = getEntryBySlug(slug);
   useEffect(() => { if (entry) track('suite_view', entry.id); }, [entry?.id]);
+  const [intent, setIntent] = useState<InquiryIntent | null>(null);
 
   if (!entry || entry.type !== 'SUITE') {
     return (
-      <div className="min-h-[60vh] bg-[#0B0F14] text-white flex items-center justify-center px-6 py-24">
-        <div className="max-w-md text-center space-y-4">
-          <p className="font-mono text-xs uppercase tracking-widest text-zinc-400">Suite not found: {slug}</p>
-          <button onClick={() => onNavigate('catalogue')} className="inline-flex items-center gap-2 bg-amber-500 text-black font-mono font-black text-xs uppercase tracking-widest px-5 py-3 border-2 border-black hover:bg-black hover:text-white transition-colors cursor-pointer">
-            <ArrowLeft size={14} /> Back to Catalogue
-          </button>
+      <div className="min-h-[60vh] flex items-center justify-center px-6 py-24" style={{ background: 'var(--k-bg)', color: 'var(--k-ink)' }}>
+        <div className="text-center space-y-4">
+          <p className="k-mono text-xs uppercase tracking-widest" style={{ color: 'var(--k-mut)' }}>SUITE NOT FOUND — {slug}</p>
+          <button onClick={() => onNavigate('catalogue')} className="k-btn k-btn-acc">Back to the Floor</button>
         </div>
       </div>
     );
   }
 
   const children = getChildren(entry.id);
+  const sprint = entry.pricing.sprintFromUsd;
+
+  const cta = (i: InquiryIntent, ev: Parameters<typeof track>[0], label: string, accent: string) => (
+    <button
+      onClick={() => { track(ev, entry.id); setIntent(i); }}
+      className="k-btn w-full"
+      style={{ background: accent, color: 'var(--k-on-acc)' }}
+    >{label}</button>
+  );
 
   return (
-    <div className="min-h-screen bg-[#0B0F14] brutal-grid-bg text-white font-sans pb-24 pt-6">
-      <div className="max-w-7xl mx-auto px-6 md:px-8">
-        <div className="pt-2 pb-5 border-b border-white/10 flex items-center justify-between gap-4">
-          <button onClick={() => onNavigate('catalogue')} className="inline-flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-amber-500 hover:text-white transition-colors group cursor-pointer">
-            <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-            <span>Catalogue</span>
+    <div className="min-h-screen pb-24" style={{ background: 'var(--k-bg)', color: 'var(--k-ink)' }}>
+      <div className="max-w-6xl mx-auto px-5 sm:px-10">
+        {/* top bar */}
+        <div className="pt-5 pb-4 flex items-center justify-between gap-4 border-b-4" style={{ borderColor: 'var(--k-edge)' }}>
+          <button onClick={() => onNavigate('catalogue')} className="inline-flex items-center gap-2 k-mono text-[11px] font-bold uppercase tracking-[0.2em] cursor-pointer" style={{ color: 'var(--k-amber)' }}>
+            <ArrowLeft size={15} /> THE FLOOR
           </button>
-          <StatusChip status={entry.status} />
+          <span className="k-badge">{entry.status.replace(/_/g, ' ')}</span>
         </div>
 
-        {/* Header */}
-        <div className="py-8 space-y-3">
-          <p className="text-[10px] font-mono uppercase tracking-widest text-amber-500 font-bold flex items-center gap-2">
-            <Layers size={12} /> {entry.category} · Suite
-          </p>
-          <h1 className="text-3xl sm:text-4xl font-black font-mono tracking-tight uppercase leading-tight">{entry.title}</h1>
-          <p className="text-base sm:text-lg text-zinc-300 leading-relaxed max-w-2xl">{entry.jobToBeDone}</p>
-          <p className="text-xs text-zinc-500">For {entry.buyer?.toLowerCase()}</p>
-        </div>
+        {/* header */}
+        <header className="py-10 space-y-5 brutal-rise">
+          <span className="k-badge" style={{ background: 'var(--k-violet)', letterSpacing: '.28em' }}>{entry.category} · SUITE</span>
+          <h1 className="k-title text-4xl sm:text-6xl max-w-4xl">{entry.title}</h1>
+          <Typewriter as="p" text={entry.jobToBeDone ?? ''} speed={12} className="block text-[15px] leading-relaxed max-w-2xl" style={{ color: 'var(--k-mut)' }} />
+          <p className="k-mono text-[11px]" style={{ color: 'var(--k-mut)' }}>FOR {entry.buyer?.toUpperCase()}</p>
+          <div className="flex flex-wrap gap-x-5 gap-y-2 k-mono text-[10px] tracking-[0.2em] pt-1" style={{ color: 'var(--k-mut)' }}>
+            <span><b className="text-[13px]" style={{ color: 'var(--k-ink)' }}>{entry.modules.length}</b> MODULES</span>
+            <span><b className="text-[13px]" style={{ color: 'var(--k-ink)' }}>{children.length}</b> READY-TO-RUN TOOLS</span>
+            <span><b className="text-[13px]" style={{ color: 'var(--k-ink)' }}>{entry.publicValidation.sources.length}</b> PUBLIC SOURCES</span>
+          </div>
+        </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          <div className="lg:col-span-8 space-y-9 brutal-stagger">
-            {/* The suite at a glance */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pb-10">
+          <div className="lg:col-span-8 space-y-9">
             <Pattern entry={entry} />
+            <EvidenceLine entry={entry} onOpenValidation={() => onNavigate('validation')} />
 
-            {/* What's inside — one line */}
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-[11px] font-mono text-zinc-500">
-              <span><span className="text-zinc-300 font-bold">{entry.modules.length}</span> modules</span>
-              <span className="text-zinc-700">·</span>
-              <span><span className="text-zinc-300 font-bold">{children.length}</span> ready-to-run workflow tools</span>
-              <span className="text-zinc-700">·</span>
-              <span><span className="text-zinc-300 font-bold">{entry.publicValidation.sources.length}</span> public reference sources</span>
-            </div>
-
-            {/* Entry workflows — the sales path */}
+            {/* entry workflows */}
             {children.length > 0 && (
-              <section aria-label="Workflows in this suite" className="space-y-3">
-                <h3 className="font-mono font-black uppercase tracking-widest text-xs text-white">Run a workflow now</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <section aria-label="Workflows in this suite" className="space-y-4">
+                <h3 className="k-title text-lg">RUN A WORKFLOW NOW</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 brutal-stagger">
                   {children.map((c) => (
-                    <button key={c.slug} onClick={() => onNavigate('workflow_detail', c.slug)} className="text-left border-2 border-black bg-[#0E1319] rounded-2xl p-4 hover:border-amber-500/60 transition-colors cursor-pointer shadow-[3px_3px_0px_0px_#000000] brutal-press">
-                      <div className="flex items-center justify-between gap-2 mb-2">
-                        <span className="inline-flex items-center gap-1 font-mono text-[8px] uppercase tracking-widest text-cyan-400 font-black border border-cyan-500/30 rounded px-1.5 py-0.5"><Wrench size={9} /> Tool</span>
-                        {c.pricing.kitFromUsd != null && <span className="font-mono text-[10px] text-amber-400 font-bold">from ${c.pricing.kitFromUsd.toLocaleString()}</span>}
+                    <button
+                      key={c.slug}
+                      onClick={() => onNavigate('workflow_detail', c.slug)}
+                      className="k-slab brutal-press text-left p-5 flex flex-col gap-3 cursor-pointer"
+                      style={{ ['--slab-c' as string]: 'var(--k-cyan)', transform: 'rotate(0deg)' }}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="k-mono text-[8px] font-bold tracking-[0.25em] border-2 px-1.5 py-0.5" style={{ borderColor: 'var(--k-edge)' }}>TOOL</span>
+                        {c.pricing.kitFromUsd != null && (
+                          <span className="k-mono text-[11px] font-black" style={{ color: 'var(--k-amber)' }}>FROM ${c.pricing.kitFromUsd.toLocaleString()}</span>
+                        )}
                       </div>
-                      <p className="font-mono font-black text-sm text-white">{c.title}</p>
-                      <p className="text-[11px] text-zinc-400 leading-snug mt-1.5 line-clamp-2">{c.jobToBeDone}</p>
-                      <span className="inline-flex items-center gap-1.5 text-[10px] font-mono font-bold uppercase tracking-widest text-amber-500 mt-3">Launch tool <ArrowRight size={11} /></span>
+                      <div>
+                        <p className="k-title text-[15px] leading-snug">{c.title}</p>
+                        <p className="text-[11.5px] leading-snug mt-1.5 line-clamp-2" style={{ color: 'var(--k-mut)' }}>{c.jobToBeDone}</p>
+                      </div>
+                      <span className="mt-auto k-mono text-[10px] font-black tracking-[0.2em] flex items-center gap-1.5" style={{ color: 'var(--k-amber)' }}>WATCH CHANNEL <ArrowRight size={11} /></span>
                     </button>
                   ))}
                 </div>
               </section>
             )}
 
-            <div className="space-y-4">
-              <EvidenceLine entry={entry} onOpenValidation={() => onNavigate('validation')} />
-              <ScopeReviewPanel entry={entry} />
-            </div>
+            <ScopeReviewPanel entry={entry} />
           </div>
 
-          <div className="lg:col-span-4">
-            <CtaRail entry={entry} />
-          </div>
+          {/* price + CTA rail */}
+          <aside className="lg:col-span-4" aria-label="Pricing">
+            <div className="k-slab p-6 space-y-5 sticky top-24" style={{ ['--slab-c' as string]: 'var(--k-amber)', transform: 'rotate(0.6deg)' }}>
+              <div>
+                <p className="k-mono text-[9px] tracking-[0.3em]" style={{ color: 'var(--k-mut)' }}>VALIDATION SPRINT</p>
+                <p className="k-title text-3xl mt-1" style={{ color: 'var(--k-amber)' }}>
+                  {sprint != null ? `FROM $${sprint.toLocaleString()}` : 'SCOPED'}
+                </p>
+              </div>
+              <div className="space-y-2.5">
+                {cta('validation_sprint', 'sprint_request', 'BOOK SPRINT', 'var(--k-amber)')}
+                {cta('enterprise_pilot', entry.status === 'INTERNAL_CONTROLLED_PILOT' ? 'controlled_pilot_request' : 'enterprise_request',
+                  entry.status === 'INTERNAL_CONTROLLED_PILOT' ? 'CONTROLLED PILOT' : 'ENTERPRISE PILOT', 'var(--k-violet)')}
+              </div>
+              <p className="k-mono text-[9px] leading-relaxed" style={{ color: 'var(--k-mut)' }}>
+                TEST MODE — THE FORM RECORDS YOUR REQUEST, NOTHING IS CHARGED.
+              </p>
+            </div>
+          </aside>
         </div>
       </div>
+      {intent && <ProductInquiryModal intent={intent} productName={entry.title} onClose={() => setIntent(null)} />}
     </div>
   );
 };

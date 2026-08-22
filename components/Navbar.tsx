@@ -82,6 +82,7 @@ const Navbar: React.FC<NavbarProps> = ({
             ? 'py-3 bg-void-100 border-b-4 border-black shadow-brutalist' 
             : 'py-4 bg-void-100 border-b-4 border-black'
         }`}
+        style={{ background: 'var(--k-bg)' }}
         initial={{ y: -60, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.2 }}
@@ -142,8 +143,8 @@ const Navbar: React.FC<NavbarProps> = ({
               }}
               className={`relative flex items-center gap-2 px-3 py-1.5 text-[10px] font-mono uppercase tracking-widest font-black border-2 transition-all duration-200 group/redaeye ${
                 currentPage === 'redaeye'
-                  ? 'bg-[#FF003C] text-white border-[#FF003C] shadow-[0_0_15px_rgba(255,0,60,0.6)]'
-                  : 'bg-black text-[#FF003C] border-[#FF003C]/80 hover:bg-[#FF003C] hover:text-white hover:shadow-[0_0_12px_rgba(255,0,60,0.5)]'
+                  ? 'bg-[#FF003C] text-white border-[#FF003C] shadow-[4px_4px_0_#000]'
+                  : 'bg-black text-[#FF003C] border-[#FF003C]/80 hover:bg-[#FF003C] hover:text-white hover:shadow-[4px_4px_0_#000]'
               }`}
             >
               <Shield size={12} className="shrink-0 animate-pulse text-[#FF003C] group-hover/redaeye:text-white" />
