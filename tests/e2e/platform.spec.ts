@@ -175,11 +175,16 @@ test.describe('mobile layout & accessibility basics', () => {
     expect(overflow).toBe(false);
   });
 
-  test('catalogue exposes semantic landmarks and accessible controls', async ({ page }) => {
+  test('catalogue floor exposes accessible controls and stations', async ({ page }) => {
     await page.goto('/catalogue');
-    await expect(page.getByRole('main')).toBeVisible();
-    await expect(page.getByRole('navigation').first()).toBeVisible();
     await expect(page.getByRole('searchbox')).toBeVisible();
+    // floor stations render for every entry
+    for (const e of manifest.entries.slice(0, 5)) {
+      await expect(page.getByTestId(`station-${e.slug}`)).toBeVisible();
+    }
+    // list view keeps cards for accessibility
+    await page.getByRole('button', { name: 'list' }).click();
+    await expect(page.getByTestId(`catalogue-card-contract-review`)).toBeVisible();
   });
 
   test('404 page offers accessible navigation', async ({ page }) => {

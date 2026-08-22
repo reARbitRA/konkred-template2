@@ -134,3 +134,59 @@
   .k-transition-overlay .k-mark > *, .k-transition-overlay .k-bar,
   .brutal-cursor { animation: none !important; }
 }
+
+/* ============================================================
+   FUSION BUILD — B slabs / E floor / G television
+   Shared theme tokens (dark default, light = B paper mode)
+   ============================================================ */
+
+:root{
+  --k-bg:#101014; --k-floor:#121319; --k-panel:#17171d; --k-line:#26262e;
+  --k-ink:#f2efe9; --k-mut:#8a8a99; --k-amber:#ffb400; --k-cyan:#19d3c5;
+  --k-violet:#8b6bff; --k-lime:#b8f53d; --k-red:#ff5252; --k-ph:#3dff9a;
+  --k-slab-shadow:rgba(0,0,0,.5);
+}
+html.theme-light{
+  --k-bg:#efece5; --k-floor:#f4f1ea; --k-panel:#ffffff; --k-line:#d8d2c4;
+  --k-ink:#14161b; --k-mut:#5d6672; --k-amber:#e08900; --k-slab-shadow:rgba(20,20,25,.22);
+}
+
+/* B-style slab */
+.k-slab{background:var(--k-panel);border:4px solid var(--k-ink);color:var(--k-ink);
+  box-shadow:10px 10px 0 var(--slab-c,var(--k-amber));transition:transform .25s cubic-bezier(.34,1.56,.64,1),box-shadow .25s cubic-bezier(.34,1.56,.64,1)}
+.k-slab:hover{transform:rotate(0deg) scale(1.02) translateY(-5px)!important;box-shadow:16px 18px 0 var(--slab-c,var(--k-amber))!important;z-index:2}
+
+/* E floor */
+.k-floor-stage{position:relative;width:100%;height:100%;overflow:hidden;cursor:grab;touch-action:none;
+  background-color:var(--k-floor);
+  background-image:linear-gradient(rgba(255,180,0,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,180,0,.05) 1px,transparent 1px);
+  background-size:80px 80px}
+.k-floor-stage.dragging{cursor:grabbing}
+.k-world{position:absolute;top:0;left:0;transform-origin:0 0;will-change:transform}
+.k-floor-stage .k-grid-big{position:absolute;inset:0;pointer-events:none;
+  background-image:linear-gradient(var(--gl,rgba(255,180,0,.1)) 1px,transparent 1px),linear-gradient(90deg,var(--gl,rgba(255,180,0,.1)) 1px,transparent 1px);
+  background-size:400px 400px}
+.k-station{position:absolute;background:var(--k-panel);border:2px solid var(--k-line);color:var(--k-ink);
+  box-shadow:6px 6px 0 var(--k-slab-shadow);cursor:pointer;user-select:none;min-width:212px;
+  transition:box-shadow .15s,border-color .15s}
+.k-station:hover{border-color:var(--k-amber);transform:translate(-2px,-2px);box-shadow:9px 9px 0 var(--k-slab-shadow)}
+.k-station.hub{border-color:color-mix(in srgb,var(--k-violet) 55%,var(--k-line))}
+.k-station.open{border-color:var(--k-amber);z-index:30;transform:none;min-width:360px;cursor:default;box-shadow:14px 14px 0 var(--k-slab-shadow)}
+.k-district{position:absolute;font-weight:900;text-transform:uppercase;color:transparent;pointer-events:none;user-select:none;
+  -webkit-text-stroke:1.5px var(--k-line);letter-spacing:.04em;font-family:'Archivo Black','IBM Plex Mono',monospace}
+
+/* G television */
+.k-tv{background:#15161c;border:3px solid #000;border-radius:26px;
+  box-shadow:0 24px 80px rgba(0,0,0,.7),inset 0 2px 0 rgba(255,255,255,.06)}
+.k-screen{position:relative;background:#020503;border-radius:14px;overflow:hidden;border:2px solid #000;box-shadow:inset 0 0 60px rgba(0,0,0,.8)}
+.k-screen::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:20;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.26) 0 1px,transparent 1px 3px),radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.5))}
+.k-noise{position:absolute;inset:0;width:100%;height:100%;z-index:18;pointer-events:none;transition:opacity .18s}
+.k-osd{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.3em;color:var(--k-ph,#3dff9a);opacity:.9}
+.k-dial{position:relative;border-radius:50%;cursor:grab;touch-action:none;
+  background:radial-gradient(circle at 35% 30%,#2c2d36,#101117 70%);border:3px solid #000;
+  box-shadow:0 6px 18px rgba(0,0,0,.6),inset 0 2px 3px rgba(255,255,255,.08)}
+.k-dial:active{cursor:grabbing}
+.k-led{width:10px;height:10px;border-radius:50%;background:#ff4d4d;box-shadow:0 0 12px #ff4d4d}
+
+@keyframes k-wire{to{stroke-dashoffset:-48}}

@@ -128,8 +128,8 @@ const App: React.FC = () => {
     if (isBooting) return <LoadingScreen onComplete={() => setIsBooting(false)} />;
     if (auth.isLoading) return <AuthLoadingScreen />;
 
-    const isFullScreen = ['enter', 'join_network', 'verify_email', 'landing', 'redaeye', 'redaeye_sandbox'].includes(currentPage);
-    const showFooter = !['enter', 'join_network', 'verify_email', 'redaeye', 'redaeye_sandbox'].includes(currentPage);
+    const isFullScreen = ['enter', 'join_network', 'verify_email', 'landing', 'redaeye', 'redaeye_sandbox', 'catalogue'].includes(currentPage);
+    const showFooter = !['enter', 'join_network', 'verify_email', 'redaeye', 'redaeye_sandbox', 'landing', 'catalogue'].includes(currentPage);
 
     return (
         <div className="min-h-screen bg-void text-metal-light selection:bg-neon-cyan selection:text-black font-sans flex overflow-hidden">
