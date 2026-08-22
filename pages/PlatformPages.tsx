@@ -103,7 +103,7 @@ export const SprintPage: React.FC<PageProps> = ({ onNavigate }) => {
     'Exception log', 'Human review checklist', 'Measured baseline and time-cost range', 'Pilot recommendation',
   ];
   return (
-    <Shell eyebrow="Engagement" title="Validation Sprint" lead="A paid, fixed-scope engagement: one workflow, one representative sample, one policy/authority pack, one named approver, one acceptance definition — and one fixed deliverable pack.">
+    <Shell eyebrow="Engagement" title="Validation Sprint" lead="Fixed scope: one workflow, one sample, one approver, one acceptance definition — and one fixed deliverable pack.">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="space-y-2.5">
           <h3 className="font-mono font-black uppercase tracking-widest text-xs">You receive</h3>
@@ -133,7 +133,7 @@ export const EnterprisePage: React.FC<PageProps> = () => {
   useEffect(() => { track('enterprise_request', 'enterprise-page'); }, []);
   const caps = ['SSO/RBAC', 'Private tenant or deployment', 'Customer policy packs', 'Retention and deletion', 'Connectors', 'Audit logs', 'Security review', 'Support/SLA', 'Training', 'Usage metering'];
   return (
-    <Shell eyebrow="For organizations" title="Enterprise integration" lead="Enterprise delivery includes the governance layer around the workflows: identity, isolation, policy packs, evidence retention and review queues. High-impact products are delivered as controlled pilots — never unrestricted self-serve execution.">
+    <Shell eyebrow="For organizations" title="Enterprise integration" lead="The governance layer around the workflows: identity, isolation, policy packs, retention and review queues. High-impact products ship as controlled pilots only.">
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
         {caps.map((c) => <div key={c} className="border border-zinc-800 rounded-xl px-3.5 py-3 bg-[#0E1319] text-[11px] text-zinc-300 font-mono">{c}</div>)}
       </div>
@@ -155,7 +155,7 @@ export const EnterprisePage: React.FC<PageProps> = () => {
 export const PartnersPage: React.FC<PageProps> = () => {
   const sectors = ['GRC consultancies', 'Accounting firms', 'Legal-ops providers', 'Proposal/RFP teams', 'Healthcare RCM vendors', 'Procurement advisors', 'Cloud consultancies', 'Atlassian partners'];
   return (
-    <Shell eyebrow="Channel" title="Partners & OEM" lead="KONKRED workflows embed into existing advisory and platform relationships. Partner categories from the published monetization reference — no reseller claims beyond that.">
+    <Shell eyebrow="Channel" title="Partners & OEM" lead="KONKRED workflows embed into existing advisory and platform relationships.">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
         {sectors.map((s) => <div key={s} className="border border-zinc-800 rounded-xl px-3.5 py-4 bg-[#0E1319] text-[11px] text-zinc-300 font-mono text-center">{s}</div>)}
       </div>
@@ -174,7 +174,7 @@ export const ValidationPage: React.FC<PageProps> = ({ onNavigate }) => {
   const pass = ENTRIES.filter((e) => e.validationStatus === 'PASS').length;
   const cond = ENTRIES.filter((e) => e.validationStatus === 'CONDITIONAL').length;
   return (
-    <Shell eyebrow="Evidence" title="Validation record" lead="Every catalogue entry carries a public-data preflight: a deterministic, narrow reference test on public documents or datasets. PASS means that test met its acceptance checks — it is not model accuracy, not certification and not production approval.">
+    <Shell eyebrow="Evidence" title="Validation record" lead="Every entry carries a public-data preflight — a narrow reference test on public documents or datasets. PASS is not model accuracy and not certification.">
       <div className="grid grid-cols-3 gap-3 mb-8">
         {[['preflight PASS', pass], ['CONDITIONAL', cond], ['total entries', ENTRIES.length]].map(([k, v]) => (
           <div key={k as string} className="border-2 border-black bg-[#0E1319] rounded-2xl p-4 shadow-[3px_3px_0px_0px_#000000]">
@@ -189,6 +189,7 @@ export const ValidationPage: React.FC<PageProps> = ({ onNavigate }) => {
             className="w-full text-left border border-zinc-800 rounded-xl px-4 py-3 bg-[#0E1319] hover:border-amber-500/50 cursor-pointer flex flex-wrap items-center gap-3">
             <span className={`font-mono text-[8px] uppercase tracking-widest font-black border rounded px-1.5 py-0.5 ${e.type === 'SUITE' ? 'text-amber-400 border-amber-500/30' : 'text-cyan-400 border-cyan-500/30'}`}>{e.type}</span>
             <span className="text-[12px] text-zinc-200 flex-1 min-w-40">{e.title}</span>
+            <DesignScore score={e.staticDesignScore} compact />
             <ValidationBadge status={e.validationStatus} />
             <span className="font-mono text-[9px] text-zinc-600">{e.publicValidation.sources.length} source{e.publicValidation.sources.length === 1 ? '' : 's'} · {e.publicValidation.runDate}</span>
           </button>
@@ -230,7 +231,6 @@ export const KitDetailPage: React.FC<PageProps & { slug: string }> = ({ onNaviga
             {entry.pricing.note && <p className="text-[9px] font-mono text-zinc-600">{entry.pricing.note}</p>}
             <p className="text-[10px] font-mono text-zinc-500 pt-1">Test mode — the form records your order; payment is arranged manually, nothing is charged now.</p>
           </div>
-          <div className="space-y-2"><DesignScore score={entry.staticDesignScore} /></div>
           <InquiryButton intent="workflow_kit" label={`Order the ${entry.title} kit`} event="kit_cta_click" product={entry.title} />
         </div>
       </div>

@@ -19,10 +19,10 @@ export const Frame: React.FC<{ slug: string; kind: 'suite' | 'workflow'; childre
   >
     <div className="flex flex-wrap items-center justify-between gap-2 border-b-2 border-black bg-[#181F2A] px-4 py-2.5">
       <span className="font-mono font-black uppercase tracking-widest text-[10px] text-white">
-        {kind === 'suite' ? 'Suite interface preview' : 'Tool workspace'}
+        {kind === 'suite' ? 'Suite preview' : 'Workspace'}
       </span>
       <span className="font-mono uppercase tracking-widest text-[8px] text-zinc-500 border border-zinc-700 rounded px-2 py-0.5">
-        {kind === 'suite' ? 'Illustrative layout from the published operating reference' : 'Sample data — public fixture'}
+        {kind === 'suite' ? 'illustrative' : 'sample data'}
       </span>
     </div>
     <div className="p-4 md:p-5">{children}</div>

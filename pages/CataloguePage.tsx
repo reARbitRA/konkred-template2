@@ -39,7 +39,7 @@ const Card: React.FC<{ entry: PortfolioEntry; onNavigate: (page: PageView, slug?
       <div className="flex items-center justify-between gap-2 mt-auto pt-1">
         <ValidationBadge status={entry.validationStatus} />
         <span className="text-[9px] font-mono text-zinc-600 shrink-0">
-          {isSuite ? `${entry.modules.length} modules${kids ? ` · ${kids} workflows` : ''}` : `from ${entry.parentRoute?.split('/').pop() ?? ''}`}
+          {isSuite ? `${entry.modules.length} modules${kids ? ` · ${kids} tools` : ''}` : `${entry.pricing.kitFromUsd != null ? `from $${entry.pricing.kitFromUsd.toLocaleString()} · ` : ''}tool`}
         </span>
       </div>
       <span className="inline-flex items-center gap-1.5 text-[10px] font-mono font-bold uppercase tracking-widest text-amber-500">
@@ -66,11 +66,9 @@ const CataloguePage: React.FC<Props> = ({ onNavigate }) => {
       <div className="max-w-7xl mx-auto px-6 md:px-8">
         <div className="pt-2 pb-8 border-b border-white/10 space-y-3">
           <p className="text-[10px] font-mono uppercase tracking-widest text-amber-500 font-bold">Product catalogue</p>
-          <h1 className="text-3xl sm:text-4xl font-black font-mono tracking-tight uppercase">36 controlled workflow products</h1>
-          <p className="text-sm text-zinc-400 leading-relaxed max-w-3xl">
-            {SUITES.length} canonical ARB suites and {WORKFLOWS.length} validated workflow tools — every entry
-            evidence-linked, versioned and human-supervised. Scores are design targets; PASS marks are narrow
-            public-data preflights.
+          <h1 className="text-3xl sm:text-4xl font-black font-mono tracking-tight uppercase">36 workflow products</h1>
+          <p className="text-sm text-zinc-400 leading-relaxed max-w-2xl">
+            {SUITES.length} suites and {WORKFLOWS.length} ready-to-run tools — evidence-linked, versioned, human-supervised.
           </p>
         </div>
 

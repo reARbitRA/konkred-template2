@@ -200,3 +200,16 @@ are deleted (superseded by `WorkflowDetailPage`, `SuiteDetailPage`, the 36-entry
 portfolio `StatusChip`). Old URLs redirect (`/products/:slug → /tools/:slug`, `/products → /catalogue`) so
 no inbound link breaks. The legacy `catalog/product-manifest.json` stays byte-identical — it remains the
 demo schema/prompt/fixture source of record for the 15 workflows until the demo engine migrates fully.
+
+## D-019 — Public pages sell; internal methodology stays in the backend (owner UX feedback)
+
+**Owner feedback (2026-08-22):** product pages were "too twisted, not user friendly, too much characters and
+too much to spoil." **Decision:** the public surface of every suite/tool page is now: one-liner → the tool /
+interactive preview → price + CTA → one quiet evidence line and a one-line scope footer.
+Removed from public pages: module lists, use-case lists, input/output contract lists, runbooks, validator
+chips, control-requirement lists, full evidence panels (test focus / measured evidence / source URLs /
+limitations), design-score blocks, verbatim pricing notes. All of it remains in
+`content/catalogue/portfolio-36.json` (backend data) and the aggregate evidence record lives on `/validation`
+(with the mandatory "Static design target — not measured model performance" and "Public-data preflight —
+narrow reference test" labels, plus compact per-row design scores). Human-approval notice and "what this
+tool does not do" survive as one collapsed footer line — present, but not shouting.

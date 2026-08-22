@@ -37,38 +37,64 @@ export const StatusChip: React.FC<{ status: PortfolioStatus; size?: 'sm' | 'md';
   </span>
 );
 
-/* ── static design score (mandatory label) ── */
-export const DesignScore: React.FC<{ score: number | null; size?: 'sm' | 'md' }> = ({ score, size = 'md' }) => {
+/* ── static design score (mandatory label kept in tooltip + /validation) ── */
+export const DesignScore: React.FC<{ score: number | null; compact?: boolean }> = ({ score, compact = false }) => {
   if (score == null) return null;
+  if (compact) {
+    return (
+      <span title="Static design target — not measured model performance" className="font-mono text-[9px] text-zinc-500">
+        design <span className="text-zinc-300 font-bold">{score}/100</span>
+      </span>
+    );
+  }
   return (
-    <div className={`inline-flex flex-col ${size === 'sm' ? 'text-[8px]' : 'text-[9px]'} font-mono uppercase tracking-widest`}>
+    <span className="inline-flex flex-col text-[9px] font-mono uppercase tracking-widest">
       <span className="text-zinc-300 font-black">
         Design target <span className="text-amber-400">{score}/100</span>
       </span>
       <span className="text-zinc-600">Static design target — not measured model performance</span>
-    </div>
+    </span>
   );
 };
 
-/* ── validation badge (mandatory label for PASS) ── */
-export const ValidationBadge: React.FC<{ status: 'PASS' | 'CONDITIONAL' | 'NOT_RUN' }> = ({ status }) => {
+/* ── validation badge ── */
+export const ValidationBadge: React.FC<{ status: 'PASS' | 'CONDITIONAL' | 'NOT_RUN'; withLabel?: boolean }> = ({ status, withLabel = false }) => {
   const style = status === 'PASS'
     ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/40'
     : status === 'CONDITIONAL'
       ? 'bg-amber-500/10 text-amber-400 border-amber-500/40'
       : 'bg-zinc-500/10 text-zinc-400 border-zinc-600';
   return (
-    <span className={`inline-flex flex-col border rounded px-2 py-1 font-mono font-black uppercase tracking-wider text-[9px] ${style}`}>
-      <span className="flex items-center gap-1.5">
-        <span className="w-1.5 h-1.5 rounded-full bg-current" />
-        {status === 'PASS' ? 'Preflight PASS' : status === 'CONDITIONAL' ? 'Preflight CONDITIONAL' : 'Not run'}
+    <span className={`inline-flex ${withLabel ? 'flex-col' : ''} border rounded px-2 py-0.5 font-mono font-black uppercase tracking-wider text-[9px] ${style}`}>
+      <span className="flex items-center gap-1">
+        <span className="w-1 h-1 rounded-full bg-current" />
+        {status === 'PASS' ? 'PASS' : status === 'CONDITIONAL' ? 'CONDITIONAL' : 'NOT RUN'}
       </span>
-      <span className="text-zinc-500 font-bold normal-case tracking-normal">
-        {status === 'NOT_RUN' ? 'No validation executed' : 'Public-data preflight — narrow reference test'}
-      </span>
+      {withLabel && (
+        <span className="text-zinc-500 font-bold normal-case tracking-normal text-[8px]">Public-data preflight — narrow reference test</span>
+      )}
     </span>
   );
 };
+
+/* ── one-line trust footer for product pages ── */
+export const EvidenceLine: React.FC<{ entry: PortfolioEntry; onOpenValidation: () => void }> = ({ entry, onOpenValidation }) => (
+  <p className="font-mono text-[10px] text-zinc-500 flex flex-wrap items-center gap-x-2 gap-y-1">
+    {entry.validationStatus === 'PASS' || entry.validationStatus === 'CONDITIONAL' ? (
+      <>
+        <span className="text-emerald-500">✓</span>
+        <span>
+          Validated on public data — preflight {entry.validationStatus}
+        </span>
+        <button onClick={onOpenValidation} className="text-cyan-400/90 hover:text-cyan-300 underline decoration-cyan-500/30 underline-offset-2 cursor-pointer">
+          validation record
+        </button>
+      </>
+    ) : (
+      <span>Validation: not run yet</span>
+    )}
+  </p>
+);
 
 /* ── public validation evidence panel ── */
 export const EvidencePanel: React.FC<{ entry: PortfolioEntry }> = ({ entry }) => {

@@ -19,7 +19,7 @@ const esc = (s: string) => new RegExp(s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 
 test.describe('36-entry catalogue', () => {
   test('catalogue page lists all 36 entries at /catalogue', async ({ page }) => {
     await page.goto('/catalogue');
-    await expect(page.getByRole('heading', { name: /36 controlled workflow products/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /36 workflow products/i })).toBeVisible();
     await expect(page.getByTestId('catalogue-count')).toHaveText(/36 of 36 entries/);
   });
 
@@ -28,7 +28,7 @@ test.describe('36-entry catalogue', () => {
       await page.goto(`/suites/${suite.slug}`);
       await expect(page.getByRole('heading', { name: esc(suite.title) })).toBeVisible();
       await expect(page.getByTestId(`pattern-${suite.slug}`)).toBeVisible();
-      await expect(page.getByText(/Static design target — not measured model performance/i).first()).toBeVisible();
+      await expect(page.getByText(/Validated on public data/i)).toBeVisible();
     }
   });
 
@@ -140,7 +140,7 @@ test.describe('purged routes', () => {
   test('/marketplace redirects to the catalogue', async ({ page }) => {
     await page.goto('/marketplace');
     await expect(page).toHaveURL(/\/catalogue$/);
-    await expect(page.getByRole('heading', { name: /36 controlled workflow products/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /36 workflow products/i })).toBeVisible();
   });
 
   test('/forge redirects to /fullkonk', async ({ page }) => {

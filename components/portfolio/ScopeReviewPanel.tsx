@@ -1,11 +1,8 @@
 /**
- * Scope & review — compact, neutral, secondary panel BELOW the product.
- * Owner direction: sellable micro-tools first; approval scope and boundaries
- * live here in calm language — no red banners, no raw prompts, no
- * self-critical walls of text above the product.
- *
- * Satisfies the publishing standard: human-approval notice and
- * "What this tool does not do" are present on every entry.
+ * Scope & review — ONE quiet footer line under the product.
+ * Owner direction: sellable micro-tools, no internal walls of text.
+ * The full boundary/approval data stays in the manifest (backend); the page
+ * shows only a short reviewed-by line and a collapsed "doesn't do" list.
  */
 import React from 'react';
 import type { PortfolioEntry } from '../../content/catalogue/types.ts';
@@ -16,37 +13,29 @@ function doesNotDo(entry: PortfolioEntry): string[] {
     items.push(...entry.exclusions.slice(0, 2));
   } else if (entry.productBoundary) {
     items.push(entry.productBoundary);
-  } else {
-    items.push('Does not execute external actions — every output is a draft for human review.');
   }
   if (!items.some((i) => /autonomous|external action/i.test(i))) {
-    items.push('No autonomous execution: outputs require a human decision before anything happens.');
+    items.push('No autonomous execution: outputs require a human decision.');
   }
   return items.slice(0, 3);
 }
 
+const shortApprover = (a: string) => a.split(/[;.]| plus /)[0].trim();
+
 export const ScopeReviewPanel: React.FC<{ entry: PortfolioEntry }> = ({ entry }) => (
-  <aside
-    aria-label="Scope and review"
-    className="border border-zinc-800 bg-[#0B0F14] rounded-xl px-5 py-4 space-y-2.5"
-  >
-    <h4 className="font-mono font-bold uppercase tracking-widest text-[9px] text-zinc-500">Scope &amp; review</h4>
-    <p className="text-[11px] text-zinc-400 leading-relaxed">
-      <span className="text-zinc-300 font-semibold">Reviewed by:</span>{' '}
-      {entry.humanApprover ?? 'a named owner in your organization'}.
-    </p>
+  <footer aria-label="Scope and review" className="border-t border-white/5 pt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5">
+    <span className="text-[10px] text-zinc-500">
+      Reviewed by <span className="text-zinc-400">{entry.humanApprover ? shortApprover(entry.humanApprover) : 'a named owner in your team'}</span>
+    </span>
+    <span className="text-[10px] text-zinc-600">·</span>
+    <span className="text-[10px] text-zinc-500">Outputs are drafts — nothing sends, posts, signs or pays automatically</span>
     <details className="group">
-      <summary className="text-[11px] text-zinc-500 hover:text-zinc-300 cursor-pointer font-mono uppercase tracking-wider text-[10px] list-none">
-        ▸ What this {entry.type === 'SUITE' ? 'suite' : 'tool'} does not do
-      </summary>
-      <ul className="mt-2 space-y-1.5">
+      <summary className="text-[10px] text-zinc-600 hover:text-zinc-400 cursor-pointer list-none font-mono">what this {entry.type === 'SUITE' ? 'suite' : 'tool'} doesn't do ▸</summary>
+      <ul className="mt-1.5 space-y-1">
         {doesNotDo(entry).map((d, i) => (
-          <li key={i} className="text-[11px] text-zinc-500 leading-relaxed flex gap-2">
-            <span className="text-zinc-700 font-mono">—</span>
-            <span>{d.replace(/\.$/, '')}.</span>
-          </li>
+          <li key={i} className="text-[10px] text-zinc-600 leading-relaxed">— {d.replace(/\.$/, '')}.</li>
         ))}
       </ul>
     </details>
-  </aside>
+  </footer>
 );

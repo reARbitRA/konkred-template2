@@ -1,21 +1,21 @@
 /**
  * Validated workflow page (/tools/:slug) — a sellable micro-tool.
- * Order (owner-specified): the tool first, its unique workspace surface
- * second, evidence and a compact scope panel after. No raw prompts, no
- * high-risk banners.
+ * Owner direction: the tool is the page. One-liner, run it, see the workspace,
+ * clear price, one quiet evidence/scope line. Methodology detail lives in the
+ * manifest (backend), not on this page.
  */
 import React, { useEffect, useMemo } from 'react';
 import type { PageView } from '../types.ts';
-import { getEntryBySlug } from '../content/catalogue/portfolio.ts';
+import { getEntryBySlug, SUITES } from '../content/catalogue/portfolio.ts';
 import type { PortfolioEntry } from '../content/catalogue/types.ts';
 import type { ProductRecord } from '../catalog/types.ts';
 import { MicroTool } from '../components/catalog/MicroTool.tsx';
 import { Pattern } from '../components/portfolio/patterns/index.tsx';
-import { StatusChip, DesignScore, ValidationBadge, EvidencePanel } from '../components/portfolio/Evidence.tsx';
+import { StatusChip, EvidenceLine } from '../components/portfolio/Evidence.tsx';
 import { ScopeReviewPanel } from '../components/portfolio/ScopeReviewPanel.tsx';
 import { CtaRail } from '../components/portfolio/CtaRail.tsx';
 import { track } from '../utils/analytics.ts';
-import { ArrowLeft, ArrowRight, Wrench } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 
 interface Props {
   slug: string;
@@ -26,8 +26,8 @@ const WorkflowDetailPage: React.FC<Props> = ({ slug, onNavigate }) => {
   const entry: PortfolioEntry | undefined = getEntryBySlug(slug);
   useEffect(() => { if (entry) track('workflow_view', entry.id); }, [entry?.id]);
 
-  // Legacy-compatible shim so MicroTool/validators keep working against the
-  // canonical entry's demo contract.
+  const parentSuite = SUITES.find((s) => s.id === entry?.parentId);
+
   const shim: ProductRecord | null = useMemo(() => {
     if (!entry?.demo) return null;
     return {
@@ -67,75 +67,47 @@ const WorkflowDetailPage: React.FC<Props> = ({ slug, onNavigate }) => {
 
   return (
     <div className="min-h-screen bg-[#0B0F14] text-white font-sans pb-24 pt-6">
-      <div className="max-w-7xl mx-auto px-6 md:px-8 pt-2 pb-6 border-b border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <button onClick={() => onNavigate('catalogue')} className="inline-flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-amber-500 hover:text-white transition-colors group cursor-pointer">
-          <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-          <span>BACK TO CATALOGUE</span>
-        </button>
-        <div className="flex items-center gap-3">
-          <ValidationBadge status={entry.validationStatus} />
+      <div className="max-w-7xl mx-auto px-6 md:px-8">
+        <div className="pt-2 pb-5 border-b border-white/10 flex items-center justify-between gap-4">
+          <button onClick={() => onNavigate('catalogue')} className="inline-flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-amber-500 hover:text-white transition-colors group cursor-pointer">
+            <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
+            <span>Catalogue</span>
+          </button>
           <StatusChip status={entry.status} />
         </div>
-      </div>
 
-      <div className="max-w-7xl mx-auto px-6 md:px-8 grid grid-cols-1 lg:grid-cols-12 gap-10 pt-10">
-        <div className="lg:col-span-8 space-y-9">
-          <div className="space-y-4">
-            <p className="text-[10px] font-mono uppercase tracking-widest text-amber-500 font-bold flex items-center gap-2">
-              <Wrench size={12} /> {entry.category} · WORKFLOW
-              {entry.parentRoute && (
-                <button onClick={() => onNavigate('suite_detail', entry.parentRoute!.split('/').pop()!)} className="text-cyan-400 hover:text-cyan-300 cursor-pointer normal-case tracking-normal font-bold">
-                  part of {entry.parentId?.replace('KONKRED-ARB-', '').replace('-CANON-0001-v1.0', '')} suite →
+        {/* Header — one screen, one message */}
+        <div className="py-8 space-y-3">
+          <h1 className="text-3xl sm:text-4xl font-black font-mono tracking-tight uppercase leading-tight">{entry.title}</h1>
+          <p className="text-base sm:text-lg text-zinc-300 leading-relaxed max-w-2xl">{entry.jobToBeDone}</p>
+          <p className="text-xs text-zinc-500">
+            For {entry.buyer?.toLowerCase()}
+            {entry.parentRoute && parentSuite && (
+              <>
+                {' · '}
+                <button onClick={() => onNavigate('suite_detail', parentSuite.slug)} className="text-cyan-400/90 hover:text-cyan-300 cursor-pointer">
+                  part of the {parentSuite.title} →
                 </button>
-              )}
-            </p>
-            <h1 className="text-3xl sm:text-4xl font-black font-mono tracking-tight uppercase leading-tight">{entry.title}</h1>
-            <p className="text-base text-zinc-300 leading-relaxed max-w-3xl">{entry.jobToBeDone}</p>
-            <div className="flex flex-wrap items-start gap-6 pt-1">
-              <div className="text-xs text-zinc-400 max-w-md">
-                <span className="font-mono font-black uppercase tracking-widest text-zinc-300">Built for: </span>{entry.buyer}
-              </div>
-              <DesignScore score={entry.staticDesignScore} />
-            </div>
-            <p className="font-mono text-[9px] text-zinc-600">{entry.id} · updated {entry.updatedAt}</p>
-          </div>
-
-          <MicroTool product={shim} fixtureKey={entry.legacySlug ?? undefined} />
-
-          <Pattern entry={entry} />
-
-          <section aria-label="How it runs" className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-2.5">
-              <h3 className="font-mono font-black uppercase tracking-widest text-xs text-white">How it runs</h3>
-              <ol className="space-y-1.5">
-                {entry.runbook.map((r, i) => (
-                  <li key={i} className="text-[11px] text-zinc-300 flex gap-2.5 leading-snug">
-                    <span className="font-mono font-black text-amber-500">{i + 1}</span>{r}
-                  </li>
-                ))}
-              </ol>
-            </div>
-            <div className="space-y-2.5">
-              <h3 className="font-mono font-black uppercase tracking-widest text-xs text-white">Inputs → outputs</h3>
-              <div className="space-y-1.5">
-                {entry.outputSummary.map((o) => (
-                  <p key={o} className="text-[11px] text-zinc-400 font-mono flex gap-2"><span className="text-emerald-500">←</span>{o}</p>
-                ))}
-              </div>
-              {entry.pricing.kitFromUsd != null && (
-                <button onClick={() => onNavigate('kit_detail', entry.slug)} className="mt-3 inline-flex items-center gap-2 text-[11px] font-mono font-bold uppercase tracking-widest text-cyan-400 hover:text-cyan-300 cursor-pointer">
-                  Workflow Kit details <ArrowRight size={11} />
-                </button>
-              )}
-            </div>
-          </section>
-
-          <EvidencePanel entry={entry} />
-          <ScopeReviewPanel entry={entry} />
+              </>
+            )}
+          </p>
         </div>
 
-        <div className="lg:col-span-4 space-y-4">
-          <CtaRail entry={entry} />
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          {/* The product */}
+          <div className="lg:col-span-8 space-y-8">
+            <MicroTool product={shim} fixtureKey={entry.legacySlug ?? undefined} />
+            <Pattern entry={entry} />
+            <div className="space-y-4">
+              <EvidenceLine entry={entry} onOpenValidation={() => onNavigate('validation')} />
+              <ScopeReviewPanel entry={entry} />
+            </div>
+          </div>
+
+          {/* Price + CTA */}
+          <div className="lg:col-span-4">
+            <CtaRail entry={entry} />
+          </div>
         </div>
       </div>
     </div>
