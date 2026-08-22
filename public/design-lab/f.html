@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAMPLE F — THE PRESS · konkred.xyz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+<style>
+:root{--ink:#0c0c0e;--paper:#f4f1e8;--amber:#ffb400;--cyan:#19d3c5;--violet:#7c5cff;--red:#ff5252;--lime:#b8f53d}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden}
+body{background:#101014;font-family:'Space Grotesk',system-ui,sans-serif;touch-action:none}
+/* room */
+.floorline{position:fixed;left:0;right:0;bottom:170px;height:4px;background:#1f1f26;z-index:1}
+.floorshade{position:fixed;left:0;right:0;bottom:0;height:170px;background:
+  repeating-linear-gradient(90deg,#141419 0 60px,#17171d 60px 120px);z-index:0}
+/* press machine */
+.press{position:fixed;top:0;left:50%;transform:translateX(-50%);z-index:5;width:min(560px,92vw);
+  background:#17171d;border:4px solid #000;border-top:none;padding:14px 18px 18px;box-shadow:10px 10px 0 #000}
+.press .row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.brand{font-family:'Archivo Black',sans-serif;color:#f4f1e8;letter-spacing:.25em;font-size:13px}
+.brand i{display:inline-block;width:20px;height:20px;background:var(--amber);color:#000;text-align:center;line-height:20px;
+  font-style:normal;font-size:12px;transform:rotate(-5deg);margin-right:8px}
+.press small{color:#6d6d7c;font-size:9px;letter-spacing:.3em;font-family:'IBM Plex Mono',monospace}
+.stampbtn{background:var(--amber);color:#000;border:3px solid #000;font-family:'Archivo Black',sans-serif;
+  font-size:12px;letter-spacing:.12em;padding:12px 22px;cursor:pointer;box-shadow:5px 5px 0 #000;transition:transform .05s}
+.stampbtn:active{transform:translate(4px,4px);box-shadow:0 0 0 #000}
+/* stamper animation */
+.stamper{height:10px;background:#000;margin-top:12px;position:relative;overflow:hidden}
+.stamper i{position:absolute;left:0;right:0;top:0;height:100%;background:var(--amber);transform:scaleY(0);transform-origin:top}
+.stamper.go i{animation:slam .45s cubic-bezier(.7,0,.3,1)}
+@keyframes slam{0%{transform:scaleY(0)}55%{transform:scaleY(1)}100%{transform:scaleY(0)}}
+/* sheets */
+#sheets{position:fixed;inset:0;z-index:2}
+.sheet{position:absolute;width:240px;padding:16px 16px 14px;background:var(--paper);color:var(--ink);
+  border:3px solid var(--ink);box-shadow:8px 8px 0 rgba(0,0,0,.5);cursor:grab;will-change:transform;line-height:1.3}
+.sheet:active{cursor:grabbing}
+.sheet .no{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.2em;color:#6d6a5e;display:flex;justify-content:space-between}
+.sheet h3{font-family:'Archivo Black',sans-serif;font-size:15px;text-transform:uppercase;margin:8px 0 6px;letter-spacing:.01em}
+.sheet p{font-size:10.5px;line-height:1.55;color:#40403a;min-height:48px}
+.sheet .pr{display:inline-block;font-size:10px;font-weight:700;background:var(--ink);color:#fff;padding:4px 8px;margin-top:8px}
+.sheet.s2 .pr{background:var(--violet)}
+.sheet .sh{position:absolute;top:-3px;left:-3px;width:0;height:0}
+.sheet::after{content:"";position:absolute;inset:6px;border:1px dashed rgba(0,0,0,.15);pointer-events:none}
+/* hint chip */
+.hint{position:fixed;top:110px;left:50%;transform:translateX(-50%);z-index:4;font-family:'IBM Plex Mono',monospace;
+  font-size:9.5px;letter-spacing:.25em;color:#6d6d7c;background:#141419;border:1px solid #26262e;padding:8px 16px}
+.count{position:fixed;top:110px;right:14px;z-index:4;font-family:'IBM Plex Mono',monospace;font-size:9px;
+  letter-spacing:.2em;color:var(--amber);background:#141419;border:1px solid #26262e;padding:8px 12px}
+/* unfold modal */
+.modal{position:fixed;inset:0;z-index:40;display:none;align-items:center;justify-content:center;padding:16px}
+.modal.on{display:flex}
+.modal .bg{position:absolute;inset:0;background:rgba(10,10,12,.72);backdrop-filter:blur(3px)}
+.paper{position:relative;width:min(700px,96vw);background:var(--paper);color:var(--ink);
+  transform:rotate(-.6deg);animation:unfold .55s cubic-bezier(.2,.9,.2,1) both;
+  box-shadow:16px 18px 0 rgba(0,0,0,.45);border:3px solid var(--ink)}
+@keyframes unfold{0%{transform:rotate(-.6deg) scaleY(.04);opacity:0}60%{transform:rotate(-.6deg) scaleY(1.04)}100%{transform:rotate(-.6deg) scaleY(1);opacity:1}}
+.paper .crease{position:absolute;top:0;bottom:0;width:1px;background:rgba(0,0,0,.12)}
+.paper .crease:nth-child(1){left:33.3%}.paper .crease:nth-child(2){left:66.6%}
+.paper .in{padding:30px 34px}
+.paper .tag{display:inline-block;font-size:9px;font-weight:700;letter-spacing:.28em;border:2px solid var(--ink);padding:4px 10px;margin-bottom:14px}
+.paper h2{font-family:'Archivo Black',sans-serif;font-size:clamp(22px,4vw,36px);text-transform:uppercase;line-height:1;margin-bottom:14px}
+.paper .tw{font-size:14px;line-height:1.75;min-height:76px;max-width:560px}
+.paper .tw::after{content:"▌";color:var(--amber);animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.paper .foot{display:flex;justify-content:space-between;align-items:center;margin-top:22px;gap:10px;flex-wrap:wrap}
+.paper .price{font-family:'Archivo Black',sans-serif;font-size:22px}
+.paper .cta{background:var(--ink);color:var(--paper);font-weight:700;letter-spacing:.18em;font-size:12px;
+  padding:15px 28px;border:none;cursor:pointer;box-shadow:6px 6px 0 var(--amber)}
+.paper .cta:active{transform:translate(3px,3px);box-shadow:none}
+.paper .x{position:absolute;top:12px;right:12px;border:3px solid var(--ink);background:none;font-weight:700;
+  padding:7px 13px;cursor:pointer;font-family:inherit}
+.paper .x:hover{background:var(--red);color:#fff;border-color:var(--red)}
+/* walkthrough */
+.walk{position:fixed;left:0;right:0;bottom:0;z-index:30;background:#0c0c0e;border-top:4px solid var(--amber);
+  display:flex;flex-wrap:wrap;color:#f4f1e8}
+.walk .st{flex:1;min-width:190px;padding:13px clamp(12px,3vw,26px);border-right:1px solid #26262e;display:flex;gap:12px;align-items:center}
+.walk .st:last-child{border-right:0}
+.walk b{display:block;font-family:'Archivo Black',sans-serif;font-size:11px;letter-spacing:.1em;color:var(--amber)}
+.walk span{font-size:10.5px;opacity:.65}
+@media(max-width:640px){.sheet{width:190px}.sheet p{min-height:0}.hint{display:none}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="floorshade"></div><div class="floorline"></div>
+
+<div class="press">
+  <div class="row">
+    <div class="brand"><i>K</i>KONKRED PRESS</div>
+    <button class="stampbtn" id="print">PRINT NEXT ▸</button>
+  </div>
+  <div class="row" style="margin-top:10px">
+    <small>SAMPLE F · PRODUCTS AS PRINTED MATTER</small>
+    <small id="queue">QUEUE: 6/36</small>
+  </div>
+  <div class="stamper" id="stamper"><i></i></div>
+</div>
+
+<div class="hint">DRAG &amp; THROW SHEETS · DOUBLE-CLICK TO UNFOLD</div>
+<div class="count" id="count">PRINTED: 0</div>
+<div id="sheets"></div>
+
+<div class="modal" id="modal">
+  <div class="bg" onclick="closeModal()"></div>
+  <div class="paper">
+    <div class="crease"></div><div class="crease"></div>
+    <div class="in">
+      <button class="x" onclick="closeModal()">FOLD ✕</button>
+      <span class="tag" id="mTag"></span>
+      <h2 id="mT"></h2>
+      <p class="tw" id="mTw"></p>
+      <div class="foot">
+        <span class="price" id="mP"></span>
+        <button class="cta">GET THE KIT →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="walk">
+  <div class="st"><b>01 — PRINT</b><span>Press the button — the machine stamps a fresh product sheet</span></div>
+  <div class="st"><b>02 — HANDLE</b><span>Sheets have real physics. Drag, throw, stack them</span></div>
+  <div class="st"><b>03 — UNFOLD</b><span>Double-click a sheet — it unfolds into the full product page</span></div>
+</footer>
+
+<script>
+const {Engine,Runner,Bodies,Body,Composite,Mouse,MouseConstraint,Events}=Matter;
+const P=[
+ {t:"Contract Review Copilot",tag:"WORKFLOW · PUBLIC DEMO",d:"First-pass review with playbook risk flags and exact source quotes. Missing terms stay missing — never invented.",p:"FROM $497"},
+ {t:"IaC Security Copilot",tag:"WORKFLOW · SUPERVISED",d:"Finding matrix on real Terraform. Read-only verification — never applies a change.",p:"FROM $497"},
+ {t:"Reconciliation Copilot",tag:"WORKFLOW · KIT",d:"Deterministic matching: exact, ambiguous, unmatched. No auto-posting.",p:"FROM $497"},
+ {t:"Incident Post-Mortem",tag:"WORKFLOW · PUBLIC DEMO",d:"Scrubable timeline with blameless causal lanes. Facts stay facts.",p:"FROM $297"},
+ {t:"Customer Support Control",tag:"SUITE · SUPERVISED",d:"Ticket queue, policy diff, SLA clock, account health — a command center.",p:"SPRINT $2.5K+",s2:1},
+ {t:"Finance Close & Reporting",tag:"SUITE · SUPERVISED",d:"Close checklist, exceptions table, controller approval drawer.",p:"SPRINT $3.5K+",s2:1},
+];
+const engine=Engine.create({gravity:{x:0,y:.9}});
+const W=innerWidth,H=innerHeight;
+const walls=[Bodies.rectangle(W/2,H+60,W*3,120,{isStatic:1}),Bodies.rectangle(-60,H/2,120,H*4,{isStatic:1}),Bodies.rectangle(W+60,H/2,120,H*4,{isStatic:1})];
+Composite.add(engine.world,walls);
+const runner=Runner.create();Runner.run(runner,engine);
+/* mouse constraint */
+const mouse=Mouse.create(document.body);
+const mc=MouseConstraint.create(engine,{mouse,constraint:{stiffness:.15,render:{visible:false}}});
+Composite.add(engine.world,mc);
+/* kill page-scroll interference */
+mouse.element.removeEventListener("mousewheel",mouse.mousewheel);
+mouse.element.removeEventListener("DOMMouseScroll",mouse.mousewheel);
+Events.on(mc,"startdrag",e=>{if(e.body)sheets.get(e.body.id)?.classList.add("held")});
+Events.on(mc,"enddrag",e=>sheets.get(e.body.id)?.classList.remove("held"));
+
+const wrap=document.getElementById("sheets");
+const sheets=new Map();let printed=0,qi=0;
+function print(){
+  if(qi>=P.length){document.getElementById("queue").textContent="QUEUE: 0/36 — REPRINTING SET";qi=0}
+  const x=P[qi++];
+  const el=document.createElement("div");
+  el.className="sheet"+(x.s2?" s2":"");
+  el.innerHTML=`<div class="no"><span>SHEET ${String(qi).padStart(2,"0")}</span><span>KONKRED.XYZ</span></div>
+   <h3>${x.t}</h3><p>${x.d}</p><span class="pr">${x.p}</span>`;
+  wrap.appendChild(el);
+  const bw=250,bh=el.offsetHeight+6;
+  const b=Bodies.rectangle(W/2+(Math.random()*80-40),140,bw,bh,{restitution:.25,friction:.4,frictionAir:.012,angle:(Math.random()*.24-.12)});
+  Body.setVelocity(b,{x:Math.random()*4-2,y:2});
+  Composite.add(engine.world,b);
+  sheets.set(b.id,{el,b,prod:x});
+  el.addEventListener("dblclick",()=>unfold(x));
+  document.getElementById("stamper").classList.remove("go");void document.getElementById("stamper").offsetWidth;
+  document.getElementById("stamper").classList.add("go");
+  printed++;document.getElementById("count").textContent="PRINTED: "+printed;
+  document.getElementById("queue").textContent=`QUEUE: ${P.length-qi}/${P.length}`;
+}
+/* sync */
+Events.on(engine,"afterUpdate",()=>{
+  sheets.forEach(s=>{
+    s.el.style.transform=`translate(${s.b.position.x-125}px,${s.b.position.y-(s.el.offsetHeight/2)-3}px) rotate(${s.b.angle}rad)`;
+  });
+});
+document.getElementById("print").addEventListener("click",print);
+/* starter set */
+print();setTimeout(print,350);setTimeout(print,700);
+function unfold(x){
+  document.getElementById("mT").textContent=x.t;
+  document.getElementById("mTag").textContent=x.tag;
+  document.getElementById("mP").textContent=x.p;
+  const tw=document.getElementById("mTw");tw.textContent="";let i=0;
+  (function w(){if(i<x.d.length){tw.textContent=x.d.slice(0,++i);setTimeout(w,13)}})();
+  document.getElementById("modal").classList.add("on");
+}
+function closeModal(){document.getElementById("modal").classList.remove("on")}
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal()});
+window.addEventListener("resize",()=>{Composite.clear(engine.world,false);location.reload()});
+</script>
+</body>
+</html>
