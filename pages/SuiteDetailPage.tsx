@@ -40,7 +40,7 @@ const SuiteDetailPage: React.FC<Props> = ({ slug, onNavigate }) => {
   const children = getChildren(entry.id);
 
   return (
-    <div className="min-h-screen bg-[#0B0F14] text-white font-sans pb-24 pt-6">
+    <div className="min-h-screen bg-[#0B0F14] brutal-grid-bg text-white font-sans pb-24 pt-6">
       <div className="max-w-7xl mx-auto px-6 md:px-8">
         <div className="pt-2 pb-5 border-b border-white/10 flex items-center justify-between gap-4">
           <button onClick={() => onNavigate('catalogue')} className="inline-flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-amber-500 hover:text-white transition-colors group cursor-pointer">
@@ -61,7 +61,7 @@ const SuiteDetailPage: React.FC<Props> = ({ slug, onNavigate }) => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          <div className="lg:col-span-8 space-y-9">
+          <div className="lg:col-span-8 space-y-9 brutal-stagger">
             {/* The suite at a glance */}
             <Pattern entry={entry} />
 
@@ -80,7 +80,7 @@ const SuiteDetailPage: React.FC<Props> = ({ slug, onNavigate }) => {
                 <h3 className="font-mono font-black uppercase tracking-widest text-xs text-white">Run a workflow now</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {children.map((c) => (
-                    <button key={c.slug} onClick={() => onNavigate('workflow_detail', c.slug)} className="text-left border-2 border-black bg-[#0E1319] rounded-2xl p-4 hover:border-amber-500/60 transition-colors cursor-pointer shadow-[3px_3px_0px_0px_#000000]">
+                    <button key={c.slug} onClick={() => onNavigate('workflow_detail', c.slug)} className="text-left border-2 border-black bg-[#0E1319] rounded-2xl p-4 hover:border-amber-500/60 transition-colors cursor-pointer shadow-[3px_3px_0px_0px_#000000] brutal-press">
                       <div className="flex items-center justify-between gap-2 mb-2">
                         <span className="inline-flex items-center gap-1 font-mono text-[8px] uppercase tracking-widest text-cyan-400 font-black border border-cyan-500/30 rounded px-1.5 py-0.5"><Wrench size={9} /> Tool</span>
                         {c.pricing.kitFromUsd != null && <span className="font-mono text-[10px] text-amber-400 font-bold">from ${c.pricing.kitFromUsd.toLocaleString()}</span>}

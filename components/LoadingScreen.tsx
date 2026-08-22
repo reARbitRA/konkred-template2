@@ -1,6 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Shield, Zap, Lock, Cpu, Globe, BarChart3, Binary } from 'lucide-react';
+import { KonkredLogo } from './brand/KonkredLogo.tsx';
 
 interface LoadingScreenProps {
   onComplete: () => void;
@@ -53,10 +54,9 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete }) => {
       <div className="absolute inset-0 opacity-[0.05] grid-bg pointer-events-none"></div>
       
       <div className="relative z-20 flex flex-col items-center text-center">
-        <div className="mb-12 space-y-4">
-          <h1 className="text-6xl md:text-7xl font-display font-black tracking-[0.4em] text-transparent bg-clip-text bg-gradient-to-r from-white via-zinc-200 to-zinc-400 animate-pulse drop-shadow-[0_0_25px_rgba(255,255,255,0.25)] ml-[0.4em]">
-            KONKRED
-          </h1>
+        <div className="mb-12 space-y-5">
+          <KonkredLogo size={84} className="brutal-stamp" />
+          <h1 className="sr-only">KONKRED</h1>
           <p className="text-[10px] font-mono text-neon-cyan tracking-[0.6em] uppercase font-black ml-[0.6em]">
             Production Uplink Active
           </p>

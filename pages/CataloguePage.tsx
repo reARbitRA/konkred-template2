@@ -23,7 +23,7 @@ const Card: React.FC<{ entry: PortfolioEntry; onNavigate: (page: PageView, slug?
     <button
       onClick={() => onNavigate(isSuite ? 'suite_detail' : 'workflow_detail', entry.slug)}
       data-testid={`catalogue-card-${entry.slug}`}
-      className="text-left border-2 border-black bg-[#0E1319] rounded-2xl p-5 hover:border-amber-500/60 transition-colors cursor-pointer shadow-[3px_3px_0px_0px_#000000] flex flex-col gap-3"
+      className="text-left border-2 border-black bg-[#0E1319] rounded-2xl p-5 hover:border-amber-500/60 transition-colors cursor-pointer shadow-[3px_3px_0px_0px_#000000] brutal-press flex flex-col gap-3"
     >
       <div className="flex items-center justify-between gap-2">
         <span className={`inline-flex items-center gap-1.5 font-mono text-[8px] uppercase tracking-widest font-black border rounded px-1.5 py-0.5 ${isSuite ? 'text-amber-400 border-amber-500/30 bg-amber-500/10' : 'text-cyan-400 border-cyan-500/30 bg-cyan-500/10'}`}>
@@ -62,7 +62,7 @@ const CataloguePage: React.FC<Props> = ({ onNavigate }) => {
   }, [query, type, category]);
 
   return (
-    <div className="min-h-screen bg-[#0B0F14] text-white font-sans pb-24 pt-6">
+    <div className="min-h-screen bg-[#0B0F14] brutal-grid-bg text-white font-sans pb-24 pt-6">
       <div className="max-w-7xl mx-auto px-6 md:px-8">
         <div className="pt-2 pb-8 border-b border-white/10 space-y-3">
           <p className="text-[10px] font-mono uppercase tracking-widest text-amber-500 font-bold">Product catalogue</p>
@@ -70,6 +70,19 @@ const CataloguePage: React.FC<Props> = ({ onNavigate }) => {
           <p className="text-sm text-zinc-400 leading-relaxed max-w-2xl">
             {SUITES.length} suites and {WORKFLOWS.length} ready-to-run tools — evidence-linked, versioned, human-supervised.
           </p>
+        </div>
+
+        {/* brutalist ticker */}
+        <div className="border-y-[3px] border-black bg-amber-500 -mx-6 md:-mx-8 mb-2 overflow-hidden" aria-hidden="true">
+          <div className="brutal-marquee py-1.5">
+            {[0, 1].map((n) => (
+              <span key={n} className="flex shrink-0 font-mono font-black uppercase tracking-[0.3em] text-[10px] text-black whitespace-nowrap">
+                {['36 workflow products', '///', '21 suites', '///', '15 ready-to-run tools', '///', 'evidence-linked', '///', 'human-supervised', '///', 'no fake claims', '///'].map((w, i) => (
+                  <span key={i} className="mx-4">{w}</span>
+                ))}
+              </span>
+            ))}
+          </div>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-3 py-6 sticky top-0 bg-[#0B0F14]/95 backdrop-blur z-10 border-b border-white/5">
@@ -114,7 +127,7 @@ const CataloguePage: React.FC<Props> = ({ onNavigate }) => {
             <p className="font-mono text-xs text-zinc-500">No entries match your filters.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 brutal-stagger">
             {results.map((e) => <Card key={e.slug} entry={e} onNavigate={onNavigate} />)}
           </div>
         )}

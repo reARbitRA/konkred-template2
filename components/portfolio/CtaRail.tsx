@@ -40,7 +40,7 @@ export const CtaRail: React.FC<{ entry: PortfolioEntry }> = ({ entry }) => {
           {entry.type === 'WORKFLOW' && (
             <button
               onClick={() => open('workflow_kit', 'kit_cta_click')}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 font-mono font-black text-[11px] uppercase tracking-widest border-2 rounded-xl transition-all cursor-pointer bg-amber-500 text-black border-black hover:bg-black hover:text-amber-400"
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 font-mono font-black text-[11px] uppercase tracking-widest border-2 rounded-xl cursor-pointer brutal-press bg-amber-500 text-black border-black hover:bg-black hover:text-amber-400"
             >
               <ShoppingBag size={14} /> Get the Kit
             </button>
@@ -53,7 +53,7 @@ export const CtaRail: React.FC<{ entry: PortfolioEntry }> = ({ entry }) => {
           </button>
           <button
             onClick={() => open('enterprise_pilot', controlled ? 'controlled_pilot_request' : 'enterprise_request')}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 font-mono font-black text-[11px] uppercase tracking-widest border-2 rounded-xl transition-all cursor-pointer bg-purple-500 text-black border-black hover:bg-black hover:text-purple-400"
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 font-mono font-black text-[11px] uppercase tracking-widest border-2 rounded-xl cursor-pointer brutal-press bg-purple-500 text-black border-black hover:bg-black hover:text-purple-400"
           >
             <Rocket size={14} /> {controlled ? 'Controlled Pilot' : 'Enterprise Pilot'}
           </button>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { ShieldCheck, FileText, Package, BookOpen, Terminal, Mail } from 'lucide-react';
+import { KonkredLogo } from './brand/KonkredLogo.tsx';
 import { getPathForPage } from '../utils/routes.ts';
 import { SITE } from '../src/config/site.ts';
 
@@ -25,9 +26,7 @@ const SystemFooter: React.FC = () => {
           {/* Column 1: Brand */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <span className="px-2 py-0.5 border-2 border-black bg-signal text-black tracking-widest uppercase font-black text-[9px] rounded-none">
-                KONKRED
-              </span>
+              <KonkredLogo size={26} animate={false} />
             </div>
             <p className="text-[9px] text-void-600 leading-relaxed uppercase">
               AI workflow marketplace and product platform. Data-driven product catalogue,

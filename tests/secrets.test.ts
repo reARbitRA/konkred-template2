@@ -42,7 +42,8 @@ describe('no secret leakage', () => {
     const suspicious: string[] = [];
     for (const file of tracked) {
       if (/\.(cjs|map|lock|json)$/.test(file)) continue;
-      const content = fs.readFileSync(path.join(ROOT, file), 'utf8');
+      if (!fs.existsSync(path.join(ROOT, file))) continue; // staged/uncommitted deletions
+    const content = fs.readFileSync(path.join(ROOT, file), 'utf8');
       if (/(sk-[A-Za-z0-9]{24,}|gh[pousr]_[A-Za-z0-9]{30,}|AKIA[0-9A-Z]{16}|-----BEGIN [A-Z ]*PRIVATE KEY-----)/.test(content)) {
         suspicious.push(file);
       }

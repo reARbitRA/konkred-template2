@@ -16,6 +16,8 @@ import Loader from './components/common/Loader.tsx';
 
 // Eager Page for instant load
 import LandingPage from './pages/LandingPage.tsx';
+import { PageTransition } from './components/brand/PageTransition.tsx';
+import './styles/brutal.css';
 
 // Code-split pages for optimized bundle size & TTI
 const FullKonkPage = lazy(() => import('./pages/FullKonkPage.tsx'));
@@ -47,6 +49,17 @@ const App: React.FC = () => {
     const [currentPage, setCurrentPage] = useState<PageView>('landing');
     const [productSlug, setProductSlug] = useState<string | undefined>(undefined);
     const [suiteSlug, setSuiteSlug] = useState<string | undefined>(undefined);
+    const [transitioning, setTransitioning] = useState(false);
+    const firstRouteLoad = React.useRef(true);
+    const routeKey = `${currentPage}:${productSlug ?? ''}:${suiteSlug ?? ''}`;
+
+    // Brutalist slab transition on route change (never on first load)
+    React.useEffect(() => {
+        if (firstRouteLoad.current) { firstRouteLoad.current = false; return; }
+        setTransitioning(true);
+        const t = setTimeout(() => setTransitioning(false), 640);
+        return () => clearTimeout(t);
+    }, [routeKey]);
     const [isCmdOpen, setIsCmdOpen] = useState(false);
     const [emailForVerification, setEmailForVerification] = useState<string | null>(null);
 
@@ -133,7 +146,8 @@ const App: React.FC = () => {
                     />
                 )}
 
-                <div className={`animate-in fade-in duration-500 ${['landing', 'redaeye', 'redaeye_sandbox'].includes(currentPage) ? '' : 'pt-20 md:pt-24 min-h-[calc(100vh-100px)]'}`}>
+                <PageTransition active={transitioning} />
+                <div key={routeKey} className={`brutal-rise ${['landing', 'redaeye', 'redaeye_sandbox'].includes(currentPage) ? '' : 'pt-20 md:pt-24 min-h-[calc(100vh-100px)]'}`}>
                     <Suspense fallback={
                         <div className="py-32 flex flex-col items-center justify-center space-y-4">
                             <Loader size={36} label="Initializing Module..." />

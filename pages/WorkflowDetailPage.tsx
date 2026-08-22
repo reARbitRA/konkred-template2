@@ -66,7 +66,7 @@ const WorkflowDetailPage: React.FC<Props> = ({ slug, onNavigate }) => {
   }
 
   return (
-    <div className="min-h-screen bg-[#0B0F14] text-white font-sans pb-24 pt-6">
+    <div className="min-h-screen bg-[#0B0F14] brutal-grid-bg text-white font-sans pb-24 pt-6">
       <div className="max-w-7xl mx-auto px-6 md:px-8">
         <div className="pt-2 pb-5 border-b border-white/10 flex items-center justify-between gap-4">
           <button onClick={() => onNavigate('catalogue')} className="inline-flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-amber-500 hover:text-white transition-colors group cursor-pointer">
@@ -95,7 +95,7 @@ const WorkflowDetailPage: React.FC<Props> = ({ slug, onNavigate }) => {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* The product */}
-          <div className="lg:col-span-8 space-y-8">
+          <div className="lg:col-span-8 space-y-8 brutal-stagger">
             <MicroTool product={shim} fixtureKey={entry.legacySlug ?? undefined} />
             <Pattern entry={entry} />
             <div className="space-y-4">

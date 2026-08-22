@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Logo3D from './Logo3D.tsx';
+import { KonkredLogo } from './brand/KonkredLogo.tsx';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Menu, X, Search, User as UserIcon, 
@@ -99,15 +99,11 @@ const Navbar: React.FC<NavbarProps> = ({
               }
             }}
           >
-            <div className="transition-all duration-150 group-hover:scale-105">
-              <Logo3D size={28} />
+            <div className="transition-transform duration-150 group-hover:scale-105">
+              <KonkredLogo size={30} />
             </div>
             <div className="flex flex-col text-left">
-              <div className="flex items-center gap-1.5">
-                <span className="text-xs font-mono font-black tracking-[0.25em] text-white uppercase sm:text-sm">KONKRED</span>
-                <span className="h-1.5 w-1.5 rounded-none bg-signal animate-pulse hidden sm:inline-block" />
-              </div>
-              <p className="text-[8px] text-void-600 font-mono tracking-wider -mt-0.5 uppercase">AI WORKFLOW PLATFORM</p>
+              <p className="text-[8px] text-void-600 font-mono tracking-wider uppercase">AI WORKFLOW PLATFORM</p>
             </div>
           </a>
 
@@ -269,8 +265,7 @@ const Navbar: React.FC<NavbarProps> = ({
               {/* Drawer Content */}
               <div className="flex items-center justify-between pb-6 border-b border-zinc-900 mt-2">
                 <div className="flex items-center gap-3">
-                  <Logo3D size={26} />
-                  <span className="text-sm font-mono font-black tracking-widest text-white">KONKRED</span>
+                  <KonkredLogo size={26} />
                 </div>
                 <button 
                   onClick={() => setIsOpen(false)}
