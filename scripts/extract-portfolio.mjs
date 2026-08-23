@@ -10,7 +10,7 @@
  */
 import { readFileSync, writeFileSync } from 'node:fs';
 
-const GUIDE = readFileSync('KONKRED_36_WORKFLOW_COMPREHENSIVE_GUIDEBOOK.md', 'utf8');
+const GUIDE = readFileSync('owner-docs/KONKRED_36_WORKFLOW_COMPREHENSIVE_GUIDEBOOK.md', 'utf8');
 const lines = GUIDE.split('\n');
 
 const lineOf = (re) => lines.findIndex((l) => re.test(l));
@@ -188,8 +188,8 @@ if (suites.length !== 21) throw new Error(`expected 21 suites, got ${suites.leng
 if (workflows.length !== 15) throw new Error(`expected 15 workflows, got ${workflows.length}`);
 
 /* ─── validation reports (cross-check) ──────────────────────── */
-const arbReport = readFileSync('ARB_CANONICAL_MERGE_VALIDATION_REPORT.md', 'utf8');
-const wfReport = readFileSync('validation_report.md', 'utf8');
+const arbReport = readFileSync('owner-docs/ARB_CANONICAL_MERGE_VALIDATION_REPORT.md', 'utf8');
+const wfReport = readFileSync('owner-docs/validation_report.md', 'utf8');
 const rowRe = /^\|\s*([^|]+?)\s*\|\s*`([^`]+)`\s*\|\s*(?:\*\*(\d+)\/100\*\*|\*\*(PASS|CONDITIONAL)\*\*)\s*\|/;
 const arbRows = {};
 for (const l of arbReport.split('\n')) {

@@ -12,6 +12,7 @@
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 
 const extracted = JSON.parse(readFileSync('agent/extracted-portfolio.json', 'utf8'));
+const DOCS = 'owner-docs/';
 const legacy = JSON.parse(readFileSync('catalog/product-manifest.json', 'utf8'));
 const UPDATED_AT = '2026-08-22';
 
@@ -138,8 +139,8 @@ const suiteEntries = extracted.suites.map((s) => {
       limitations: s.publicValidation.limitations,
     },
     autonomousActions: [],
-    validationReport: 'ARB_CANONICAL_MERGE_VALIDATION_REPORT.md',
-    promptReference: 'ARB_CANONICAL_MERGED_PROMPTS.md',
+    validationReport: `${DOCS}ARB_CANONICAL_MERGE_VALIDATION_REPORT.md`,
+    promptReference: `${DOCS}ARB_CANONICAL_MERGED_PROMPTS.md`,
     pricing,
     demo: null,
     updatedAt: UPDATED_AT,
@@ -207,8 +208,8 @@ const workflowEntries = extracted.workflows.map((w) => {
       limitations: [],
     },
     autonomousActions: [],
-    validationReport: 'validation_report.md',
-    promptReference: 'merged_upgraded_prompts.md',
+    validationReport: `${DOCS}validation_report.md`,
+    promptReference: `${DOCS}merged_upgraded_prompts.md`,
     pricing: {
       kitFromUsd: offer.kitFromUsd ?? lg.pricing?.kitUsd ?? null,
       sprintFromUsd: offer.sprintFromUsd ?? lg.pricing?.validationSprintUsd ?? null,
@@ -249,11 +250,11 @@ const manifest = {
       CONDITIONAL_VALIDATION: 'Published with conditions; missing inputs must be supplied before unrestricted use.',
     },
     sourceDocuments: [
-      'KONKRED_36_WORKFLOW_COMPREHENSIVE_GUIDEBOOK.md',
-      'ARB_CANONICAL_MERGE_VALIDATION_REPORT.md',
-      'validation_report.md',
-      'ARB_CANONICAL_MERGED_PROMPTS.md',
-      'merged_upgraded_prompts.md',
+      'owner-docs/KONKRED_36_WORKFLOW_COMPREHENSIVE_GUIDEBOOK.md',
+      'owner-docs/ARB_CANONICAL_MERGE_VALIDATION_REPORT.md',
+      'owner-docs/validation_report.md',
+      'owner-docs/ARB_CANONICAL_MERGED_PROMPTS.md',
+      'owner-docs/merged_upgraded_prompts.md',
       'catalog/product-manifest.json',
     ],
     integrityNote: 'Static design score is a design target, not measured model performance. PASS means a deterministic public-data preflight passed its narrow reference test. autonomousActions is always empty: no product executes external side effects.',
