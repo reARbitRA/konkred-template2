@@ -221,3 +221,24 @@ html.theme-light ::selection{background:var(--k-ink);color:var(--k-bg)}
 .k-led{width:10px;height:10px;border-radius:50%;background:#ff4d4d;box-shadow:0 0 12px #ff4d4d}
 
 @keyframes k-wire{to{stroke-dashoffset:-48}}
+
+/* ── fullKONK console (dark always — it's a tool, not a page) ── */
+.fk-root{background:#0b0d10;color:#f2efe9}
+.fk-scan{background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.05) 2px,rgba(0,0,0,.05) 4px)}
+.fk-btn{background:#121319;border:2px solid #2b2b34;color:#8a8a99;padding:5px 10px;
+  font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:8px;font-weight:700;letter-spacing:.12em;
+  cursor:pointer;white-space:nowrap;text-transform:uppercase;transition:border-color .12s,color .12s,transform .05s,box-shadow .05s}
+.fk-btn:hover:not(:disabled){border-color:#ffb400;color:#f2efe9}
+.fk-btn:active{transform:translate(1px,1px)}
+.fk-btn:disabled{opacity:.5;cursor:default}
+.fk-btn-acc{background:#ffb400;border-color:#000;color:#0b0d10;box-shadow:3px 3px 0 #000}
+.fk-btn-acc:hover:not(:disabled){background:#ffc531;color:#0b0d10;border-color:#000}
+.fk-brand{font-family:'Archivo Black','IBM Plex Mono',monospace;color:#ffb400;letter-spacing:2px;white-space:nowrap;
+  text-transform:uppercase;text-shadow:3px 3px 0 #000}
+.fk-select{appearance:none;-webkit-appearance:none;background:#121319;border:2px solid #2b2b34;color:#8a8a99;
+  padding:5px 8px;font-family:'IBM Plex Mono',monospace;font-size:8px;font-weight:700;letter-spacing:.1em;cursor:pointer;outline:none}
+.fk-select:hover{border-color:#ffb400;color:#f2efe9}
+.fk-head{border-bottom:4px solid #000;background:#0e0f14}
+.fk-settings{background:#0e0f14;border-bottom:2px solid #26262e;
+  font-family:'IBM Plex Mono',monospace;font-size:8px;color:#8a8a99}
+.fk-led{width:9px;height:9px;background:#ff4d4d;box-shadow:none;animation:k-blink 1.4s steps(1) infinite}

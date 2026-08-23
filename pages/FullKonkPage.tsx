@@ -340,35 +340,35 @@ export default function FullKonkPage() {
     } catch (error) { setSaveState(error instanceof Error ? error.message.toUpperCase() : 'SAVE FAILED'); }
   }, [activeProject, activeSession, files, userId]);
 
-  return <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: '#000', color: '#fff', overflow: 'hidden' }}>
-    <div aria-hidden="true" style={{ position: 'fixed', inset: 0, zIndex: 9999, pointerEvents: 'none', background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,.035) 2px, rgba(0,0,0,.035) 4px)' }} />
-    <header style={{ height: 54, flexShrink: 0, display: 'flex', alignItems: 'center', gap: 10, padding: '0 16px', borderBottom: '3px solid #1a1a1a', overflowX: 'auto' }}>
-      <motion.span animate={{ opacity: [1, .35, 1] }} transition={{ repeat: Infinity, duration: 1.4 }} style={{ width: 8, height: 8, background: '#FF003C', boxShadow: '0 0 8px #FF003C' }} />
-      <strong style={{ fontFamily: 'Orbitron, sans-serif', color: '#FFD700', letterSpacing: 3, whiteSpace: 'nowrap' }}>fullKONK_&gt;</strong>
+  return <div className="fk-root" style={{ height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+    <div aria-hidden="true" className="fk-scan" style={{ position: 'fixed', inset: 0, zIndex: 9999, pointerEvents: 'none' }} />
+    <header className="fk-head" style={{ height: 54, flexShrink: 0, display: 'flex', alignItems: 'center', gap: 10, padding: '0 16px', overflowX: 'auto' }}>
+      <motion.span animate={{ opacity: [1, .35, 1] }} transition={{ repeat: Infinity, duration: 1.4 }} className="fk-led" />
+      <strong className="fk-brand">fullKONK_&gt;</strong>
       <div style={{ flex: 1 }} />
-      {userId && <button onClick={() => setShowSidebar(value => !value)} style={topButton}>≡ WORKSPACE</button>}
-      {userId && files.length > 0 && <button onClick={() => { void handleSaveProject(); }} style={{ ...topButton, borderColor: '#FFD700', color: '#FFD700' }}>{saveState}</button>}
-      {userId && <button onClick={() => setShowAnalytics(true)} style={topButton}>◎ ANALYTICS</button>}
-      {files.length > 0 && <button onClick={() => setShowGitHub(true)} style={{ ...topButton, background: '#0055FF', color: '#fff', borderColor: '#0055FF' }}>↑ GITHUB</button>}
-      <div style={{ display: 'flex' }}>{MODES.map(item => <button key={item.id} disabled={streaming} onClick={() => setMode(item.id)} style={{ ...topButton, color: mode === item.id ? '#000' : '#555', background: mode === item.id ? '#FFD700' : '#050505', borderColor: mode === item.id ? '#FFD700' : '#222' }}>{item.label}</button>)}</div>
-      <button onClick={() => setShowSettings(value => !value)} style={topButton}>⚙ SETTINGS</button>
-      <select value={provider} disabled={streaming} onChange={event => { const next = providerOptions.find(option => option.id === event.target.value); setProvider(event.target.value); if (next?.models[0]) setModel(next.models[0].id); }} style={selectStyle}>{providerOptions.length ? providerOptions.map(option => <option key={option.id} value={option.id}>{option.name.toUpperCase()}</option>) : <option value={provider}>{providersLoaded ? 'NO PROVIDERS' : 'LOADING…'}</option>}</select>
-      <select value={model} disabled={streaming} onChange={event => setModel(event.target.value)} style={selectStyle}>{(providerOptions.find(option => option.id === provider)?.models || [{ id: model, label: model }]).map(option => <option key={option.id} value={option.id}>{option.label}</option>)}</select>
+      {userId && <button onClick={() => setShowSidebar(value => !value)} className="fk-btn">≡ WORKSPACE</button>}
+      {userId && files.length > 0 && <button onClick={() => { void handleSaveProject(); }} className="fk-btn" style={{ borderColor: '#ffb400', color: '#ffb400' }}>{saveState}</button>}
+      {userId && <button onClick={() => setShowAnalytics(true)} className="fk-btn">◎ ANALYTICS</button>}
+      {files.length > 0 && <button onClick={() => setShowGitHub(true)} className="fk-btn" style={{ background: '#19d3c5', borderColor: '#000', color: '#0b0d10' }}>↑ GITHUB</button>}
+      <div style={{ display: 'flex', gap: 4 }}>{MODES.map(item => <button key={item.id} disabled={streaming} onClick={() => setMode(item.id)} className={`fk-btn${mode === item.id ? ' fk-btn-acc' : ''}`}>{item.label}</button>)}</div>
+      <button onClick={() => setShowSettings(value => !value)} className="fk-btn">⚙ SETTINGS</button>
+      <select className="fk-select" value={provider} disabled={streaming} onChange={event => { const next = providerOptions.find(option => option.id === event.target.value); setProvider(event.target.value); if (next?.models[0]) setModel(next.models[0].id); }}>{providerOptions.length ? providerOptions.map(option => <option key={option.id} value={option.id}>{option.name.toUpperCase()}</option>) : <option value={provider}>{providersLoaded ? 'NO PROVIDERS' : 'LOADING…'}</option>}</select>
+      <select value={model} disabled={streaming} onChange={event => setModel(event.target.value)} className="fk-select">{(providerOptions.find(option => option.id === provider)?.models || [{ id: model, label: model }]).map(option => <option key={option.id} value={option.id}>{option.label}</option>)}</select>
     </header>
-    {showSettings && <div style={{ display: 'grid', gridTemplateColumns: '120px 160px minmax(240px, 1fr)', gap: 10, alignItems: 'center', padding: '8px 16px', background: '#050505', borderBottom: '1px solid #222', fontFamily: '"JetBrains Mono", monospace', fontSize: 8, color: '#666' }}>
-      <label>TEMPERATURE <input type="number" min={0} max={1} step={0.05} value={temperature} onChange={event => setTemperature(Number(event.target.value))} style={{ ...selectStyle, width: 58, marginLeft: 5 }} /></label>
-      <label>MAX TOKENS <select value={maxTokens} onChange={event => setMaxTokens(Number(event.target.value))} style={{ ...selectStyle, marginLeft: 5 }}><option value={4096}>4096</option><option value={8192}>8192</option><option value={16384}>16384</option></select></label>
-      <input value={systemPrompt} onChange={event => setSystemPrompt(event.target.value)} placeholder="Optional system prompt override" style={{ ...selectStyle, width: '100%', boxSizing: 'border-box' }} />
+    {showSettings && <div className="fk-settings" style={{ display: 'grid', gridTemplateColumns: '120px 160px minmax(240px, 1fr)', gap: 10, alignItems: 'center', padding: '8px 16px' }}>
+      <label>TEMPERATURE <input type="number" min={0} max={1} step={0.05} value={temperature} onChange={event => setTemperature(Number(event.target.value))} className="fk-select" style={{ width: 58, marginLeft: 5 }} /></label>
+      <label>MAX TOKENS <select value={maxTokens} onChange={event => setMaxTokens(Number(event.target.value))} className="fk-select" style={{ marginLeft: 5 }}><option value={4096}>4096</option><option value={8192}>8192</option><option value={16384}>16384</option></select></label>
+      <input value={systemPrompt} onChange={event => setSystemPrompt(event.target.value)} placeholder="Optional system prompt override" className="fk-select" style={{ width: '100%', boxSizing: 'border-box' }} />
     </div>}
     <PipelineStatus stage={stage} text={stageText} streaming={streaming} metrics={metrics} onStop={() => abortRef.current?.abort()} canRetry={retryable && Boolean(latestPromptRef.current)} onRetry={handleRetry} />
     <main style={{ flex: 1, minHeight: 0, display: 'grid', gridTemplateColumns: showSidebar && userId ? '220px minmax(300px, 380px) minmax(0, 1fr)' : 'minmax(300px, 380px) minmax(0, 1fr)' }}>
       {showSidebar && userId && <SessionSidebar userId={userId} activeSessionId={activeSession} activeProjectId={activeProject?.id || null} refreshKey={sidebarRefresh} onSelect={selectSession} onSelectProject={selectProject} onNew={clearWorkspace} />}
-      <div style={{ minWidth: 0, borderRight: '3px solid #111' }}><ChatPanel messages={messages} streaming={streaming} attachments={attachments} onAttachmentsChange={setAttachments} onSend={prompt => { void handleSend(prompt); }} onClear={clearWorkspace} /></div>
+      <div style={{ minWidth: 0, borderRight: '3px solid #000' }}><ChatPanel messages={messages} streaming={streaming} attachments={attachments} onAttachmentsChange={setAttachments} onSend={prompt => { void handleSend(prompt); }} onClear={clearWorkspace} /></div>
       <div style={{ minWidth: 0 }}><CodeOutput files={files} previousFiles={previousFiles} activeFile={activeFile} onSelectFile={setActiveFile} streaming={streaming} /></div>
     </main>
     <AnimatePresence>{showAnalytics && userId && <AnalyticsDashboard userId={userId} onClose={() => setShowAnalytics(false)} />}{showGitHub && <GitHubExportModal files={files} onClose={() => setShowGitHub(false)} />}</AnimatePresence>
   </div>;
 }
 
-const topButton: React.CSSProperties = { background: '#050505', border: '1px solid #222', color: '#888', padding: '5px 9px', fontFamily: '"JetBrains Mono", monospace', fontSize: 8, fontWeight: 700, letterSpacing: 1, cursor: 'pointer', whiteSpace: 'nowrap' };
-const selectStyle: React.CSSProperties = { ...topButton, outline: 'none' };
+const topButton: React.CSSProperties = {};
+const selectStyle: React.CSSProperties = {};
