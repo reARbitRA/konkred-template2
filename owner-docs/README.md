@@ -16,13 +16,15 @@ implementing — never as instructions that execute themselves.
 
 Any format works: `.md`, `.txt`, `.pdf`, `.docx`, `.json`, `.csv`.
 
-## Expected next (owner's fullKONK set — announced, not yet uploaded)
+## fullKONK set — received 2026-08-23 ✅ (read: see `agent/FULLKONK_READING.md`)
 
-- `Full.md`
-- `Fullkonksession.md`
-- `Live env.md`
-- `Project explaining.md`
-- `پروایدرهای رایگان.md` (free providers)
+`Full.md`, `Fullkojk System Instructions.md`, `Fullkonksession.md`, `Live env.md`,
+`MergedFullkonkForge.md`, `Obsidian plugin.md`, `Project explaining.md`, `SaaS.md`,
+`Simplified.md`, `تجدیدنظر.md`, `توضیح پروژه به زبان ساده site.md`,
+`در Obsidian نحو کارکرد کامل.md`, `پروایدرهای رایگان.md`
+
+**Still welcome:** the "1000 specialized prompts" library referenced in `تجدیدنظر.md`
+(it is the claimed competitive moat but was not included in the upload).
 
 > Chat attachments have failed to reach the workspace repeatedly; this folder is
 > the reliable channel.

@@ -4,6 +4,7 @@ import { getAuth } from 'firebase/auth';
 import AnalyticsDashboard from '../components/fullkonk/AnalyticsDashboard';
 import ChatPanel from '../components/fullkonk/ChatPanel';
 import CodeOutput from '../components/fullkonk/CodeOutput';
+import LiveEnvironment from '../components/fullkonk/LiveEnvironment';
 import GitHubExportModal from '../components/fullkonk/GitHubExportModal';
 import PipelineStatus, { PipelineMetrics } from '../components/fullkonk/PipelineStatus';
 import SessionSidebar from '../components/fullkonk/SessionSidebar';
@@ -119,6 +120,7 @@ export default function FullKonkPage() {
   const [maxTokens, setMaxTokens] = useState(8192);
   const [systemPrompt, setSystemPrompt] = useState('');
   const [showSettings, setShowSettings] = useState(false);
+  const [liveEnv, setLiveEnv] = useState(true);
   const [metrics, setMetrics] = useState<PipelineMetrics>({ tokensPerSecond: 0, totalTokens: 0, provider: '', elapsedMs: 0 });
   const [attachments, setAttachments] = useState<AttachedCodeFile[]>([]);
   const [userId, setUserId] = useState<string | null>(null);
@@ -352,6 +354,7 @@ export default function FullKonkPage() {
       {files.length > 0 && <button onClick={() => setShowGitHub(true)} className="fk-btn" style={{ background: '#19d3c5', borderColor: '#000', color: '#0b0d10' }}>↑ GITHUB</button>}
       <div style={{ display: 'flex', gap: 4 }}>{MODES.map(item => <button key={item.id} disabled={streaming} onClick={() => setMode(item.id)} className={`fk-btn${mode === item.id ? ' fk-btn-acc' : ''}`}>{item.label}</button>)}</div>
       <button onClick={() => setShowSettings(value => !value)} className="fk-btn">⚙ SETTINGS</button>
+      <button onClick={() => setLiveEnv(value => !value)} className={`fk-btn${liveEnv ? ' fk-btn-acc' : ''}`}>▶ LIVE ENV</button>
       <select className="fk-select" value={provider} disabled={streaming} onChange={event => { const next = providerOptions.find(option => option.id === event.target.value); setProvider(event.target.value); if (next?.models[0]) setModel(next.models[0].id); }}>{providerOptions.length ? providerOptions.map(option => <option key={option.id} value={option.id}>{option.name.toUpperCase()}</option>) : <option value={provider}>{providersLoaded ? 'NO PROVIDERS' : 'LOADING…'}</option>}</select>
       <select value={model} disabled={streaming} onChange={event => setModel(event.target.value)} className="fk-select">{(providerOptions.find(option => option.id === provider)?.models || [{ id: model, label: model }]).map(option => <option key={option.id} value={option.id}>{option.label}</option>)}</select>
     </header>
@@ -361,10 +364,15 @@ export default function FullKonkPage() {
       <input value={systemPrompt} onChange={event => setSystemPrompt(event.target.value)} placeholder="Optional system prompt override" className="fk-select" style={{ width: '100%', boxSizing: 'border-box' }} />
     </div>}
     <PipelineStatus stage={stage} text={stageText} streaming={streaming} metrics={metrics} onStop={() => abortRef.current?.abort()} canRetry={retryable && Boolean(latestPromptRef.current)} onRetry={handleRetry} />
-    <main style={{ flex: 1, minHeight: 0, display: 'grid', gridTemplateColumns: showSidebar && userId ? '220px minmax(300px, 380px) minmax(0, 1fr)' : 'minmax(300px, 380px) minmax(0, 1fr)' }}>
+    <main style={{ flex: 1, minHeight: 0, display: 'grid', gridTemplateColumns:
+        showSidebar && userId && liveEnv ? '200px minmax(250px, 330px) minmax(0, 1fr) minmax(300px, 420px)'
+      : showSidebar && userId ? '220px minmax(300px, 380px) minmax(0, 1fr)'
+      : liveEnv ? 'minmax(260px, 360px) minmax(0, 1fr) minmax(300px, 420px)'
+      : 'minmax(300px, 380px) minmax(0, 1fr)' }}>
       {showSidebar && userId && <SessionSidebar userId={userId} activeSessionId={activeSession} activeProjectId={activeProject?.id || null} refreshKey={sidebarRefresh} onSelect={selectSession} onSelectProject={selectProject} onNew={clearWorkspace} />}
       <div style={{ minWidth: 0, borderRight: '3px solid #000' }}><ChatPanel messages={messages} streaming={streaming} attachments={attachments} onAttachmentsChange={setAttachments} onSend={prompt => { void handleSend(prompt); }} onClear={clearWorkspace} /></div>
-      <div style={{ minWidth: 0 }}><CodeOutput files={files} previousFiles={previousFiles} activeFile={activeFile} onSelectFile={setActiveFile} streaming={streaming} /></div>
+      <div style={{ minWidth: 0, borderRight: liveEnv ? '3px solid #000' : undefined }}><CodeOutput files={files} previousFiles={previousFiles} activeFile={activeFile} onSelectFile={setActiveFile} streaming={streaming} /></div>
+      {liveEnv && <div style={{ minWidth: 0 }}><LiveEnvironment files={files} streaming={streaming} /></div>}
     </main>
     <AnimatePresence>{showAnalytics && userId && <AnalyticsDashboard userId={userId} onClose={() => setShowAnalytics(false)} />}{showGitHub && <GitHubExportModal files={files} onClose={() => setShowGitHub(false)} />}</AnimatePresence>
   </div>;
