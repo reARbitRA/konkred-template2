@@ -5,6 +5,7 @@ import AnalyticsDashboard from '../components/fullkonk/AnalyticsDashboard';
 import ChatPanel from '../components/fullkonk/ChatPanel';
 import CodeOutput from '../components/fullkonk/CodeOutput';
 import LiveEnvironment from '../components/fullkonk/LiveEnvironment';
+import { getPlaybooks, composePlaybook } from '../services/fullkonk.prompts';
 import GitHubExportModal from '../components/fullkonk/GitHubExportModal';
 import PipelineStatus, { PipelineMetrics } from '../components/fullkonk/PipelineStatus';
 import SessionSidebar from '../components/fullkonk/SessionSidebar';
@@ -358,10 +359,14 @@ export default function FullKonkPage() {
       <select className="fk-select" value={provider} disabled={streaming} onChange={event => { const next = providerOptions.find(option => option.id === event.target.value); setProvider(event.target.value); if (next?.models[0]) setModel(next.models[0].id); }}>{providerOptions.length ? providerOptions.map(option => <option key={option.id} value={option.id}>{option.name.toUpperCase()}</option>) : <option value={provider}>{providersLoaded ? 'NO PROVIDERS' : 'LOADING…'}</option>}</select>
       <select value={model} disabled={streaming} onChange={event => setModel(event.target.value)} className="fk-select">{(providerOptions.find(option => option.id === provider)?.models || [{ id: model, label: model }]).map(option => <option key={option.id} value={option.id}>{option.label}</option>)}</select>
     </header>
-    {showSettings && <div className="fk-settings" style={{ display: 'grid', gridTemplateColumns: '120px 160px minmax(240px, 1fr)', gap: 10, alignItems: 'center', padding: '8px 16px' }}>
+    {showSettings && <div className="fk-settings" style={{ display: 'grid', gridTemplateColumns: '120px 160px 170px minmax(240px, 1fr)', gap: 10, alignItems: 'center', padding: '8px 16px' }}>
       <label>TEMPERATURE <input type="number" min={0} max={1} step={0.05} value={temperature} onChange={event => setTemperature(Number(event.target.value))} className="fk-select" style={{ width: 58, marginLeft: 5 }} /></label>
       <label>MAX TOKENS <select value={maxTokens} onChange={event => setMaxTokens(Number(event.target.value))} className="fk-select" style={{ marginLeft: 5 }}><option value={4096}>4096</option><option value={8192}>8192</option><option value={16384}>16384</option></select></label>
-      <input value={systemPrompt} onChange={event => setSystemPrompt(event.target.value)} placeholder="Optional system prompt override" className="fk-select" style={{ width: '100%', boxSizing: 'border-box' }} />
+      <select className="fk-select" value="" onChange={event => { const pb = composePlaybook(event.target.value); if (pb) setSystemPrompt(pb); }} title="Load a specialized playbook from the prompt library" style={{ minWidth: 150 }}>
+        <option value="">▸ PLAYBOOK LIBRARY…</option>
+        {getPlaybooks().map(pb => <option key={pb.id} value={pb.id}>{pb.name} ({pb.count})</option>)}
+      </select>
+      <input value={systemPrompt} onChange={event => setSystemPrompt(event.target.value)} placeholder="Optional system prompt override (or load a playbook)" className="fk-select" style={{ width: '100%', boxSizing: 'border-box' }} />
     </div>}
     <PipelineStatus stage={stage} text={stageText} streaming={streaming} metrics={metrics} onStop={() => abortRef.current?.abort()} canRetry={retryable && Boolean(latestPromptRef.current)} onRetry={handleRetry} />
     <main style={{ flex: 1, minHeight: 0, display: 'grid', gridTemplateColumns:

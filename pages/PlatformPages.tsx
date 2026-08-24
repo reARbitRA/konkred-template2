@@ -66,8 +66,51 @@ export const PricingPage: React.FC<PageProps> = ({ onNavigate }) => {
     { name: 'Team / All-Catalog Workspace', range: '$599 – $4,000 / month', note: 'shared run history, policies, queues, evidence and exports' },
     { name: 'Enterprise setup', range: '$20,000 – $75,000 + recurring', note: 'SSO/RBAC, private tenant, connectors, audit logs, security review' },
   ];
+  const fkTiers = [
+    { name: 'FREE', price: '$0', accent: 'var(--k-cyan)', features: ['3 fullKONK generations / day', 'Free-tier models (Groq, Cerebras)', 'Output carries “Built with fullKONK_>”', 'Community support'] },
+    { name: 'PRO', price: '$29/mo', accent: 'var(--k-amber)', features: ['Unlimited generations', 'All providers + smart routing', 'Watermark-free output', 'GitHub integration', 'Project history'], hot: true },
+    { name: 'AGENCY', price: '$99/mo', accent: 'var(--k-violet)', features: ['Everything in Pro', 'White-label export', 'API access', '3 workspaces'] },
+  ];
+
   return (
     <Shell eyebrow="Pricing" title="Offer ladder" lead="Planning ranges from the published packaging reference. Price includes model/tool usage, review time, support and governance. Exact quotes come from a scoping call — nothing is charged on this site.">
+
+      {/* fullKONK_> subscription tiers — planned (owner strategy doc تجدیدنظر.md) */}
+      <section aria-label="fullKONK subscription tiers" className="mb-12 space-y-4">
+        <div className="flex flex-wrap items-baseline gap-3">
+          <h2 className="k-title text-2xl sm:text-3xl">fullKONK_&gt; TIERS</h2>
+          <span className="k-mono text-[9px] tracking-[0.25em] border-2 px-2 py-1" style={{ borderColor: 'var(--k-line)', color: 'var(--k-mut)' }}>
+            PLANNED — FROM THE STRATEGY DOC · NOT LIVE YET · TEST-MODE FORMS ONLY
+          </span>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 brutal-stagger">
+          {fkTiers.map((tier) => (
+            <div key={tier.name} className="k-slab p-6 flex flex-col gap-4" style={{ ['--slab-c' as string]: tier.accent, transform: 'rotate(0deg)' }}>
+              <div className="flex items-baseline justify-between gap-3">
+                <h3 className="k-title text-xl">{tier.name}</h3>
+                <span className="k-title text-2xl" style={{ color: tier.accent }}>{tier.price}</span>
+              </div>
+              <ul className="space-y-2">
+                {tier.features.map((f) => (
+                  <li key={f} className="text-[12px] flex items-start gap-2.5" style={{ color: 'var(--k-mut)' }}>
+                    <CheckCircle2 size={13} className="shrink-0 mt-0.5" style={{ color: tier.accent }} />{f}
+                  </li>
+                ))}
+              </ul>
+              <InquiryButton
+                intent={tier.hot ? 'all_catalog_workspace' : 'enterprise_pilot'}
+                label={tier.name === 'FREE' ? 'JOIN WAITLIST' : `GET ${tier.name}`}
+                event="checkout_start"
+                product={`fullKONK ${tier.name} tier`}
+              />
+            </div>
+          ))}
+        </div>
+        <p className="k-mono text-[9px] leading-relaxed" style={{ color: 'var(--k-mut)' }}>
+          TIERS ARE A PUBLISHED PLAN, NOT A LIVE BILLING SYSTEM — PAYMENT IS NOT CONFIGURED. UNTIL THEN FULLKONK RUNS ON PROVIDER KEYS AND EVERY FORM JUST RECORDS YOUR REQUEST.
+        </p>
+      </section>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {ladder.map((l) => (
           <div key={l.name} className="k-slab p-5 space-y-2" style={{ ['--slab-c' as string]: 'var(--k-amber)', transform: 'rotate(0deg)' }}>

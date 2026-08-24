@@ -44,13 +44,19 @@ deploy-ready») are implemented as functionality, never as UI claims (repo no-fa
 - Sessions + projects persistence (`services/fullkonk.sessions.ts`, `fullkonk.projects.ts`)
 - GitHub export (`fullkonk.github.ts`), usage analytics (`fullkonk.analytics.ts`)
 
-## Open items from the docs (owner decisions required)
+## Open items from the docs — status
 
-1. **Pricing tiers** (Free / Pro $29 / Agency $99 from `تجدیدنظر.md` + `SaaS.md`) — proposal only;
-   adding to `/pricing` needs owner approval; checkout stays test-mode.
-2. **"1000 specialized prompts" library** — referenced in `تجدیدنظر.md` as the competitive moat;
-   the prompt library itself is NOT among the uploaded documents. Upload it to `owner-docs/`
-   and it becomes the architect/frontend/backend template source.
+1. **Pricing tiers** — ✅ DONE 2026-08-23 (owner approved): Free / Pro $29 / Agency $99 added
+   to `/pricing` as planned-tier slabs, labelled "PLANNED — NOT LIVE", test-mode waitlist/CTA forms,
+   checkout_start analytics. Billing enforcement not built (payment not configured).
+2. **"1000 specialized prompts" library** — ✅ ADDRESSED (both routes, strongest combined):
+   - Seed library LIVE: 48 prompts (12 categories × 4 pipeline tasks) assembled deterministically
+     by `scripts/build-prompt-library.mjs` → `content/fullkonk/prompts/library.json`; wired into
+     fullKONK via `services/fullkonk.prompts.ts` + a PLAYBOOK selector in the settings strip
+     (loads architect prompt + verify gate into the system-prompt override).
+   - Scale-up: `owner-docs/PROMPT_FOUNDRY.md` — engineered master prompt + 25×40 matrix; the
+     owner runs it 25 times on any frontier model and drops JSON batches into `owner-docs/prompts/`;
+     agent merges/validates with the same quality law (tests/prompt-library.test.ts enforces it).
 3. **Obsidian plugin version** — documented extensively; separate product, not started.
-4. Free-tier daily limits/quotas enforcement (docs suggest 3 generations/day free tier) —
-   needs the monetization decision before implementing.
+4. Free-tier daily limits/quotas enforcement (3 generations/day) — still awaiting monetization
+   go-live decision.
