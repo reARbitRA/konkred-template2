@@ -1,0 +1,13 @@
+{
+  "sampleLabel": "SYNTHETIC PUBLIC RFP SAMPLE",
+  "questions": [
+    { "id": "Q1", "question": "Describe your experience implementing security programs for SaaS customers." },
+    { "id": "Q2", "question": "What is your typical implementation timeline for a mid-size deployment?" },
+    { "id": "Q3", "question": "Do you support integration with our existing ticketing system?" }
+  ],
+  "contentLibrary": [
+    { "id": "LIB-01", "content": "KONKRED has delivered security audit engagements for mid-size SaaS companies, including evidence mapping for SOC 2 programs (synthetic sample library content)." },
+    { "id": "LIB-02", "content": "Standard implementation timeline: four to six weeks for mid-size deployments (synthetic sample library content)." },
+    { "id": "LIB-03", "content": "Integration with major ticketing platforms is available through a documented API (synthetic sample library content)." }
+  ]
+}

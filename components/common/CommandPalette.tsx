@@ -18,16 +18,15 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, onNavi
   const allCommands = [
     { id: 'fullkonk', label: 'fullKONK_> AI Compiler', icon: Shield, group: 'Navigation', action: () => onNavigate('fullkonk'), requiresAuth: false },
     { id: 'redaeye', label: 'REDAEYE Adversarial Red Teaming', icon: Shield, group: 'Navigation', action: () => onNavigate('redaeye'), requiresAuth: false },
-    { id: 'ktools', label: 'K-Tools Enterprise Suite', icon: Shield, group: 'Navigation', action: () => onNavigate('ktools'), requiresAuth: false },
-    { id: 'marketplace', label: 'Go to Marketplace', icon: ShoppingBag, group: 'Navigation', action: () => onNavigate('marketplace'), requiresAuth: false },
-    { id: 'forge', label: 'Open The Forge', icon: Shield, group: 'Navigation', action: () => onNavigate('forge_audit'), requiresAuth: false },
+    { id: 'catalogue', label: 'Product Catalogue', icon: ShoppingBag, group: 'Navigation', action: () => onNavigate('catalogue'), requiresAuth: false },
+  { id: 'pricing', label: 'Pricing', icon: ShoppingBag, group: 'Navigation', action: () => onNavigate('pricing'), requiresAuth: false },
+  { id: 'validation', label: 'Validation Record', icon: ShoppingBag, group: 'Navigation', action: () => onNavigate('validation'), requiresAuth: false },
+    { id: 'audit', label: 'AUDITOR — Neural Audit', icon: Shield, group: 'Navigation', action: () => onNavigate('forge_audit'), requiresAuth: false },
     { id: 'docs', label: 'Documentation', icon: FileText, group: 'Resources', action: () => onNavigate('documentation'), requiresAuth: false },
     { id: 'home', label: 'Return to Base', icon: Home, group: 'Navigation', action: () => onNavigate('landing'), requiresAuth: false },
+    { id: 'intel', label: 'Intel Blog', icon: FileText, group: 'Resources', action: () => onNavigate('intel'), requiresAuth: false },
     
-    { id: 'dashboard', label: 'Seller Dashboard', icon: LayoutDashboard, group: 'Navigation', action: () => onNavigate('seller_dashboard'), requiresAuth: true },
-    { id: 'wallet', label: 'Wallet & Liquidity', icon: CreditCard, group: 'Navigation', action: () => onNavigate('wallet'), requiresAuth: true },
-    { id: 'settings', label: 'System Settings', icon: Settings, group: 'General', action: () => onNavigate('account'), requiresAuth: true },
-    { id: 'new_listing', label: 'Deploy New Protocol', icon: PlusCircle, group: 'Actions', action: () => onNavigate('wizard'), requiresAuth: true },
+    { id: 'settings', label: 'Account & Settings', icon: Settings, group: 'General', action: () => onNavigate('account'), requiresAuth: true },
     { id: 'logout', label: 'Terminate Session', icon: LogOut, group: 'System', action: async () => { await logout(); onNavigate('landing'); }, requiresAuth: true },
   ];
 

@@ -35,7 +35,7 @@ const consultingPackages = [
     title: 'Market Readiness Advisory', 
     price: 1200, 
     duration: '2 Hours', 
-    desc: 'Strategic positioning, valuation benchmarking, and acquisition target analysis.' 
+    desc: 'Strategic positioning, benchmarking, and target analysis.' 
   },
   { 
     id: 'S3', 
@@ -63,12 +63,12 @@ const ConsultingPage: React.FC<ConsultingPageProps> = ({ onNavigate }) => {
     {
       title: 'Arbitra 4 Orchestration',
       subtitle: 'Multi-stage Validation',
-      desc: 'Provisioning of a live multi-agent validator net. Agents dynamically cross-examine inputs and syntheses before output execution.'
+      desc: 'Provisioning of a multi-agent review pipeline. Agents cross-examine inputs and syntheses before output is shared with your team.'
     },
     {
       title: 'Final Implementation',
       subtitle: 'Production Lift-off',
-      desc: 'Production deployment with zero downtime. 100% of pipeline metrics are projected to live executive telemetry HUDs.'
+      desc: 'Deployment guidance for your environment. Pipeline metrics are shared in structured reports for your review.'
     }
   ];
 

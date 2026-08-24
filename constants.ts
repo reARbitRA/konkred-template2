@@ -1,25 +1,16 @@
-import { AIProviderID, User } from './types.ts';
+import { AIProviderID } from './types.ts';
 
 export const BRAND = {
     name: 'KONKRED',
     suffix: '.xyz',
-    tagline: 'The Operating System for AI Commerce'
+    tagline: 'AI Workflow Marketplace & Product Platform'
 };
 
-export const LICENSE_TYPES = [
-  { id: 'personal', name: 'Personal License', multiplier: 1, description: 'Single node deployment. For individual architects and researchers.' },
-  { id: 'commercial', name: 'Commercial License', multiplier: 2.5, description: 'Up to 5 nodes. For boutique consultancies and startup labs.' },
-  { id: 'enterprise', name: 'Enterprise License', multiplier: 8, description: 'Unlimited node distribution. For global enterprise infrastructure.' },
-];
-
-export const ASSET_TYPES = [
-    { id: 'prompt', name: 'Prompt System' },
-    { id: 'agent', name: 'Autonomous Agent' },
-    { id: 'dataset', name: 'Proprietary Dataset' },
-    { id: 'api', name: 'Enterprise API' },
-    { id: 'protocol', name: 'Logic Protocol' },
-];
-
+/**
+ * AI provider registry used by the account-level AI configuration.
+ * Marketplace-specific constants (licenses, asset types, sort options,
+ * trust points, how-it-works steps) were removed with the mock marketplace.
+ */
 export const AI_PROVIDERS: Record<AIProviderID, { name: string; baseUrl: string; models: string[] }> = {
   openai: {
     name: 'OpenAI',
@@ -97,56 +88,3 @@ export const AI_PROVIDERS: Record<AIProviderID, { name: string; baseUrl: string;
     models: ['command-r-plus', 'command-r']
   }
 };
-
-export const SUBSCRIPTION_PLANS = [
-    { id: 'free', name: 'Explorer', price: 0 },
-    { id: 'pro', name: 'Professional', price: 49 },
-    { id: 'enterprise', name: 'Enterprise', price: 299 },
-];
-
-export const CATEGORIES = [
-    { id: 'content', name: 'Content' },
-    { id: 'cybersecurity', name: 'Cybersecurity' },
-    { id: 'business_automation', name: 'Business Automation' },
-    { id: 'creative_tools', name: 'Creative Tools' },
-];
-
-export const SORT_OPTIONS = [
-    { label: 'Trending', value: 'trending' },
-    { label: 'Newest', value: 'newest' },
-    { label: 'Price: Low', value: 'price_low' },
-    { label: 'Price: High', value: 'price_high' },
-    { label: 'Highest Rated', value: 'rating' },
-];
-
-export const HOW_IT_WORKS_BUYER = [
-  { step: '01', title: 'Search', icon: 'Search', description: 'Browse the verified library for structural capital.' },
-  { step: '02', title: 'Verify', icon: 'Shield', description: 'Review the audit report and technical grading.' },
-  { step: '03', title: 'Acquire', icon: 'CreditCard', description: 'Secure licensing via decentralized settlement.' },
-  { step: '04', title: 'Deploy', icon: 'Rocket', description: 'Download the payload to your secure enclave.' },
-];
-
-export const HOW_IT_WORKS_SELLER = [
-  { step: '01', title: 'Design', icon: 'PenTool', description: 'Construct high-fidelity logic maps or agents.' },
-  { step: '02', title: 'Audit', icon: 'Shield', description: 'Pass the Forge verification for logic integrity.' },
-  { step: '03', title: 'Publish', icon: 'Upload', description: 'Deploy your asset to the global network.' },
-  { step: '04', title: 'Earn', icon: 'DollarSign', description: 'Receive instant yield on every acquisition.' },
-];
-
-/**
- * Trust and verification pillars.
- */
-export const TRUST_POINTS = [
-  {
-    title: 'Deterministic Logic',
-    description: 'Every asset undergoes formal verification to ensure logical consistency and output stability.'
-  },
-  {
-    title: 'Zero-Hallucination',
-    description: 'Protocols are stress-tested against adversarial inputs to minimize probabilistic error rates.'
-  },
-  {
-    title: 'Secure Settlement',
-    description: 'Instant global clearing via decentralized crypto rails ensures privacy and sovereign ownership.'
-  }
-];

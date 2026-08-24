@@ -1,0 +1,11 @@
+{
+  "sampleLabel": "SYNTHETIC PUBLIC FP&A SAMPLE",
+  "period": "2026-05",
+  "lines": [
+    { "lineItem": "Revenue - Subscription", "budget": 250000, "actual": 241000 },
+    { "lineItem": "Cost of Revenue", "budget": 60000, "actual": 64000 },
+    { "lineItem": "Marketing Spend", "budget": 40000, "actual": 52000 },
+    { "lineItem": "R&D Headcount", "budget": 90000, "actual": 88000 },
+    { "lineItem": "G&A", "budget": 45000, "actual": 43000 }
+  ]
+}

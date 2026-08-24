@@ -63,7 +63,7 @@ const SignupModal: React.FC<SignupModalProps> = ({ onClose, onSuccess }) => {
                 <input type="password" placeholder="••••••••••••" className="w-full bg-void-200 border border-white/5 rounded-xl px-5 py-4 text-white focus:border-neon-purple outline-none font-mono" />
               </div>
               <div className="p-6 bg-white/[0.02] border border-white/5 rounded-2xl">
-                 <p className="text-xs text-ghost leading-relaxed font-light italic">Keys must exceed 12 characters and undergo secondary entropy validation by the Forge.</p>
+                 <p className="text-xs text-ghost leading-relaxed font-light italic">Keys must exceed 12 characters and undergo secondary entropy validation by the KONKRED platform.</p>
               </div>
             </div>
           )}

@@ -6,7 +6,7 @@ const Notifications: React.FC = () => {
   const notifications = [
     { id: 1, type: 'success', title: 'Asset Acquisition Confirmed', desc: 'SaaS Valuation Model v4 was successfully added to your enclave.', time: '2 hours ago' },
     { id: 2, type: 'alert', title: 'New Device Detected', desc: 'Login attempt from IP 192.168.1.42 (London, UK).', time: '1 day ago' },
-    { id: 3, type: 'info', title: 'System Update v2.5', desc: 'The Forge has been upgraded with new logic audit capabilities.', time: '3 days ago' },
+    { id: 3, type: 'info', title: 'System Update v2.5', desc: 'fullKONK_> pipeline and audit capabilities were upgraded.', time: '3 days ago' },
   ];
 
   const getIcon = (type: string) => {

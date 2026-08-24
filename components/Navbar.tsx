@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import Logo3D from './Logo3D.tsx';
+import { KonkredLogo } from './brand/KonkredLogo.tsx';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
-  Menu, X, Search, LogIn, User as UserIcon, LayoutDashboard, 
-  Database, Wallet, LogOut, Terminal, Cpu, Hammer, Home, ChevronRight, Activity, Shield 
+  Menu, X, Search, User as UserIcon, 
+  LogOut, Terminal, Cpu, Hammer, Home, ChevronRight, Shield, ShieldCheck, Package 
 } from 'lucide-react';
 import { PageView, User } from '../types.ts';
 import { getPathForPage } from '../utils/routes.ts';
@@ -35,36 +35,39 @@ const Navbar: React.FC<NavbarProps> = ({
   }, []);
 
   const publicNavItems = [
-    { label: 'Browse Tools', page: 'marketplace' as PageView },
-    { label: 'Services', page: 'advisory' as PageView },
-    { label: 'Intel Blog', page: 'intel' as PageView },
-    { label: 'Knowledge Hub', page: 'academy' as PageView },
-  ];
-
-  const dashboardNavItems = [
-    { label: 'Playgrounds', page: 'playgrounds' as PageView },
-    { label: 'Intel Report', page: 'intel_report' as PageView },
+    { label: 'Catalogue', page: 'catalogue' as PageView },
+    { label: 'Pricing', page: 'pricing' as PageView },
+    { label: 'Audit', page: 'forge_audit' as PageView },
     { label: 'fullKONK_>', page: 'fullkonk' as PageView },
-    { label: 'Network', page: 'network' as PageView },
+    { label: 'Advisory', page: 'advisory' as PageView },
+    { label: 'Intel', page: 'intel' as PageView },
+    { label: 'Academy', page: 'academy' as PageView },
   ];
 
   const getPageTitle = (page: PageView) => {
     switch (page) {
       case 'landing': return 'BASE SYSTEM';
-      case 'marketplace': return 'PROTOCOLS';
-      case 'playgrounds': return 'PLAYGROUNDS';
-      case 'intel_report': return 'INTEL REPORT';
+      case 'catalogue': return 'PRODUCT CATALOGUE';
+      case 'suite_detail': return 'SUITE';
+      case 'workflow_detail': return 'WORKFLOW TOOL';
+      case 'kit_detail': return 'WORKFLOW KIT';
+      case 'pricing': return 'PRICING';
+      case 'validation': return 'VALIDATION';
+      case 'sprint': return 'VALIDATION SPRINT';
+      case 'enterprise': return 'ENTERPRISE';
+      case 'partners': return 'PARTNERS';
+      case 'forge_audit': return 'AUDITOR';
       case 'fullkonk': return 'fullKONK_>';
-      case 'forge_audit':
-      case 'forge': return 'THE FORGE';
-      case 'wallet': return 'NODE LEDGER';
-      case 'usage': return 'ENCLAVE LIBRARY';
-      case 'seller_dashboard': return 'CONTROLLER';
-      case 'account': return 'SECURITY PROFILE';
-      case 'dispute': return 'ARBITRATION';
-      case 'admin': return 'SYSTEM ADMIN';
+      case 'redaeye': return 'REDAEYE';
+      case 'account': return 'ACCOUNT';
+      case 'not_found': return '404';
       default: return 'CONSOLE';
     }
+  };
+
+  const handleNav = (page: PageView) => {
+    onNavigate(page);
+    setIsOpen(false);
   };
 
   return (
@@ -79,6 +82,7 @@ const Navbar: React.FC<NavbarProps> = ({
             ? 'py-3 bg-void-100 border-b-4 border-black shadow-brutalist' 
             : 'py-4 bg-void-100 border-b-4 border-black'
         }`}
+        style={{ background: 'var(--k-bg)' }}
         initial={{ y: -60, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.2 }}
@@ -92,23 +96,19 @@ const Navbar: React.FC<NavbarProps> = ({
             onClick={(e) => {
               if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
                 e.preventDefault();
-                onNavigate('landing');
+                handleNav('landing');
               }
             }}
           >
-            <div className="transition-all duration-150 group-hover:scale-105">
-              <Logo3D size={28} />
+            <div className="transition-transform duration-150 group-hover:scale-105">
+              <KonkredLogo size={30} />
             </div>
             <div className="flex flex-col text-left">
-              <div className="flex items-center gap-1.5">
-                <span className="text-xs font-mono font-black tracking-[0.25em] text-white uppercase sm:text-sm">KONKRED</span>
-                <span className="h-1.5 w-1.5 rounded-none bg-signal animate-pulse hidden sm:inline-block" />
-              </div>
-              <p className="text-[8px] text-void-600 font-mono tracking-wider -mt-0.5 uppercase">SYSTEM_NODE://CORE</p>
+              <p className="text-[8px] text-void-600 font-mono tracking-wider uppercase">AI WORKFLOW PLATFORM</p>
             </div>
           </a>
 
-          {/* Active Module Indicator (Only shown on mobile/tablet when Logged In) */}
+          {/* Active Module Indicator (Only shown on mobile/tablet) */}
           {user && (
             <div className="lg:hidden flex items-center gap-1.5 bg-black border-2 border-black py-0.5 px-2.5 rounded-none">
               <span className="w-1.5 h-1.5 bg-signal rounded-none animate-pulse" />
@@ -118,7 +118,7 @@ const Navbar: React.FC<NavbarProps> = ({
             </div>
           )}
 
-          {/* Search Trigger Input (Desktop) - Responsive space-saving bar */}
+          {/* Search Trigger Input (Desktop) */}
           {!user && onOpenCmd && (
             <div 
               onClick={onOpenCmd}
@@ -130,7 +130,7 @@ const Navbar: React.FC<NavbarProps> = ({
             </div>
           )}
 
-          {/* Private Public Menu Links (Desktop) */}
+          {/* Public Menu Links (Desktop) */}
           <div className="hidden md:flex items-center gap-4 lg:gap-6 ml-auto px-4">
             {/* REDAEYE Direct Nav Entry */}
             <a
@@ -138,21 +138,20 @@ const Navbar: React.FC<NavbarProps> = ({
               onClick={(e) => {
                 if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
                   e.preventDefault();
-                  onNavigate('redaeye');
+                  handleNav('redaeye');
                 }
               }}
               className={`relative flex items-center gap-2 px-3 py-1.5 text-[10px] font-mono uppercase tracking-widest font-black border-2 transition-all duration-200 group/redaeye ${
                 currentPage === 'redaeye'
-                  ? 'bg-[#FF003C] text-white border-[#FF003C] shadow-[0_0_15px_rgba(255,0,60,0.6)]'
-                  : 'bg-black text-[#FF003C] border-[#FF003C]/80 hover:bg-[#FF003C] hover:text-white hover:shadow-[0_0_12px_rgba(255,0,60,0.5)]'
+                  ? 'bg-[#FF003C] text-white border-[#FF003C] shadow-[4px_4px_0_#000]'
+                  : 'bg-black text-[#FF003C] border-[#FF003C]/80 hover:bg-[#FF003C] hover:text-white hover:shadow-[4px_4px_0_#000]'
               }`}
             >
               <Shield size={12} className="shrink-0 animate-pulse text-[#FF003C] group-hover/redaeye:text-white" />
               <span>REDAEYE</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-[#f5279c] animate-ping" />
             </a>
 
-            {(user ? dashboardNavItems : publicNavItems).map((item) => {
+            {publicNavItems.map((item) => {
               const isActive = currentPage === item.page;
               return (
                 <a
@@ -161,7 +160,7 @@ const Navbar: React.FC<NavbarProps> = ({
                   onClick={(e) => {
                     if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
                       e.preventDefault();
-                      onNavigate(item.page);
+                      handleNav(item.page);
                     }
                   }}
                   className="relative text-[10px] font-mono uppercase tracking-widest py-1.5 hover:text-signal font-black transition-all duration-150 group/link"
@@ -183,7 +182,7 @@ const Navbar: React.FC<NavbarProps> = ({
                   onClick={(e) => {
                     if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
                       e.preventDefault();
-                      onNavigate('enter');
+                      handleNav('enter');
                     }
                   }}
                   className="text-[10px] font-mono uppercase tracking-widest font-black text-void-500 hover:text-white py-2 px-3 transition-colors"
@@ -195,25 +194,25 @@ const Navbar: React.FC<NavbarProps> = ({
                   onClick={(e) => {
                     if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
                       e.preventDefault();
-                      onNavigate('join_network');
+                      handleNav('join_network');
                     }
                   }}
                   className="relative overflow-hidden px-4 py-2.5 bg-signal text-black text-[10px] font-mono tracking-widest font-black rounded-none border-2 border-black shadow-brutalist hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-brutalist-hover transition-all"
                 >
-                  JOIN_NETWORK_
+                  JOIN_WAITLIST_
                 </a>
               </>
             ) : (
-              /* Compact dashboard user badge */
+              /* Compact account badge */
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-3 bg-black border-2 border-black py-1 px-3 rounded-none">
                   <div className="flex flex-col text-right">
                     <span className="text-[9px] font-black text-white uppercase tracking-wider">{user.name}</span>
-                    <span className="text-[9px] font-mono text-signal font-bold">${user.balance.fiat.toLocaleString()}</span>
+                    <span className="text-[9px] font-mono text-signal font-bold uppercase">{user.tier} TIER</span>
                   </div>
                   <div 
                     className="w-7 h-7 rounded-none bg-signal p-[1px] cursor-pointer hover:opacity-80 transition-opacity" 
-                    onClick={() => onNavigate('account')}
+                    onClick={() => handleNav('account')}
                   >
                     <div className="w-full h-full bg-void-100 rounded-none flex items-center justify-center font-bold text-white text-[9px] border border-black">
                       {user.name.substring(0, 2).toUpperCase()}
@@ -223,7 +222,7 @@ const Navbar: React.FC<NavbarProps> = ({
                 <button 
                   onClick={onLogout}
                   className="p-2 text-void-600 hover:text-red-500 hover:bg-black border border-transparent hover:border-black rounded-none transition-all"
-                  title="Terminate Session"
+                  title="Sign out"
                 >
                   <LogOut size={16} />
                 </button>
@@ -231,7 +230,7 @@ const Navbar: React.FC<NavbarProps> = ({
             )}
           </div>
 
-          {/* Responsive Hamburger Toggle - ONLY show below md/lg viewports */}
+          {/* Responsive Hamburger Toggle */}
           <button 
             className="md:hidden p-2 border-2 border-black bg-black text-zinc-400 hover:text-white rounded-none transition-all focus:outline-none" 
             onClick={() => setIsOpen(!isOpen)}
@@ -267,18 +266,18 @@ const Navbar: React.FC<NavbarProps> = ({
               {/* Drawer Content */}
               <div className="flex items-center justify-between pb-6 border-b border-zinc-900 mt-2">
                 <div className="flex items-center gap-3">
-                  <Logo3D size={26} />
-                  <span className="text-sm font-mono font-black tracking-widest text-white">KONKRED</span>
+                  <KonkredLogo size={26} />
                 </div>
                 <button 
                   onClick={() => setIsOpen(false)}
                   className="p-1.5 border border-zinc-855 rounded-lg bg-zinc-900 hover:bg-zinc-850 transition-all text-zinc-400 hover:text-white"
+                  aria-label="Close Menu"
                 >
                   <X size={14} />
                 </button>
               </div>
 
-              {/* User Node Info inside Mobile Drawer */}
+              {/* User Info inside Mobile Drawer */}
               {user && (
                 <div className="p-4 bg-zinc-900/40 border border-zinc-905 rounded-xl my-5 space-y-3">
                   <div className="flex items-center gap-3">
@@ -289,17 +288,7 @@ const Navbar: React.FC<NavbarProps> = ({
                     </div>
                     <div>
                       <h4 className="text-white font-bold text-xs truncate w-40">{user.name}</h4>
-                      <p className="text-[8px] text-zinc-500 font-mono uppercase tracking-widest mt-0.5">{user.tier.toUpperCase()} NODE_OPERATOR</p>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 pt-2 border-t border-zinc-900 text-[10px] font-mono">
-                    <div className="bg-black/60 p-2 rounded-lg border border-zinc-900">
-                      <span className="text-zinc-500 block text-[7px] uppercase tracking-wider mb-0.5">LIQUID</span>
-                      <span className="text-emerald-400 font-bold">${user.balance.fiat.toLocaleString()}</span>
-                    </div>
-                    <div className="bg-black/60 p-2 rounded-lg border border-zinc-900">
-                      <span className="text-zinc-500 block text-[7px] uppercase tracking-wider mb-0.5">LEDGER</span>
-                      <span className="text-white font-bold">{user.balance.crypto.toFixed(2)} USDT</span>
+                      <p className="text-[8px] text-zinc-500 font-mono uppercase tracking-widest mt-0.5">{user.tier.toUpperCase()} ACCOUNT</p>
                     </div>
                   </div>
                 </div>
@@ -307,44 +296,17 @@ const Navbar: React.FC<NavbarProps> = ({
 
               {/* Primary Mobile Menu items */}
               <div className="flex-1 py-4 space-y-1">
-                {!user ? (
-                  <div className="space-y-1.5 label text-left">
-                    <span className="text-[8px] font-mono uppercase text-zinc-550 tracking-[0.25em] block pl-3 mb-2 font-bold">DIRECTORY NODE</span>
-                    {publicNavItems.map((item) => (
-                      <DrawerLink 
-                        key={item.page}
-                        icon={Terminal}
-                        label={item.label} 
-                        onClick={() => { onNavigate(item.page); setIsOpen(false); }}
-                        active={currentPage === item.page} 
-                      />
-                    ))}
-                    <DrawerLink 
-                      icon={Cpu}
-                      label="Custom Consulting" 
-                      onClick={() => { onNavigate('advisory'); setIsOpen(false); }}
-                      active={currentPage === 'advisory'} 
-                    />
-                  </div>
-                ) : (
-                  <div className="space-y-5 text-left">
-                    <div className="space-y-1">
-                      <span className="text-[8px] font-mono uppercase text-zinc-550 tracking-[0.25em] block pl-3 mb-1 font-bold">OPERATIONAL DIRECTORY</span>
-                      <DrawerLink icon={Home} label="Base System Home" onClick={() => { onNavigate('landing'); setIsOpen(false); }} active={currentPage === 'landing'} />
-                      <DrawerLink icon={Terminal} label="Playgrounds Shell" onClick={() => { onNavigate('playgrounds'); setIsOpen(false); }} active={currentPage === 'playgrounds'} />
-                      <DrawerLink icon={Cpu} label="System Intel Analytics" onClick={() => { onNavigate('intel_report'); setIsOpen(false); }} active={currentPage === 'intel_report'} />
-                      <DrawerLink icon={Hammer} label="fullKONK_> Compiler" onClick={() => { onNavigate('fullkonk'); setIsOpen(false); }} active={currentPage === 'fullkonk'} />
-                    </div>
-
-                    <div className="space-y-1">
-                      <span className="text-[8px] font-mono uppercase text-zinc-550 tracking-[0.25em] block pl-3 mb-1 font-bold">LEDGER DIRECTORY</span>
-                      <DrawerLink icon={LayoutDashboard} label="Network Controller" onClick={() => { onNavigate('seller_dashboard'); setIsOpen(false); }} active={currentPage === 'seller_dashboard'} />
-                      <DrawerLink icon={Database} label="Purchased Enclave Modules" onClick={() => { onNavigate('usage'); setIsOpen(false); }} active={currentPage === 'usage'} />
-                      <DrawerLink icon={Wallet} label="Node Wallet Liquidity" onClick={() => { onNavigate('wallet'); setIsOpen(false); }} active={currentPage === 'wallet'} />
-                      <DrawerLink icon={UserIcon} label="Identity Profile Keys" onClick={() => { onNavigate('account'); setIsOpen(false); }} active={currentPage === 'account'} />
-                    </div>
-                  </div>
-                )}
+                <div className="space-y-1.5 label text-left">
+                  <span className="text-[8px] font-mono uppercase text-zinc-550 tracking-[0.25em] block pl-3 mb-2 font-bold">PLATFORM</span>
+                  <DrawerLink icon={Home} label="Home" onClick={() => handleNav('landing')} active={currentPage === 'landing'} />
+                  <DrawerLink icon={Package} label="Product Catalogue" onClick={() => handleNav('catalogue')} active={currentPage === 'catalogue' || currentPage === 'suite_detail' || currentPage === 'workflow_detail' || currentPage === 'kit_detail'} />
+                  <DrawerLink icon={ShieldCheck} label="AUDITOR (Neural Audit)" onClick={() => handleNav('forge_audit')} active={currentPage === 'forge_audit'} />
+                  <DrawerLink icon={Hammer} label="fullKONK_> Compiler" onClick={() => handleNav('fullkonk')} active={currentPage === 'fullkonk'} />
+                  <DrawerLink icon={Shield} label="REDAEYE" onClick={() => handleNav('redaeye')} active={currentPage === 'redaeye'} />
+                  <DrawerLink icon={Cpu} label="Advisory" onClick={() => handleNav('advisory')} active={currentPage === 'advisory'} />
+                  <DrawerLink icon={Terminal} label="Intel & Academy" onClick={() => handleNav('intel')} active={currentPage === 'intel' || currentPage === 'academy'} />
+                  <DrawerLink icon={UserIcon} label="Account" onClick={() => handleNav(user ? 'account' : 'enter')} active={currentPage === 'account'} />
+                </div>
               </div>
 
               {/* Bottom Drawer Actions */}
@@ -352,16 +314,16 @@ const Navbar: React.FC<NavbarProps> = ({
                 {!user ? (
                   <div className="grid grid-cols-2 gap-3">
                     <button
-                      onClick={() => { onNavigate('enter'); setIsOpen(false); }}
+                      onClick={() => { handleNav('enter'); }}
                       className="py-2.5 border border-zinc-800 hover:border-zinc-700 bg-zinc-900 hover:bg-zinc-850 rounded-lg text-[10px] font-mono font-bold uppercase tracking-widest text-[#fafafa] transition-all"
                     >
                       Sign In
                     </button>
                     <button
-                      onClick={() => { onNavigate('join_network'); setIsOpen(false); }}
+                      onClick={() => { handleNav('join_network'); }}
                       className="py-2.5 bg-gradient-to-r from-cyan-500 to-cyan-600 text-black font-black rounded-lg text-[10px] font-mono uppercase tracking-widest transition-all"
                     >
-                      Join Up
+                      Join Waitlist
                     </button>
                   </div>
                 ) : (
@@ -370,12 +332,9 @@ const Navbar: React.FC<NavbarProps> = ({
                     className="w-full py-2.5 bg-red-950/20 hover:bg-red-900 border border-red-900/30 hover:border-red-600 text-red-400 hover:text-black font-bold text-[10px] font-mono uppercase tracking-widest rounded-lg transition-all flex items-center justify-center gap-2 group"
                   >
                     <LogOut size={12} className="group-hover:-translate-x-0.5 transition-transform" />
-                    TERMINATE_SESSION
+                    SIGN OUT
                   </button>
                 )}
-                <div className="text-[8px] font-mono text-zinc-600 text-center uppercase tracking-widest pt-1">
-                  NODE NETWORK STATUS // ACTIVE v4.9.4
-                </div>
               </div>
 
             </motion.div>

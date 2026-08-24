@@ -1,0 +1,3040 @@
+{
+  "suites": [
+    {
+      "title": "Customer Support Control Suite",
+      "id": "KONKRED-ARB-CSM-CONTROL-CANON-0001-v1.0",
+      "tier": "PUBLIC_CATALOGUE_SUPERVISED",
+      "staticDesignTarget": 86,
+      "buyer": "Support Operations, Customer Success and account owners",
+      "humanApprover": "Support Operations owner plus policy owner; account owner for customer actions",
+      "commercialEntryRaw": "$2,500–$6,000 Support-Control Validation Sprint",
+      "expansionRaw": "$1,500–$5,000/month managed support-health workflow",
+      "jobToBeDone": "Reduce repetitive support and customer-success review while preserving customer policy, privacy, account ownership and human approval.",
+      "definition": "A shared evidence and policy workflow for customer-support and success teams. It drafts and prioritizes; it does not refund, deny, contact, suspend, retain or change an account automatically.",
+      "includedUseCases": [
+        "Policy-grounded response drafting",
+        "SLA and escalation review",
+        "Sensitive-data redaction before translation",
+        "License entitlement and contracted-access checks",
+        "Ticket RCA and knowledge-article drafting",
+        "Customer-health/churn review with calibrated-model gating",
+        "VoC, onboarding and refund/chargeback evidence review"
+      ],
+      "modules": [
+        "policy-grounded response drafting",
+        "SLA escalation planning",
+        "sensitive-data redaction before translation",
+        "license entitlement review",
+        "support RCA and knowledge drafts",
+        "calibrated customer-health/churn review",
+        "VoC synthesis",
+        "onboarding checklist",
+        "refund/chargeback evidence review"
+      ],
+      "exclusions": [
+        "Autonomous decisioning or execution",
+        "Unsupported outcome, accuracy, ROI or certification claims",
+        "Any action outside the supplied policy, source set or named validator",
+        "Silent assumption of jurisdiction, accounting basis, clinical authority, employment rule or market data"
+      ],
+      "inputContract": [
+        "Ticket/case records with stable IDs",
+        "Customer/account and entitlement records",
+        "Versioned support, refund, SLA and communication policies",
+        "Locale and approved terminology/glossary",
+        "Customer-health features and registered model output when used",
+        "Consent, privacy and account-owner context"
+      ],
+      "outputContract": [
+        "Policy evaluation per rule",
+        "Source-linked response draft",
+        "SLA calculation and escalation proposal",
+        "Redaction register and safe translated draft",
+        "Entitlement result",
+        "RCA/knowledge draft with fact-versus-hypothesis separation",
+        "Customer-health mode and intervention queue"
+      ],
+      "validators": [
+        "Policy evaluator",
+        "Timestamp/SLA calculator",
+        "PII/secrets redaction scanner",
+        "Calibrated model registry",
+        "CRM/CS platform connector"
+      ],
+      "controlRequirements": [
+        "No refund, denial, suspension, retention concession or customer message is executed",
+        "No probability without registered calibration evidence",
+        "Minimum-necessary customer data and redaction before translation",
+        "Account owner approval for material customer action",
+        "Blameless RCA language"
+      ],
+      "pilotDesign": "One support queue, one approved policy bundle, one locale and one named support owner. Measure source coverage, reviewer correction time, escalations and policy exceptions for 30 days.",
+      "acceptanceMeasures": [
+        "Schema-valid output rate",
+        "Source-reference fidelity",
+        "Critical missing-input stop rate",
+        "Unsupported-claim rate",
+        "Human acceptance and correction time",
+        "Product-specific error or exception rate",
+        "Audit-log completeness"
+      ],
+      "failureModes": [
+        "Policy version missing",
+        "Customer entitlement conflict",
+        "Uncalibrated churn output",
+        "Sensitive data in translation input",
+        "SLA timestamps incomplete",
+        "RCA hypothesis presented as confirmed cause"
+      ],
+      "buyerQuestions": [
+        "Which support policies are authoritative?",
+        "Which actions require account-owner approval?",
+        "What customer data may enter the workflow?",
+        "What is the existing escalation SLA?",
+        "How are corrections and customer outcomes recorded?"
+      ],
+      "publicValidation": {
+        "testFocus": "Public incident timeline and public churn benchmark used to test evidence traceability, model-metadata gates and non-execution of customer actions.",
+        "result": "PASS",
+        "measuredEvidence": "The preflight used 15 public incident timestamps and 7,043 public churn rows. The policy fixture enforced human review for refunds, redaction before translation and a calibrated model requirement for probabilities.",
+        "sources": [
+          "https://blog.cloudflare.com/cloudflare-incident-march-21-2025/",
+          "https://raw.githubusercontent.com/Giskard-AI/examples/main/datasets/WA_Fn-UseC_-Telco-Customer-Churn.csv"
+        ],
+        "limitations": [
+          "The public telco file is a benchmark, not a customer tenant.",
+          "This validates bounded evidence and stop behavior, not an LLM support response benchmark."
+        ]
+      },
+      "technicalRefs": [
+        "Prompt: `arb_merged_validation/products/customer_support_control/prompt.txt`",
+        "Product dossier: `arb_merged_validation/products/customer_support_control/PRODUCT.md`",
+        "Test output: `arb_merged_validation/products/customer_support_control/test_output.json`"
+      ]
+    },
+    {
+      "title": "Finance Close, Reconciliation & Reporting Suite",
+      "id": "KONKRED-ARB-FIN-CLOSE-CANON-0001-v1.0",
+      "tier": "PUBLIC_CATALOGUE_SUPERVISED",
+      "staticDesignTarget": 88,
+      "buyer": "Controller, accounting operations and finance systems",
+      "humanApprover": "Controller or designated finance owner",
+      "commercialEntryRaw": "$3,500–$10,000 Close and Reconciliation Sprint",
+      "expansionRaw": "$2,000–$8,000/month finance workspace",
+      "jobToBeDone": "Coordinate close, reconciliation and reporting work without letting a language model post accounting entries or certify financial statements.",
+      "definition": "A finance close workbench that coordinates evidence, exceptions and narratives around deterministic accounting calculations. It never posts journals or certifies financial statements.",
+      "includedUseCases": [
+        "Close checklist and dependency management",
+        "Bank/PSP/ERP reconciliation exception review",
+        "Multi-entity consolidation and intercompany review",
+        "Financial data-quality and duplicate checks",
+        "Reporting/XBRL preparation review",
+        "CFO KPI definitions and alert narratives"
+      ],
+      "modules": [
+        "close checklist and dependency map",
+        "multi-entity consolidation review",
+        "bank/PSP/ledger reconciliation review",
+        "financial data-quality exceptions",
+        "reporting/XBRL preparation review",
+        "CFO KPI definitions and alerts"
+      ],
+      "exclusions": [
+        "Autonomous decisioning or execution",
+        "Unsupported outcome, accuracy, ROI or certification claims",
+        "Any action outside the supplied policy, source set or named validator",
+        "Silent assumption of jurisdiction, accounting basis, clinical authority, employment rule or market data"
+      ],
+      "inputContract": [
+        "ERP, bank and PSP exports with stable row IDs",
+        "Entity, period, currency and accounting-basis context",
+        "Chart of accounts and close policy",
+        "Verified reconciliation/double-entry results",
+        "Consolidation and elimination rules",
+        "KPI definitions and threshold registry"
+      ],
+      "outputContract": [
+        "Close task register",
+        "Verified-match and exception explanation",
+        "Balance/variance summary",
+        "Consolidation exceptions",
+        "Unposted journal-entry proposals",
+        "KPI narrative and evidence ledger",
+        "Controller approval queue"
+      ],
+      "validators": [
+        "ERP export validator",
+        "Reconciliation engine",
+        "Double-entry checker",
+        "Period-close validator",
+        "Currency and unit checker"
+      ],
+      "controlRequirements": [
+        "No journal posting",
+        "No financial-statement certification",
+        "Ambiguous matches remain manual review",
+        "Stable source row IDs on every exception",
+        "Segregation-of-duties and controller approval"
+      ],
+      "pilotDesign": "One entity, one monthly close and one bank/PSP feed. Baseline reconciliation time, exception count, false matches, journal-proposal correction and close-task completion.",
+      "acceptanceMeasures": [
+        "Schema-valid output rate",
+        "Source-reference fidelity",
+        "Critical missing-input stop rate",
+        "Unsupported-claim rate",
+        "Human acceptance and correction time",
+        "Product-specific error or exception rate",
+        "Audit-log completeness"
+      ],
+      "failureModes": [
+        "Opening/closing balance mismatch",
+        "Currency or sign convention mismatch",
+        "Duplicate candidate",
+        "Out-of-period transaction",
+        "Engine result absent",
+        "Narrative exceeds source evidence"
+      ],
+      "buyerQuestions": [
+        "What system is the accounting authority?",
+        "What is the close calendar?",
+        "Who may approve/post a journal?",
+        "What matching engine exists?",
+        "What is the materiality policy?"
+      ],
+      "publicValidation": {
+        "testFocus": "Public bank/ledger example data and public budget/investor data used to test deterministic arithmetic boundaries, source-row traceability and no automatic posting.",
+        "result": "PASS",
+        "measuredEvidence": "The public bank/ledger test produced 19 unique exact candidates, 1 ambiguous candidate and 8 unmatched bank rows. No journal entries were posted and no financial statement was certified.",
+        "sources": [
+          "https://github.com/pavitsu/pavit-bank-reconciliation",
+          "https://data.dumfriesva.gov/api/views/x4av-ttes/rows.csv?accessType=DOWNLOAD",
+          "https://investors.palantir.com/files/Palantir%20-%20Q4%202025%20Investor%20Presentation.pdf"
+        ],
+        "limitations": [
+          "The bank/ledger repository is example data, not a live close.",
+          "No model-specific output was evaluated."
+        ]
+      },
+      "technicalRefs": [
+        "Prompt: `arb_merged_validation/products/finance_close_reporting/prompt.txt`",
+        "Product dossier: `arb_merged_validation/products/finance_close_reporting/PRODUCT.md`",
+        "Test output: `arb_merged_validation/products/finance_close_reporting/test_output.json`"
+      ]
+    },
+    {
+      "title": "Finance Planning, Treasury & Liquidity Suite",
+      "id": "KONKRED-ARB-FIN-PLAN-CANON-0001-v1.0",
+      "tier": "PUBLIC_CATALOGUE_SUPERVISED",
+      "staticDesignTarget": 84,
+      "buyer": "FP&A leader, Treasurer and finance leadership",
+      "humanApprover": "FP&A leader or Treasurer",
+      "commercialEntryRaw": "$2,500–$7,500 Planning and Liquidity Sprint",
+      "expansionRaw": "$1,000–$4,000/month planning workspace",
+      "jobToBeDone": "Turn verified finance data into transparent variance explanations and scenario plans without pretending that a scenario is a forecast or executing treasury actions.",
+      "definition": "A scenario and planning assistant that separates supplied facts from calculated scenarios and hypotheses. It does not move cash, hedge, borrow or change a forecast without approval.",
+      "includedUseCases": [
+        "Budget/actual variance review",
+        "Cash-conversion and working-capital analysis",
+        "Liquidity scenarios",
+        "Stress-test assumption ledger",
+        "Treasury action proposals",
+        "Discount, FX and cash-risk review"
+      ],
+      "modules": [
+        "budget and forecast variance",
+        "cash conversion analysis",
+        "liquidity scenario planning",
+        "stress-test assumptions ledger",
+        "treasury action proposals",
+        "working-capital bottleneck review"
+      ],
+      "exclusions": [
+        "Autonomous decisioning or execution",
+        "Unsupported outcome, accuracy, ROI or certification claims",
+        "Any action outside the supplied policy, source set or named validator",
+        "Silent assumption of jurisdiction, accounting basis, clinical authority, employment rule or market data"
+      ],
+      "inputContract": [
+        "Time-series financial rows",
+        "Budget and forecast versions",
+        "Currency, period and entity context",
+        "Scenario assumptions and horizon",
+        "Forecast-tool output and backtest metrics",
+        "Treasury policy and approval directory"
+      ],
+      "outputContract": [
+        "Calculated variance table",
+        "Scenario register with assumptions",
+        "Liquidity and cash-conversion metrics",
+        "Sensitivity table",
+        "Unknown/unsupported driver list",
+        "Treasury approval queue"
+      ],
+      "validators": [
+        "Forecasting engine",
+        "Scenario calculator",
+        "FX/market-data source",
+        "Variance calculator",
+        "Treasury policy validator"
+      ],
+      "controlRequirements": [
+        "No cash movement, borrowing, hedging or limit change",
+        "Point estimates separated from ranges",
+        "Unknown causes remain unknown",
+        "Every calculation has units and formula",
+        "Finance approval before action"
+      ],
+      "pilotDesign": "One monthly planning cycle and one liquidity scenario. Measure arithmetic agreement, explanation provenance, assumption completeness and reviewer acceptance.",
+      "acceptanceMeasures": [
+        "Schema-valid output rate",
+        "Source-reference fidelity",
+        "Critical missing-input stop rate",
+        "Unsupported-claim rate",
+        "Human acceptance and correction time",
+        "Product-specific error or exception rate",
+        "Audit-log completeness"
+      ],
+      "failureModes": [
+        "Time series missing",
+        "Forecast horizon not defined",
+        "Budget semantics inconsistent",
+        "Zero or near-zero denominator",
+        "Scenario assumption unapproved",
+        "Market data stale"
+      ],
+      "buyerQuestions": [
+        "Which rows are authoritative?",
+        "What is the forecast method?",
+        "What thresholds make a variance material?",
+        "Which treasury actions are in scope?",
+        "What is the approval cadence?"
+      ],
+      "publicValidation": {
+        "testFocus": "Public investor liquidity and revenue figures used to test reproducible ratios, explicit assumptions and non-execution of treasury decisions.",
+        "result": "PASS",
+        "measuredEvidence": "A public-source calculation reproduced a cash-to-revenue ratio of 5.106383 from 7.2 and 1.41 billion source values. Forecasting without a time series and cash movement were correctly gated.",
+        "sources": [
+          "https://investors.palantir.com/files/Palantir%20-%20Q4%202025%20Investor%20Presentation.pdf",
+          "https://data.dumfriesva.gov/api/views/x4av-ttes/rows.csv?accessType=DOWNLOAD"
+        ],
+        "limitations": [
+          "The public investor figures are not a treasury forecast.",
+          "No scenario policy, horizon or time series was supplied."
+        ]
+      },
+      "technicalRefs": [
+        "Prompt: `arb_merged_validation/products/finance_planning_treasury/prompt.txt`",
+        "Product dossier: `arb_merged_validation/products/finance_planning_treasury/PRODUCT.md`",
+        "Test output: `arb_merged_validation/products/finance_planning_treasury/test_output.json`"
+      ]
+    },
+    {
+      "title": "Finance AP/AR, Billing & Collections Operations Suite",
+      "id": "KONKRED-ARB-FIN-APAR-CANON-0001-v1.0",
+      "tier": "PUBLIC_CATALOGUE_SUPERVISED",
+      "staticDesignTarget": 84,
+      "buyer": "AP/AR manager, billing operations and Controller",
+      "humanApprover": "Accounts Payable/Receivable manager or Controller",
+      "commercialEntryRaw": "$3,000–$9,000 Exception-Routing Sprint",
+      "expansionRaw": "$2,000–$7,000/month finance operations workspace",
+      "jobToBeDone": "Route AP/AR, billing and collections exceptions with stable evidence while preserving segregation of duties and avoiding automatic payment or collection actions.",
+      "definition": "An exception-first finance operations workbench. It proposes classifications and resolution steps while preserving segregation of duties and human approval.",
+      "includedUseCases": [
+        "Invoice/receipt extraction",
+        "Three-way-match review",
+        "Usage and billing anomaly triage",
+        "Dispute and dunning prioritization",
+        "Commission leakage review",
+        "Expense-policy evidence review",
+        "Unposted adjustment proposals"
+      ],
+      "modules": [
+        "invoice and receipt extraction",
+        "three-way-match exception review",
+        "billing and usage anomaly triage",
+        "dispute and dunning prioritization",
+        "commission leakage review",
+        "expense-policy evidence review",
+        "proposed but unposted adjustments"
+      ],
+      "exclusions": [
+        "Autonomous decisioning or execution",
+        "Unsupported outcome, accuracy, ROI or certification claims",
+        "Any action outside the supplied policy, source set or named validator",
+        "Silent assumption of jurisdiction, accounting basis, clinical authority, employment rule or market data"
+      ],
+      "inputContract": [
+        "Invoices, purchase orders and receipts",
+        "ERP/PSP/bank rows",
+        "Customer and supplier policies",
+        "Payment terms and collection rules",
+        "OCR/parser and matching-engine results",
+        "Owner directory and exception SLAs"
+      ],
+      "outputContract": [
+        "Normalized invoice/receipt fields",
+        "Verified match review",
+        "Unmatched/ambiguous exception queue",
+        "Billing anomaly evidence",
+        "Collection proposal",
+        "Owner/SLA and resolution test",
+        "Proposed adjustment with approval state"
+      ],
+      "validators": [
+        "OCR/parser",
+        "Three-way-match engine",
+        "Duplicate detector",
+        "ERP/PSP connector",
+        "Payment-policy evaluator"
+      ],
+      "controlRequirements": [
+        "No invoice payment or journal post",
+        "No customer collection message without approval",
+        "No write-off or discount execution",
+        "Unreadable document routes to manual review",
+        "Stable source rows and monetary formulas"
+      ],
+      "pilotDesign": "One AP or AR queue, one policy pack and one accounting system. Measure exception routing, false matches, review time and correction rate.",
+      "acceptanceMeasures": [
+        "Schema-valid output rate",
+        "Source-reference fidelity",
+        "Critical missing-input stop rate",
+        "Unsupported-claim rate",
+        "Human acceptance and correction time",
+        "Product-specific error or exception rate",
+        "Audit-log completeness"
+      ],
+      "failureModes": [
+        "Duplicate invoice",
+        "Conflicting PO/receipt",
+        "Unreadable document",
+        "Payment-term ambiguity",
+        "Customer policy missing",
+        "Currency mismatch"
+      ],
+      "buyerQuestions": [
+        "Where is the system of record?",
+        "Which matching rules are already approved?",
+        "What actions need dual approval?",
+        "What is the exception SLA?",
+        "What source data may be processed?"
+      ],
+      "publicValidation": {
+        "testFocus": "Public bank/ledger records and a public questionnaire used to test exception routing, stable row IDs and no automatic collection or posting.",
+        "result": "PASS",
+        "measuredEvidence": "The public example-data test routed 19 exact candidates, 1 ambiguous candidate and 8 unmatched items without sending collection messages, paying invoices, posting journals or closing disputes.",
+        "sources": [
+          "https://github.com/pavitsu/pavit-bank-reconciliation",
+          "https://esentire-dot-com-assets.s3.ca-central-1.amazonaws.com/assets/resourcefiles/MDR-RFP-RFI-Questionnaire.pdf"
+        ],
+        "limitations": [
+          "The source is a bank-reconciliation example, not AP/AR production data.",
+          "The test does not measure OCR or invoice classification accuracy."
+        ]
+      },
+      "technicalRefs": [
+        "Prompt: `arb_merged_validation/products/finance_ap_ar_operations/prompt.txt`",
+        "Product dossier: `arb_merged_validation/products/finance_ap_ar_operations/PRODUCT.md`",
+        "Test output: `arb_merged_validation/products/finance_ap_ar_operations/test_output.json`"
+      ]
+    },
+    {
+      "title": "Finance Risk, Crime & Credit Analytics Suite",
+      "id": "KONKRED-ARB-FIN-RISK-CANON-0001-v1.0",
+      "tier": "INTERNAL_CONTROLLED_PILOT",
+      "staticDesignTarget": 83,
+      "buyer": "Chief Risk Officer, compliance, credit and financial-crime teams",
+      "humanApprover": "Chief Risk Officer, compliance officer or credit policy owner",
+      "commercialEntryRaw": "$5,000–$15,000 Controlled Model-Governance Sprint",
+      "expansionRaw": "$5,000–$15,000/month private risk environment",
+      "jobToBeDone": "Provide an evidence and governance layer around registered finance-risk, credit and financial-crime models without creating regulated decisions from prose.",
+      "definition": "A risk-analytics review layer that consumes validated model outputs and authoritative policy packs. It cannot create a regulated probability or make a credit, AML or capital decision from prose.",
+      "includedUseCases": [
+        "Model-output review",
+        "Credit-risk evidence ledger",
+        "AML/FCC alert triage",
+        "Capital and stress-test evidence review",
+        "Insurance/derivative model input checks",
+        "Fairness, calibration, drift and appeal review"
+      ],
+      "modules": [
+        "model-output review",
+        "credit-risk evidence ledger",
+        "AML/FCC alert triage",
+        "capital and stress-test evidence review",
+        "derivative/insurance model input checks",
+        "fairness, calibration and appeal register"
+      ],
+      "exclusions": [
+        "Autonomous decisioning or execution",
+        "Unsupported outcome, accuracy, ROI or certification claims",
+        "Any action outside the supplied policy, source set or named validator",
+        "Silent assumption of jurisdiction, accounting basis, clinical authority, employment rule or market data"
+      ],
+      "inputContract": [
+        "Registered model output",
+        "Model/version/calibration/drift metadata",
+        "Feature and protected-data policy",
+        "Confirmed labels or outcomes",
+        "Threshold and decision policy",
+        "Case evidence and appeal records"
+      ],
+      "outputContract": [
+        "Model metadata check",
+        "Alert/case evidence ledger",
+        "Threshold and fairness gaps",
+        "Alternative explanations",
+        "Human investigation queue",
+        "Unresolved validation questions"
+      ],
+      "validators": [
+        "Model registry",
+        "Calibration/drift monitor",
+        "Fairness evaluator",
+        "Case-management system",
+        "Policy/version checker"
+      ],
+      "controlRequirements": [
+        "No credit approval/denial",
+        "No account block/freeze",
+        "No alert closure or regulatory filing",
+        "No person labelled fraudulent by the assistant",
+        "Appeal and counter-evidence preserved"
+      ],
+      "pilotDesign": "One registered model or alert family, one policy, one reviewer group and a labelled historical sample. Measure calibration, false positives, escalation quality and reviewer agreement.",
+      "acceptanceMeasures": [
+        "Schema-valid output rate",
+        "Source-reference fidelity",
+        "Critical missing-input stop rate",
+        "Unsupported-claim rate",
+        "Human acceptance and correction time",
+        "Product-specific error or exception rate",
+        "Audit-log completeness"
+      ],
+      "failureModes": [
+        "Ground truth absent",
+        "Model version stale",
+        "Threshold policy missing",
+        "Protected-attribute misuse",
+        "No appeal path",
+        "Narrative suspicion treated as fact"
+      ],
+      "buyerQuestions": [
+        "Who owns the model?",
+        "Where are labels and calibration reports?",
+        "What is the decision policy?",
+        "What appeal rights exist?",
+        "What actions are expressly out of scope?"
+      ],
+      "publicValidation": {
+        "testFocus": "Public AML guidance and public investor material used to test model/label/policy hard stops; no approval, denial, alert closure or account blocking is executed.",
+        "result": "PASS",
+        "measuredEvidence": "Public FinCEN guidance was available, but missing registered-model metadata, labelled outcomes and appeal/fairness policy correctly produced hard stops. No account was blocked or loan approved/denied.",
+        "sources": [
+          "https://www.fincen.gov/resources/statutes-regulations/guidance",
+          "https://investors.palantir.com/files/Palantir%20-%20Q4%202025%20Investor%20Presentation.pdf"
+        ],
+        "limitations": [
+          "No transaction-level AML/credit labels were supplied.",
+          "This is a safety-gate test, not a fraud or credit performance benchmark."
+        ]
+      },
+      "technicalRefs": [
+        "Prompt: `arb_merged_validation/products/finance_risk_crime_credit/prompt.txt`",
+        "Product dossier: `arb_merged_validation/products/finance_risk_crime_credit/PRODUCT.md`",
+        "Test output: `arb_merged_validation/products/finance_risk_crime_credit/test_output.json`"
+      ]
+    },
+    {
+      "title": "Finance Tax, Revenue Recognition & Compliance Suite",
+      "id": "KONKRED-ARB-FIN-TAX-CANON-0001-v1.0",
+      "tier": "INTERNAL_CONTROLLED_PILOT",
+      "staticDesignTarget": 84,
+      "buyer": "Tax director, technical accounting and compliance",
+      "humanApprover": "Tax director, Technical Accounting or Controller",
+      "commercialEntryRaw": "$4,000–$12,000 Rule-Pack and Workpaper Sprint",
+      "expansionRaw": "$3,000–$10,000/month policy/evidence workspace",
+      "jobToBeDone": "Organize finance compliance workpapers and rule-linked evidence without filing, certifying or selecting a tax/accounting position.",
+      "definition": "A source-linked compliance and workpaper assistant. It identifies evidence gaps and drafts review notes; it does not file, opine, certify or select a tax position.",
+      "includedUseCases": [
+        "Revenue-recognition contract review",
+        "Tax-workpaper completeness",
+        "SOX/control evidence planning",
+        "Accounting-policy mapping",
+        "ESG financial-disclosure evidence",
+        "Jurisdiction/effective-date tracking"
+      ],
+      "modules": [
+        "versioned accounting-policy mapping",
+        "revenue-contract evidence review",
+        "tax-workpaper completeness triage",
+        "SOX/control evidence planning",
+        "ESG financial disclosure evidence review",
+        "jurisdiction and effective-date register"
+      ],
+      "exclusions": [
+        "Autonomous decisioning or execution",
+        "Unsupported outcome, accuracy, ROI or certification claims",
+        "Any action outside the supplied policy, source set or named validator",
+        "Silent assumption of jurisdiction, accounting basis, clinical authority, employment rule or market data"
+      ],
+      "inputContract": [
+        "Contracts and performance obligations",
+        "Invoices and transaction rows",
+        "Accounting/tax rule pack",
+        "Jurisdiction and effective dates",
+        "Control library and evidence period",
+        "Technical-accounting owner"
+      ],
+      "outputContract": [
+        "Rule-source ledger",
+        "Contract/transaction finding register",
+        "Workpaper gap list",
+        "Control evidence plan",
+        "Technical-owner questions",
+        "Draft—not-certified—workpaper notes"
+      ],
+      "validators": [
+        "Accounting-policy registry",
+        "Tax-rule retrieval",
+        "Contract/transaction calculator",
+        "Control-evidence repository",
+        "Effective-date checker"
+      ],
+      "controlRequirements": [
+        "No filing or signature",
+        "No legal/tax conclusion without qualified owner",
+        "Generic framework names are unmapped",
+        "Missing nexus/contract evidence stays explicit",
+        "No control certification"
+      ],
+      "pilotDesign": "One accounting or tax workpaper family, one jurisdiction and one effective-date range. Measure evidence coverage, source fidelity and reviewer corrections.",
+      "acceptanceMeasures": [
+        "Schema-valid output rate",
+        "Source-reference fidelity",
+        "Critical missing-input stop rate",
+        "Unsupported-claim rate",
+        "Human acceptance and correction time",
+        "Product-specific error or exception rate",
+        "Audit-log completeness"
+      ],
+      "failureModes": [
+        "Rule pack missing",
+        "Jurisdiction missing",
+        "Effective date unclear",
+        "Performance obligation ambiguous",
+        "Source conflict",
+        "Control presence mistaken for effectiveness"
+      ],
+      "buyerQuestions": [
+        "Which accounting/tax authority is used?",
+        "What is the period and jurisdiction?",
+        "Who signs the workpaper?",
+        "What evidence repository exists?",
+        "What is the retention policy?"
+      ],
+      "publicValidation": {
+        "testFocus": "Public financial and control sources used to test missing-policy behavior, source/effective-date requirements and no tax or accounting conclusion without an approved rule pack.",
+        "result": "PASS",
+        "measuredEvidence": "Public finance and control sources were processed, while missing accounting-policy version and tax jurisdiction correctly prevented a tax conclusion, filing or certification.",
+        "sources": [
+          "https://investors.palantir.com/files/Palantir%20-%20Q4%202025%20Investor%20Presentation.pdf",
+          "https://soc2auditors.org/insights/soc-2-controls-list/"
+        ],
+        "limitations": [
+          "Public investor/control material is not a tax workpaper or accounting rule pack.",
+          "No tax filing or accounting conclusion was attempted."
+        ]
+      },
+      "technicalRefs": [
+        "Prompt: `arb_merged_validation/products/finance_tax_revenue_compliance/prompt.txt`",
+        "Product dossier: `arb_merged_validation/products/finance_tax_revenue_compliance/PRODUCT.md`",
+        "Test output: `arb_merged_validation/products/finance_tax_revenue_compliance/test_output.json`"
+      ]
+    },
+    {
+      "title": "Investment & M&A Analytics Workbench",
+      "id": "KONKRED-ARB-FIN-MA-CANON-0001-v1.0",
+      "tier": "PUBLIC_CATALOGUE_SUPERVISED",
+      "staticDesignTarget": 84,
+      "buyer": "Deal lead, transaction services, investment and portfolio teams",
+      "humanApprover": "Deal lead plus financial, legal, tax and technical specialists",
+      "commercialEntryRaw": "$4,000–$12,000 Diligence Evidence Pack",
+      "expansionRaw": "Per-engagement or portfolio workspace",
+      "jobToBeDone": "Make M&A and portfolio analysis source-complete, conditional and reproducible without issuing an investment decision.",
+      "definition": "An evidence-led diligence and portfolio analytics workbench. It highlights what is supported, missing or contradictory; it never issues a buy/no-buy or valuation approval.",
+      "includedUseCases": [
+        "Data-room index and missing-document register",
+        "Commercial and financial diligence",
+        "Portfolio KPI review",
+        "Valuation-input provenance",
+        "Sensitivity and scenario tables",
+        "Specialist question generation"
+      ],
+      "modules": [
+        "data-room evidence ledger",
+        "commercial and financial diligence",
+        "portfolio KPI review",
+        "valuation-input provenance",
+        "scenario and sensitivity tables",
+        "specialist question register"
+      ],
+      "exclusions": [
+        "Autonomous decisioning or execution",
+        "Unsupported outcome, accuracy, ROI or certification claims",
+        "Any action outside the supplied policy, source set or named validator",
+        "Silent assumption of jurisdiction, accounting basis, clinical authority, employment rule or market data"
+      ],
+      "inputContract": [
+        "Deal context and thesis",
+        "Document inventory",
+        "Evidence extracts and tables",
+        "Structured financials",
+        "Management representations",
+        "Materiality policy and specialist policies"
+      ],
+      "outputContract": [
+        "Thesis assessment",
+        "Workstream finding ledger",
+        "Calculation register",
+        "Missing-document queue",
+        "Management questions",
+        "Specialist approval route"
+      ],
+      "validators": [
+        "Data-room indexer",
+        "Spreadsheet calculator",
+        "Financial-statement normalizer",
+        "Citation validator",
+        "Specialist review"
+      ],
+      "controlRequirements": [
+        "No buy/no-buy recommendation",
+        "No valuation approval",
+        "No management fact invention",
+        "Reported and adjusted values separated",
+        "Incomplete data room visible"
+      ],
+      "pilotDesign": "One diligence workstream and one public/private evidence sample. Measure source coverage, calculation reproducibility and missing-document recall.",
+      "acceptanceMeasures": [
+        "Schema-valid output rate",
+        "Source-reference fidelity",
+        "Critical missing-input stop rate",
+        "Unsupported-claim rate",
+        "Human acceptance and correction time",
+        "Product-specific error or exception rate",
+        "Audit-log completeness"
+      ],
+      "failureModes": [
+        "Summary mistaken for full data room",
+        "Currency/period mismatch",
+        "Management representation unverified",
+        "Valuation formula incomplete",
+        "Specialist review absent"
+      ],
+      "buyerQuestions": [
+        "What is the investment thesis?",
+        "Which workstreams are material?",
+        "Which documents are expected?",
+        "What valuation method is approved?",
+        "Who owns the final decision?"
+      ],
+      "publicValidation": {
+        "testFocus": "Public investor-presentation evidence and reproducible ratio calculation used to test conditional diligence output and no autonomous investment decision.",
+        "result": "PASS",
+        "measuredEvidence": "Five public investor values were source-located and the Q4-to-FY revenue share was calculated as 0.314732. Data-room completeness, valuation approval and investment decisions remained unestablished.",
+        "sources": [
+          "https://investors.palantir.com/files/Palantir%20-%20Q4%202025%20Investor%20Presentation.pdf"
+        ],
+        "limitations": [
+          "An investor presentation is not a complete data room.",
+          "No valuation or investment recommendation was made."
+        ]
+      },
+      "technicalRefs": [
+        "Prompt: `arb_merged_validation/products/investment_ma_analytics/prompt.txt`",
+        "Product dossier: `arb_merged_validation/products/investment_ma_analytics/PRODUCT.md`",
+        "Test output: `arb_merged_validation/products/investment_ma_analytics/test_output.json`"
+      ]
+    },
+    {
+      "title": "Pricing & Monetization Science Suite",
+      "id": "KONKRED-ARB-GRO-PRICING-CANON-0001-v1.0",
+      "tier": "PUBLIC_CATALOGUE_SUPERVISED",
+      "staticDesignTarget": 82,
+      "buyer": "Pricing, product, finance and monetization leaders",
+      "humanApprover": "Pricing owner, Finance and Legal/Compliance as applicable",
+      "commercialEntryRaw": "$3,000–$10,000 Pricing Experiment Sprint",
+      "expansionRaw": "$1,000–$4,000/month pricing analytics workspace",
+      "jobToBeDone": "Support pricing decisions through verified experiments, cost data and transparent scenarios without automatically changing prices or targeting protected groups.",
+      "definition": "A pricing analysis and experiment-planning suite. It produces assumptions, ranges and test plans from supplied data; it does not set prices or target protected groups.",
+      "includedUseCases": [
+        "Elasticity analysis",
+        "Packaging and segmentation review",
+        "Cost-to-serve analysis",
+        "Promotion/markdown scenarios",
+        "Cross-channel price consistency",
+        "Price migration planning",
+        "Experiment design and guardrails"
+      ],
+      "modules": [
+        "elasticity analysis",
+        "segmentation and packaging review",
+        "cost-to-serve model",
+        "promotion and markdown scenarios",
+        "price-consistency checks",
+        "migration and communication plan",
+        "experiment design and guardrails"
+      ],
+      "exclusions": [
+        "Autonomous decisioning or execution",
+        "Unsupported outcome, accuracy, ROI or certification claims",
+        "Any action outside the supplied policy, source set or named validator",
+        "Silent assumption of jurisdiction, accounting basis, clinical authority, employment rule or market data"
+      ],
+      "inputContract": [
+        "Timestamped price and volume data",
+        "Cost-to-serve and margin inputs",
+        "Experiment plan and verified statistical output",
+        "Market/competitive exports",
+        "Customer-impact and legal constraints",
+        "Rollout and rollback policy"
+      ],
+      "outputContract": [
+        "Effect/elasticity summary",
+        "Pricing scenario table",
+        "Guardrail register",
+        "Experiment interpretation",
+        "Customer-impact risks",
+        "Approval queue"
+      ],
+      "validators": [
+        "Experiment/statistics engine",
+        "Pricing data mart",
+        "Cost calculator",
+        "Platform/policy validator",
+        "Rollout monitor"
+      ],
+      "controlRequirements": [
+        "No price change execution",
+        "No protected-group targeting",
+        "No fabricated conversion/traffic forecast",
+        "Ranges and assumptions required",
+        "Practical versus statistical significance separated"
+      ],
+      "pilotDesign": "One pricing question, one verified dataset and one experiment or scenario. Measure statistic agreement, scenario reproducibility and decision-owner acceptance.",
+      "acceptanceMeasures": [
+        "Schema-valid output rate",
+        "Source-reference fidelity",
+        "Critical missing-input stop rate",
+        "Unsupported-claim rate",
+        "Human acceptance and correction time",
+        "Product-specific error or exception rate",
+        "Audit-log completeness"
+      ],
+      "failureModes": [
+        "Price/cost inputs absent",
+        "Post-hoc analysis",
+        "Market export stale",
+        "Protected proxy feature",
+        "Guardrail missing",
+        "Scenario presented as forecast"
+      ],
+      "buyerQuestions": [
+        "What is the estimand?",
+        "What data is timestamped?",
+        "What is the rollout policy?",
+        "Which constraints apply?",
+        "Who approves a price change?"
+      ],
+      "publicValidation": {
+        "testFocus": "Public A/B data and public SEO-factor data used to test external-statistics boundaries, missing market-data behavior and no automatic price change.",
+        "result": "PASS",
+        "measuredEvidence": "The preflight read 294,478 public A/B rows and 2,960 SEO rows. Missing price/cost inputs and missing keyword/SERP exports correctly prevented authoritative pricing effects or traffic forecasts.",
+        "sources": [
+          "https://github.com/tnangrani/Analyze_AB_Test_Results",
+          "https://github.com/Zafar-Saeed/SEO_Dataset"
+        ],
+        "limitations": [
+          "The A/B data is educational and not a pricing experiment.",
+          "No price, cost, elasticity or market dataset was supplied."
+        ]
+      },
+      "technicalRefs": [
+        "Prompt: `arb_merged_validation/products/pricing_monetization_science/prompt.txt`",
+        "Product dossier: `arb_merged_validation/products/pricing_monetization_science/PRODUCT.md`",
+        "Test output: `arb_merged_validation/products/pricing_monetization_science/test_output.json`"
+      ]
+    },
+    {
+      "title": "Healthcare Revenue Cycle Review Suite",
+      "id": "KONKRED-ARB-HEL-RCM-CANON-0001-v1.0",
+      "tier": "INTERNAL_CONTROLLED_PILOT",
+      "staticDesignTarget": 84,
+      "buyer": "Revenue-cycle, coding, payer-contract and compliance leaders",
+      "humanApprover": "Qualified coding/revenue-cycle professional plus compliance/privacy owner",
+      "commercialEntryRaw": "$6,000–$20,000 De-identified RCM Validation Sprint",
+      "expansionRaw": "$5,000–$15,000/month governed RCM service",
+      "jobToBeDone": "Improve revenue-cycle review quality and exception visibility while preventing autonomous coding, billing, medical-necessity or patient-responsibility decisions.",
+      "definition": "A supervised revenue-cycle evidence and exception workbench. It supports review of coding and payer-policy evidence but does not submit claims or make clinical or billing decisions.",
+      "includedUseCases": [
+        "Denial and underpayment triage",
+        "Coding/documentation completeness",
+        "Charge-capture exceptions",
+        "Eligibility/financial clearance",
+        "Payer-policy comparison",
+        "HCC/risk-adjustment evidence review",
+        "FWA referral packet drafting"
+      ],
+      "modules": [
+        "denial and underpayment evidence triage",
+        "coding/documentation completeness review",
+        "charge-capture exception review",
+        "eligibility and financial-clearance checklist",
+        "payer-policy comparison",
+        "HCC/risk-adjustment documentation review",
+        "FWA referral package"
+      ],
+      "exclusions": [
+        "Autonomous decisioning or execution",
+        "Unsupported outcome, accuracy, ROI or certification claims",
+        "Any action outside the supplied policy, source set or named validator",
+        "Silent assumption of jurisdiction, accounting basis, clinical authority, employment rule or market data"
+      ],
+      "inputContract": [
+        "De-identified claims/encounter records",
+        "Code-set and payer-policy versions",
+        "Documentation excerpts",
+        "Contract terms",
+        "PHI handling context",
+        "Qualified coding/revenue-cycle reviewer"
+      ],
+      "outputContract": [
+        "Evidence-backed documentation gaps",
+        "Payer-policy comparison",
+        "Exception queue",
+        "PHI handling log",
+        "Review questions and appeal materials",
+        "Qualified review route"
+      ],
+      "validators": [
+        "Code-set/rule retrieval",
+        "Claims validator",
+        "PHI detector/redactor",
+        "Revenue-cycle work queue",
+        "Qualified coder review"
+      ],
+      "controlRequirements": [
+        "No upcoding/unbundling instruction",
+        "No claim submission",
+        "No medical-necessity decision",
+        "Minimum-necessary PHI",
+        "No unsupported revenue-recovery claims"
+      ],
+      "pilotDesign": "One de-identified denial or coding queue, one payer/code-set version and one qualified reviewer. Measure evidence coverage, review time and correction rate.",
+      "acceptanceMeasures": [
+        "Schema-valid output rate",
+        "Source-reference fidelity",
+        "Critical missing-input stop rate",
+        "Unsupported-claim rate",
+        "Human acceptance and correction time",
+        "Product-specific error or exception rate",
+        "Audit-log completeness"
+      ],
+      "failureModes": [
+        "Code-set version missing",
+        "PHI overexposure",
+        "Payer contract absent",
+        "Clinical inference from billing text",
+        "Appeal path missing"
+      ],
+      "buyerQuestions": [
+        "What data can be de-identified?",
+        "Which code set and payer rules apply?",
+        "Who is the qualified reviewer?",
+        "What is the appeal process?",
+        "What is prohibited from automation?"
+      ],
+      "publicValidation": {
+        "testFocus": "Public CMS coding information used to test versioned coding-source requirements, PHI minimization and no autonomous code selection, claim submission or medical-necessity decision.",
+        "result": "PASS",
+        "measuredEvidence": "Public CMS coding information supplied coding/HCPCS evidence, but missing code-set version, payer context and PHI controls correctly prevented coding, claim submission and medical-necessity decisions.",
+        "sources": [
+          "https://www.cms.gov/medicare/coding-billing/healthcare-common-procedure-system"
+        ],
+        "limitations": [
+          "The CMS page is public coding information, not a claims dataset or payer contract.",
+          "No clinical or billing decision was made."
+        ]
+      },
+      "technicalRefs": [
+        "Prompt: `arb_merged_validation/products/healthcare_revenue_cycle/prompt.txt`",
+        "Product dossier: `arb_merged_validation/products/healthcare_revenue_cycle/PRODUCT.md`",
+        "Test output: `arb_merged_validation/products/healthcare_revenue_cycle/test_output.json`"
+      ]
+    },
+    {
+      "title": "Clinical & Patient-Care Decision-Support Copilot",
+      "id": "KONKRED-ARB-HEALTH-CLINICAL-CANON-0001-v1.0",
+      "tier": "INTERNAL_CONTROLLED_PILOT",
+      "staticDesignTarget": 83,
+      "buyer": "Clinical governance, care operations and licensed clinicians",
+      "humanApprover": "Licensed clinician and clinical governance owner",
+      "commercialEntryRaw": "$10,000–$30,000 Clinical Governance Validation",
+      "expansionRaw": "Private clinician-review environment",
+      "jobToBeDone": "Help clinicians retrieve, compare and document evidence without diagnosing, prescribing or replacing clinical judgment.",
+      "definition": "A clinician-facing evidence and coordination assistant only. It does not diagnose, prescribe, triage emergencies, select treatment or communicate clinical instructions without clinical review.",
+      "includedUseCases": [
+        "Evidence retrieval and citation",
+        "Clinical question summary",
+        "Care-coordination draft",
+        "Quality/safety review",
+        "Patient-education draft for approval",
+        "Specialist disagreement register"
+      ],
+      "modules": [
+        "evidence retrieval and citation",
+        "care-coordination draft",
+        "clinical question summarization",
+        "quality and safety review",
+        "patient-education draft",
+        "specialist disagreement and escalation register"
+      ],
+      "exclusions": [
+        "Autonomous decisioning or execution",
+        "Unsupported outcome, accuracy, ROI or certification claims",
+        "Any action outside the supplied policy, source set or named validator",
+        "Silent assumption of jurisdiction, accounting basis, clinical authority, employment rule or market data"
+      ],
+      "inputContract": [
+        "Clinical question",
+        "Approved evidence/guideline sources",
+        "Retrieval date and version",
+        "Minimum-necessary patient context",
+        "Clinical model metadata if used",
+        "Clinician reviewer"
+      ],
+      "outputContract": [
+        "Clinical question restatement",
+        "Evidence table",
+        "Uncertainty/conflict register",
+        "Clinician review queue",
+        "Safe draft for approval",
+        "Source and retrieval ledger"
+      ],
+      "validators": [
+        "Evidence retrieval",
+        "Citation verifier",
+        "Clinical model registry",
+        "PHI redactor",
+        "Clinical governance review"
+      ],
+      "controlRequirements": [
+        "No diagnosis",
+        "No treatment selection",
+        "No prescription",
+        "No emergency triage",
+        "No patient-facing output without clinical review",
+        "No invented probability"
+      ],
+      "pilotDesign": "One non-emergency clinical question class, approved sources and a clinician reviewer. Measure citation fidelity, omission/error rate and clinician acceptance.",
+      "acceptanceMeasures": [
+        "Schema-valid output rate",
+        "Source-reference fidelity",
+        "Critical missing-input stop rate",
+        "Unsupported-claim rate",
+        "Human acceptance and correction time",
+        "Product-specific error or exception rate",
+        "Audit-log completeness"
+      ],
+      "failureModes": [
+        "Source outdated",
+        "Conflicting studies",
+        "Patient context insufficient",
+        "Evidence summary becomes recommendation",
+        "PHI in output"
+      ],
+      "buyerQuestions": [
+        "What clinical questions are in scope?",
+        "Which evidence authorities are approved?",
+        "What is the escalation path?",
+        "What patient data is necessary?",
+        "Who signs off?"
+      ],
+      "publicValidation": {
+        "testFocus": "Public FDA AI/ML medical-device information used to test evidence-source/version requirements and hard stops against diagnosis, treatment or patient-facing execution.",
+        "result": "PASS",
+        "measuredEvidence": "Public FDA AI/ML medical-device material was source-checked. The workflow remained an evidence summary for clinician review and executed no diagnosis, treatment, prescription or emergency triage.",
+        "sources": [
+          "https://www.fda.gov/medical-devices/software-medical-device-samd/artificial-intelligence-and-machine-learning-aiml-enabled-medical-devices"
+        ],
+        "limitations": [
+          "This validates evidence and action boundaries, not diagnostic accuracy or clinical safety.",
+          "No patient record was processed."
+        ]
+      },
+      "technicalRefs": [
+        "Prompt: `arb_merged_validation/products/clinical_patient_decision_support/prompt.txt`",
+        "Product dossier: `arb_merged_validation/products/clinical_patient_decision_support/PRODUCT.md`",
+        "Test output: `arb_merged_validation/products/clinical_patient_decision_support/test_output.json`"
+      ]
+    },
+    {
+      "title": "Clinical Trials & Life-Sciences Operations Suite",
+      "id": "KONKRED-ARB-LISC-TRIALS-CANON-0001-v1.0",
+      "tier": "INTERNAL_CONTROLLED_PILOT",
+      "staticDesignTarget": 84,
+      "buyer": "Clinical operations, biostatistics, regulatory and pharmacovigilance teams",
+      "humanApprover": "Qualified clinical-operations, biostatistics, pharmacovigilance or regulatory owner",
+      "commercialEntryRaw": "$8,000–$25,000 Trial-Evidence Validation",
+      "expansionRaw": "$5,000–$20,000/month life-sciences workspace",
+      "jobToBeDone": "Organize clinical-trial and life-sciences evidence across protocol, registry, statistics, safety and TMF workflows without making patient or regulatory decisions.",
+      "definition": "A trial-operations and life-sciences evidence workbench. It organizes protocol, registry and quality evidence; it does not determine eligibility, safety, approval probability or patient treatment.",
+      "includedUseCases": [
+        "Protocol and registry review",
+        "Site/enrollment operations",
+        "SAP handoff",
+        "Regulatory narrative gap review",
+        "PRO data-quality review",
+        "Pharmacovigilance triage",
+        "TMF and clinical-supply evidence"
+      ],
+      "modules": [
+        "protocol and registry review",
+        "site/enrollment operations",
+        "statistical-analysis-plan handoff",
+        "regulatory narrative gap review",
+        "patient-reported-outcome data-quality review",
+        "pharmacovigilance signal triage",
+        "TMF and supply-chain evidence review"
+      ],
+      "exclusions": [
+        "Autonomous decisioning or execution",
+        "Unsupported outcome, accuracy, ROI or certification claims",
+        "Any action outside the supplied policy, source set or named validator",
+        "Silent assumption of jurisdiction, accounting basis, clinical authority, employment rule or market data"
+      ],
+      "inputContract": [
+        "Protocol and registry records",
+        "SAP/data dictionary/code",
+        "GCP/ICH authority and version",
+        "Site and enrollment data",
+        "Safety/quality records",
+        "Qualified operations/statistical/regulatory owner"
+      ],
+      "outputContract": [
+        "Protocol/registry ledger",
+        "Data-quality findings",
+        "Statistical-review queue",
+        "Safety-signal triage",
+        "TMF gaps",
+        "Regulatory-owner questions"
+      ],
+      "validators": [
+        "Clinical-trial registry",
+        "Statistical analysis engine",
+        "EDC/TMF system",
+        "Pharmacovigilance validator",
+        "Qualified reviewer"
+      ],
+      "controlRequirements": [
+        "No eligibility decision",
+        "No safety conclusion",
+        "No approval-probability claim",
+        "No patient-level data reproduction",
+        "No submission or intervention execution"
+      ],
+      "pilotDesign": "One registry/protocol workstream and one quality/evidence sample. Measure source traceability, missing-document detection and reviewer agreement.",
+      "acceptanceMeasures": [
+        "Schema-valid output rate",
+        "Source-reference fidelity",
+        "Critical missing-input stop rate",
+        "Unsupported-claim rate",
+        "Human acceptance and correction time",
+        "Product-specific error or exception rate",
+        "Audit-log completeness"
+      ],
+      "failureModes": [
+        "Protocol version mismatch",
+        "SAP absent",
+        "Patient-level data exposed",
+        "Statistical method missing",
+        "Safety signal overcalled"
+      ],
+      "buyerQuestions": [
+        "Which protocol/version is authoritative?",
+        "What data is accessible?",
+        "Who is the qualified statistical/regulatory owner?",
+        "What is the TMF source?",
+        "What action is prohibited?"
+      ],
+      "publicValidation": {
+        "testFocus": "A public ClinicalTrials.gov record and public FDA GCP guidance used to test protocol/version traceability, no patient-level inference and no enrollment or safety action execution.",
+        "result": "PASS",
+        "measuredEvidence": "A public ClinicalTrials.gov record was parsed with an NCT ID, title, status and study type. No patient-level data was processed, and missing protocol/SAP evidence stopped higher-risk conclusions.",
+        "sources": [
+          "https://clinicaltrials.gov/api/v2/studies/NCT00001372",
+          "https://www.fda.gov/regulatory-information/search-fda-guidance-documents/guide-good-clinical-practice"
+        ],
+        "limitations": [
+          "A registry record is not a full protocol, SAP, TMF or patient dataset.",
+          "No enrollment, safety or regulatory decision was made."
+        ]
+      },
+      "technicalRefs": [
+        "Prompt: `arb_merged_validation/products/clinical_trials_life_sciences/prompt.txt`",
+        "Product dossier: `arb_merged_validation/products/clinical_trials_life_sciences/PRODUCT.md`",
+        "Test output: `arb_merged_validation/products/clinical_trials_life_sciences/test_output.json`"
+      ]
+    },
+    {
+      "title": "Healthcare Operations, Privacy & Compliance Suite",
+      "id": "KONKRED-ARB-HEALTH-OPS-CANON-0001-v1.0",
+      "tier": "INTERNAL_CONTROLLED_PILOT",
+      "staticDesignTarget": 83,
+      "buyer": "Healthcare privacy, security, compliance and operations leaders",
+      "humanApprover": "Healthcare privacy/security/compliance owner and operational owner",
+      "commercialEntryRaw": "$6,000–$18,000 Privacy and Evidence-Readiness Sprint",
+      "expansionRaw": "$4,000–$15,000/month private compliance workspace",
+      "jobToBeDone": "Prepare healthcare privacy, security, quality and operations evidence without claiming organization-specific compliance or changing access.",
+      "definition": "An operations and evidence-planning suite for healthcare organizations. It identifies gaps and proposes review tasks; it does not certify compliance or expose PHI.",
+      "includedUseCases": [
+        "Healthcare AI security review",
+        "Privacy/access evidence",
+        "Quality-improvement register",
+        "Supply/resource exception planning",
+        "Education-content review",
+        "Policy audit preparation"
+      ],
+      "modules": [
+        "healthcare AI security review",
+        "privacy and access-control evidence",
+        "quality-improvement register",
+        "supply and resource exception planning",
+        "education-content review",
+        "policy audit preparation"
+      ],
+      "exclusions": [
+        "Autonomous decisioning or execution",
+        "Unsupported outcome, accuracy, ROI or certification claims",
+        "Any action outside the supplied policy, source set or named validator",
+        "Silent assumption of jurisdiction, accounting basis, clinical authority, employment rule or market data"
+      ],
+      "inputContract": [
+        "Organization and covered-entity context",
+        "Policy/control versions",
+        "Evidence period",
+        "Access logs and system inventory",
+        "Incident/quality records",
+        "PHI handling and owner directory"
+      ],
+      "outputContract": [
+        "Privacy/security evidence map",
+        "Control gaps",
+        "Operational exception register",
+        "Data-minimization notes",
+        "Owner approval queue",
+        "Audit preparation package"
+      ],
+      "validators": [
+        "GRC/control library",
+        "Access-log query",
+        "PHI/secrets scanner",
+        "Incident/quality system",
+        "Privacy/security review"
+      ],
+      "controlRequirements": [
+        "No HIPAA/SOC/ISO certification claim",
+        "No PHI echo",
+        "No access grant/revocation",
+        "Evidence presence is not control effectiveness",
+        "Incidents are not auto-closed"
+      ],
+      "pilotDesign": "One privacy/security or quality evidence process, one period and one owner. Measure evidence completeness, owner assignment and correction time.",
+      "acceptanceMeasures": [
+        "Schema-valid output rate",
+        "Source-reference fidelity",
+        "Critical missing-input stop rate",
+        "Unsupported-claim rate",
+        "Human acceptance and correction time",
+        "Product-specific error or exception rate",
+        "Audit-log completeness"
+      ],
+      "failureModes": [
+        "Organization scope missing",
+        "Policy version missing",
+        "Evidence period mismatch",
+        "PHI overcollection",
+        "Control presence mistaken for effectiveness"
+      ],
+      "buyerQuestions": [
+        "What is the entity scope?",
+        "Which control library is approved?",
+        "What is the evidence period?",
+        "Which repository holds artifacts?",
+        "Who approves the gap register?"
+      ],
+      "publicValidation": {
+        "testFocus": "Public HHS HIPAA material used to test privacy-source traceability and no assertion of HIPAA compliance or audit certification.",
+        "result": "PASS",
+        "measuredEvidence": "Public HHS HIPAA material was source-checked while the workflow refused to claim organization-specific HIPAA compliance, grant access or process PHI.",
+        "sources": [
+          "https://www.hhs.gov/hipaa/for-professionals/privacy/laws-regulations/index.html"
+        ],
+        "limitations": [
+          "Public HHS information is not an organization-specific compliance assessment.",
+          "No PHI or access-control data was processed."
+        ]
+      },
+      "technicalRefs": [
+        "Prompt: `arb_merged_validation/products/healthcare_operations_compliance/prompt.txt`",
+        "Product dossier: `arb_merged_validation/products/healthcare_operations_compliance/PRODUCT.md`",
+        "Test output: `arb_merged_validation/products/healthcare_operations_compliance/test_output.json`"
+      ]
+    },
+    {
+      "title": "Fraud, Identity & Financial-Crime Triage Suite",
+      "id": "KONKRED-ARB-SEC-FRAUD-CANON-0001-v1.0",
+      "tier": "INTERNAL_CONTROLLED_PILOT",
+      "staticDesignTarget": 82,
+      "buyer": "Fraud operations, identity risk and financial-crime compliance",
+      "humanApprover": "Financial-crime compliance, fraud operations or identity-risk owner",
+      "commercialEntryRaw": "$8,000–$25,000 Alert-Evidence Governance Sprint",
+      "expansionRaw": "$6,000–$20,000/month private case-review environment",
+      "jobToBeDone": "Structure fraud and financial-crime investigation evidence while preserving counter-evidence, appeals and human decision ownership.",
+      "definition": "A supervised fraud and financial-crime investigation aid. It organizes evidence and questions; it cannot decide that a person or transaction is fraudulent.",
+      "includedUseCases": [
+        "Alert evidence triage",
+        "Identity/payment anomaly review",
+        "AML/FCC case packet",
+        "Chargeback/refund evidence",
+        "FWA referral review",
+        "Threshold/fairness/appeal register"
+      ],
+      "modules": [
+        "alert evidence triage",
+        "identity and payment anomaly review",
+        "AML/FCC case packet drafting",
+        "refund/chargeback evidence",
+        "FWA referral review",
+        "model-threshold, fairness and appeal register"
+      ],
+      "exclusions": [
+        "Autonomous decisioning or execution",
+        "Unsupported outcome, accuracy, ROI or certification claims",
+        "Any action outside the supplied policy, source set or named validator",
+        "Silent assumption of jurisdiction, accounting basis, clinical authority, employment rule or market data"
+      ],
+      "inputContract": [
+        "Alert and transaction records",
+        "Registered model/threshold metadata",
+        "Confirmed labels",
+        "Investigation policy",
+        "Identity/privacy context",
+        "Case owner and appeal path"
+      ],
+      "outputContract": [
+        "Alert evidence register",
+        "Alternative explanations",
+        "Model/threshold gaps",
+        "Appeal/fairness register",
+        "Investigator queue",
+        "Source and privacy ledger"
+      ],
+      "validators": [
+        "Case-management system",
+        "Model registry",
+        "Graph/transaction analysis",
+        "Privacy/access monitor",
+        "Compliance review"
+      ],
+      "controlRequirements": [
+        "No fraudulent-person label",
+        "No account block or case closure",
+        "No external referral",
+        "No false-positive claim without labels",
+        "Minimum-necessary suspicious-activity detail"
+      ],
+      "pilotDesign": "One alert family, one historical labelled sample and one compliance owner. Measure evidence quality, escalation accuracy and analyst correction time.",
+      "acceptanceMeasures": [
+        "Schema-valid output rate",
+        "Source-reference fidelity",
+        "Critical missing-input stop rate",
+        "Unsupported-claim rate",
+        "Human acceptance and correction time",
+        "Product-specific error or exception rate",
+        "Audit-log completeness"
+      ],
+      "failureModes": [
+        "Alert treated as proof",
+        "Ground truth missing",
+        "Model drift unknown",
+        "Appeal absent",
+        "Sensitive identity data overexposed"
+      ],
+      "buyerQuestions": [
+        "Who owns the alert policy?",
+        "Where are confirmed labels?",
+        "What appeals exist?",
+        "What action is prohibited?",
+        "What is the retention boundary?"
+      ],
+      "publicValidation": {
+        "testFocus": "Public FinCEN guidance used to test policy/version and model-ground-truth hard stops; no account block, case closure, denial or law-enforcement referral is executed.",
+        "result": "PASS",
+        "measuredEvidence": "Public FinCEN guidance was used for source presence. Missing ground truth, model calibration and appeal policy correctly prevented blocking, case closure, fraudulent-person labelling or external referral.",
+        "sources": [
+          "https://www.fincen.gov/resources/statutes-regulations/guidance"
+        ],
+        "limitations": [
+          "No transaction or identity dataset was supplied.",
+          "This validates the investigation boundary, not fraud-detection performance."
+        ]
+      },
+      "technicalRefs": [
+        "Prompt: `arb_merged_validation/products/fraud_identity_financial_crime/prompt.txt`",
+        "Product dossier: `arb_merged_validation/products/fraud_identity_financial_crime/PRODUCT.md`",
+        "Test output: `arb_merged_validation/products/fraud_identity_financial_crime/test_output.json`"
+      ]
+    },
+    {
+      "title": "Security Risk, Access & Data-Integrity Suite",
+      "id": "KONKRED-ARB-SEC-GRC-CANON-0001-v1.0",
+      "tier": "PUBLIC_CATALOGUE_SUPERVISED",
+      "staticDesignTarget": 86,
+      "buyer": "Security engineering, data owners and service owners",
+      "humanApprover": "Security engineer, data owner or service owner",
+      "commercialEntryRaw": "$3,000–$10,000 Read-Only Security Review Sprint",
+      "expansionRaw": "$1,500–$7,000/month security workspace",
+      "jobToBeDone": "Identify security, access, data-integrity and infrastructure risks with read-only evidence and proposed remediation.",
+      "definition": "A read-only security evidence and remediation-planning suite. It reports findings and safe verification steps; it does not apply, delete, block or rotate anything.",
+      "includedUseCases": [
+        "IaC and cloud configuration review",
+        "Insider/vendor access review",
+        "Shadow-AI inventory",
+        "Audit-log/data-integrity review",
+        "IoT/mobile/network anomaly triage",
+        "Cloud-cost/commitment review"
+      ],
+      "modules": [
+        "insider/vendor access review",
+        "shadow-AI inventory",
+        "data-integrity and audit-log review",
+        "IoT/mobile/network anomaly triage",
+        "cloud-cost and commitment review",
+        "read-only remediation planning"
+      ],
+      "exclusions": [
+        "Autonomous decisioning or execution",
+        "Unsupported outcome, accuracy, ROI or certification claims",
+        "Any action outside the supplied policy, source set or named validator",
+        "Silent assumption of jurisdiction, accounting basis, clinical authority, employment rule or market data"
+      ],
+      "inputContract": [
+        "Repository/AST/plan/inventory",
+        "Scanner results",
+        "Provider/module versions",
+        "Control library",
+        "Access/log data",
+        "Approved exceptions and owner directory"
+      ],
+      "outputContract": [
+        "Finding register",
+        "Control mapping",
+        "Attack preconditions",
+        "Safe verification steps",
+        "Proposed—not-applied—patch",
+        "Security owner queue"
+      ],
+      "validators": [
+        "IaC parser/AST",
+        "Scanner",
+        "Plan evaluator",
+        "OPA/policy engine",
+        "Secret scanner"
+      ],
+      "controlRequirements": [
+        "No apply/destroy/delete/rotate",
+        "No LLM-only CI block",
+        "No secret echo",
+        "Unresolved modules flagged",
+        "Control mapping versioned"
+      ],
+      "pilotDesign": "One repository or cloud account in read-only mode, one control library and one security owner. Measure finding precision/recall against scanner truth and unsafe-fix rate.",
+      "acceptanceMeasures": [
+        "Schema-valid output rate",
+        "Source-reference fidelity",
+        "Critical missing-input stop rate",
+        "Unsupported-claim rate",
+        "Human acceptance and correction time",
+        "Product-specific error or exception rate",
+        "Audit-log completeness"
+      ],
+      "failureModes": [
+        "Text pattern mistaken for exploitability",
+        "Module/provider unresolved",
+        "Control version absent",
+        "Secret in output",
+        "Proposed patch applied accidentally"
+      ],
+      "buyerQuestions": [
+        "What is read-only access?",
+        "Which scanner/plan is authoritative?",
+        "Which controls are in scope?",
+        "Who approves fixes?",
+        "What commands are prohibited?"
+      ],
+      "publicValidation": {
+        "testFocus": "Public Terraform security patterns and public control checklist used to test known-finding detection, versioned controls and absence of destructive commands.",
+        "result": "PASS",
+        "measuredEvidence": "The public IaC-derived fixture detected 4/4 known findings with 1.0 known-finding recall and no destructive commands. Control mapping remained UNMAPPED without a versioned control library.",
+        "sources": [
+          "https://dev.to/suhteevah/your-terraform-is-probably-insecure-here-are-90-patterns-to-check-1bci",
+          "https://soc2auditors.org/insights/soc-2-controls-list/"
+        ],
+        "limitations": [
+          "The fixture is not a complete repository, plan or runtime context.",
+          "No remediation was applied."
+        ]
+      },
+      "technicalRefs": [
+        "Prompt: `arb_merged_validation/products/security_access_data_integrity/prompt.txt`",
+        "Product dossier: `arb_merged_validation/products/security_access_data_integrity/PRODUCT.md`",
+        "Test output: `arb_merged_validation/products/security_access_data_integrity/test_output.json`"
+      ]
+    },
+    {
+      "title": "Legal Contract & Transaction Review Suite",
+      "id": "KONKRED-ARB-LEG-CONTRACT-CANON-0001-v1.0",
+      "tier": "PUBLIC_CATALOGUE_SUPERVISED",
+      "staticDesignTarget": 85,
+      "buyer": "Commercial counsel, legal operations and transaction counsel",
+      "humanApprover": "Commercial counsel, legal owner or transaction counsel",
+      "commercialEntryRaw": "$3,000–$9,000 Contract-Playbook Validation Sprint",
+      "expansionRaw": "$1,500–$7,000/month legal review workspace",
+      "jobToBeDone": "Extract contract and transaction evidence against a supplied playbook while preserving source spans and counsel ownership.",
+      "definition": "An evidence-extraction and playbook-review suite for legal teams. It drafts review material; it does not give legal advice, approve a contract or sign.",
+      "includedUseCases": [
+        "Contract term extraction",
+        "Playbook deviation review",
+        "Lease/real-estate abstraction",
+        "Transaction diligence evidence",
+        "Negotiation issue register",
+        "Approved-clause draft preparation"
+      ],
+      "modules": [
+        "contract term extraction",
+        "playbook deviation review",
+        "lease/real-estate abstraction",
+        "transaction diligence evidence",
+        "negotiation issue register",
+        "approved-clause drafting for counsel review"
+      ],
+      "exclusions": [
+        "Autonomous decisioning or execution",
+        "Unsupported outcome, accuracy, ROI or certification claims",
+        "Any action outside the supplied policy, source set or named validator",
+        "Silent assumption of jurisdiction, accounting basis, clinical authority, employment rule or market data"
+      ],
+      "inputContract": [
+        "Contract/lease documents with page/span markers",
+        "Playbook and clause library",
+        "Jurisdiction and party role",
+        "Transaction context",
+        "Materiality/risk policy",
+        "Counsel approval directory"
+      ],
+      "outputContract": [
+        "Term extract",
+        "Playbook deviation register",
+        "Exact source quotes",
+        "Calculated exposure/rent values",
+        "Draft/approved redline state",
+        "Counsel escalation queue"
+      ],
+      "validators": [
+        "Document/OCR span parser",
+        "Playbook evaluator",
+        "Date/arithmetic calculator",
+        "Privilege/PII scanner",
+        "Counsel review"
+      ],
+      "controlRequirements": [
+        "No generic market norm",
+        "No legal advice or signature approval",
+        "Missing term not low risk",
+        "Redlines labelled draft unless approved",
+        "Privilege and sensitive data protected"
+      ],
+      "pilotDesign": "One contract type, one playbook and one legal owner. Measure clause coverage, quote exactness, playbook-status accuracy and reviewer correction.",
+      "acceptanceMeasures": [
+        "Schema-valid output rate",
+        "Source-reference fidelity",
+        "Critical missing-input stop rate",
+        "Unsupported-claim rate",
+        "Human acceptance and correction time",
+        "Product-specific error or exception rate",
+        "Audit-log completeness"
+      ],
+      "failureModes": [
+        "Page coordinates lost",
+        "Jurisdiction assumed",
+        "Playbook absent",
+        "Cross-reference unresolved",
+        "Draft language treated as approved"
+      ],
+      "buyerQuestions": [
+        "What is the playbook authority?",
+        "What jurisdictions and party roles apply?",
+        "What terms are material?",
+        "Who approves redlines?",
+        "What data may be retained?"
+      ],
+      "publicValidation": {
+        "testFocus": "Public MSA and commercial lease sources used to test source-span extraction, missing-playbook hard stops and no signature or legal conclusion.",
+        "result": "PASS",
+        "measuredEvidence": "Public MSA and lease sources exposed indemnity, confidentiality, termination, payment and holdover evidence. Missing playbook and jurisdiction correctly blocked legal approval and signature actions.",
+        "sources": [
+          "https://community.trustcloud.ai/kbuPFACeFReXReB/uploads/2022/09/Form-of-Master-Services-Agreement.pdf",
+          "https://esign.com/wp-content/uploads/Texas-Association-of-Realtors-Commercial-Lease-Agreement.pdf"
+        ],
+        "limitations": [
+          "Lexical evidence checks are not semantic legal review.",
+          "No legal conclusion, redline transmission or signature was performed."
+        ]
+      },
+      "technicalRefs": [
+        "Prompt: `arb_merged_validation/products/legal_contract_transaction/prompt.txt`",
+        "Product dossier: `arb_merged_validation/products/legal_contract_transaction/PRODUCT.md`",
+        "Test output: `arb_merged_validation/products/legal_contract_transaction/test_output.json`"
+      ]
+    },
+    {
+      "title": "Legal Regulatory, Privacy & AI-Governance Suite",
+      "id": "KONKRED-ARB-LEG-REG-CANON-0001-v1.0",
+      "tier": "INTERNAL_CONTROLLED_PILOT",
+      "staticDesignTarget": 84,
+      "buyer": "Legal, privacy, compliance and AI-governance owners",
+      "humanApprover": "Qualified legal/compliance owner for the relevant jurisdiction",
+      "commercialEntryRaw": "$6,000–$20,000 Jurisdiction and Source-Pack Sprint",
+      "expansionRaw": "$4,000–$15,000/month regulatory workspace",
+      "jobToBeDone": "Create source-linked regulatory, privacy and AI-governance research and evidence maps without issuing universal legal conclusions.",
+      "definition": "A jurisdiction-aware legal research and control-mapping assistant. It finds source-linked issues and questions; it does not determine legal compliance or provide a universal regulatory answer.",
+      "includedUseCases": [
+        "Jurisdiction/effective-date register",
+        "DPIA evidence",
+        "Regulatory change tracking",
+        "AI-governance mapping",
+        "Sector compliance evidence planning",
+        "Counsel questions and source ledger"
+      ],
+      "modules": [
+        "jurisdiction and effective-date register",
+        "privacy impact assessment evidence",
+        "regulatory change tracking",
+        "AI-governance control mapping",
+        "sector compliance evidence planning",
+        "counsel question and source ledger"
+      ],
+      "exclusions": [
+        "Autonomous decisioning or execution",
+        "Unsupported outcome, accuracy, ROI or certification claims",
+        "Any action outside the supplied policy, source set or named validator",
+        "Silent assumption of jurisdiction, accounting basis, clinical authority, employment rule or market data"
+      ],
+      "inputContract": [
+        "Jurisdiction",
+        "Authority/instrument/version",
+        "Effective date and scope",
+        "Organization/system facts",
+        "Data inventory and processing purpose",
+        "Approved legal crosswalk"
+      ],
+      "outputContract": [
+        "Authority register",
+        "Obligation/control map",
+        "Organizational fact gaps",
+        "Privacy/AI risk questions",
+        "Counsel review queue",
+        "Source/effective-date ledger"
+      ],
+      "validators": [
+        "Authoritative source retrieval",
+        "Version/effective-date checker",
+        "Control crosswalk",
+        "Data-inventory connector",
+        "Qualified counsel review"
+      ],
+      "controlRequirements": [
+        "No compliant/non-compliant conclusion without counsel",
+        "Generic frameworks unmapped",
+        "No current-law assumption",
+        "No legal filing",
+        "Organization facts separated from source text"
+      ],
+      "pilotDesign": "One jurisdiction and one AI/privacy use case. Measure source freshness, obligation mapping and counsel correction time.",
+      "acceptanceMeasures": [
+        "Schema-valid output rate",
+        "Source-reference fidelity",
+        "Critical missing-input stop rate",
+        "Unsupported-claim rate",
+        "Human acceptance and correction time",
+        "Product-specific error or exception rate",
+        "Audit-log completeness"
+      ],
+      "failureModes": [
+        "Jurisdiction missing",
+        "Source effective date unknown",
+        "Generic Article mapping",
+        "Organization fact absent",
+        "Crosswalk unapproved"
+      ],
+      "buyerQuestions": [
+        "Which jurisdiction applies?",
+        "What authority is binding?",
+        "What is the effective date?",
+        "What system/data facts are known?",
+        "Who is counsel owner?"
+      ],
+      "publicValidation": {
+        "testFocus": "Public European Commission AI Act and HHS material used to test jurisdiction/version requirements and no generic legal conclusion without an authoritative source pack.",
+        "result": "PASS",
+        "measuredEvidence": "European Commission AI Act and HHS material were source-checked. Missing jurisdiction, effective-date scope and organization facts correctly prevented a generic compliant/non-compliant conclusion.",
+        "sources": [
+          "https://digital-strategy.ec.europa.eu/en/policies/regulatory-framework-ai",
+          "https://www.hhs.gov/hipaa/for-professionals/privacy/laws-regulations/index.html"
+        ],
+        "limitations": [
+          "The public legal text is not an organization-specific legal assessment.",
+          "No universal compliance conclusion was made."
+        ]
+      },
+      "technicalRefs": [
+        "Prompt: `arb_merged_validation/products/legal_regulatory_privacy_ai/prompt.txt`",
+        "Product dossier: `arb_merged_validation/products/legal_regulatory_privacy_ai/PRODUCT.md`",
+        "Test output: `arb_merged_validation/products/legal_regulatory_privacy_ai/test_output.json`"
+      ]
+    },
+    {
+      "title": "HR Hiring, Privacy & Onboarding Suite",
+      "id": "KONKRED-ARB-HR-PEOPLE-CANON-0001-v1.0",
+      "tier": "INTERNAL_CONTROLLED_PILOT",
+      "staticDesignTarget": 83,
+      "buyer": "HR, employment counsel, people operations and hiring managers",
+      "humanApprover": "HR owner plus employment counsel/privacy and hiring manager as applicable",
+      "commercialEntryRaw": "$5,000–$15,000 Assistive HR Validation Sprint",
+      "expansionRaw": "$3,000–$12,000/month governed HR workflow",
+      "jobToBeDone": "Improve HR process consistency and evidence quality without ranking, selecting, rejecting, compensating or disciplining people automatically.",
+      "definition": "An assistive HR process and evidence suite. It structures documentation and review; it does not rank, hire, reject, discipline, compensate or terminate a person.",
+      "includedUseCases": [
+        "Job-description and pay-transparency review",
+        "Structured interview kit",
+        "Candidate consent/retention",
+        "Background-check checklist",
+        "Offer/pay-equity evidence",
+        "Onboarding/access/training/goals"
+      ],
+      "modules": [
+        "job-description and pay-transparency review",
+        "structured interview kit",
+        "candidate consent and retention",
+        "background-check process checklist",
+        "offer/pay-equity evidence review",
+        "onboarding checklist and access request",
+        "training and goals draft"
+      ],
+      "exclusions": [
+        "Autonomous decisioning or execution",
+        "Unsupported outcome, accuracy, ROI or certification claims",
+        "Any action outside the supplied policy, source set or named validator",
+        "Silent assumption of jurisdiction, accounting basis, clinical authority, employment rule or market data"
+      ],
+      "inputContract": [
+        "Job-related rubric",
+        "Jurisdiction and employment policy",
+        "Consent/retention context",
+        "De-identified process records",
+        "Fairness/statistics engine output",
+        "HR/hiring/counsel approvers"
+      ],
+      "outputContract": [
+        "Job-related criteria check",
+        "Process evidence register",
+        "Privacy/retention gaps",
+        "Fairness review queue",
+        "Human decision record",
+        "Onboarding checklist"
+      ],
+      "validators": [
+        "HRIS/ATS connector",
+        "Consent/retention checker",
+        "Adverse-impact calculator",
+        "Employment-policy registry",
+        "HR/counsel review"
+      ],
+      "controlRequirements": [
+        "No candidate ranking or selection",
+        "No protected/proxy attribute inference",
+        "No adverse action",
+        "No legal certification",
+        "Minimum-necessary employee data"
+      ],
+      "pilotDesign": "One HR process, one jurisdiction, one HR owner and one counsel reviewer. Measure documentation completeness, review time and fairness-test readiness.",
+      "acceptanceMeasures": [
+        "Schema-valid output rate",
+        "Source-reference fidelity",
+        "Critical missing-input stop rate",
+        "Unsupported-claim rate",
+        "Human acceptance and correction time",
+        "Product-specific error or exception rate",
+        "Audit-log completeness"
+      ],
+      "failureModes": [
+        "Rubric not job-related",
+        "Consent missing",
+        "Jurisdiction assumed",
+        "Protected proxy used",
+        "Draft decision mistaken for final action"
+      ],
+      "buyerQuestions": [
+        "What is the job-related rubric?",
+        "Which jurisdiction/policy applies?",
+        "What consent exists?",
+        "What fairness test is required?",
+        "Who makes the final decision?"
+      ],
+      "publicValidation": {
+        "testFocus": "Public EEOC Title VII material used to test job-related criteria, human decision ownership and no candidate ranking, selection or adverse-action execution.",
+        "result": "PASS",
+        "measuredEvidence": "Public EEOC Title VII material was source-checked. No candidate data was processed and no ranking, hiring, rejection, compensation or adverse action occurred.",
+        "sources": [
+          "https://www.eeoc.gov/statutes/title-vii-civil-rights-act-1964"
+        ],
+        "limitations": [
+          "Public Title VII text is not jurisdiction-complete employment advice.",
+          "No candidate records or employment decision were processed."
+        ]
+      },
+      "technicalRefs": [
+        "Prompt: `arb_merged_validation/products/hr_hiring_privacy_onboarding/prompt.txt`",
+        "Product dossier: `arb_merged_validation/products/hr_hiring_privacy_onboarding/PRODUCT.md`",
+        "Test output: `arb_merged_validation/products/hr_hiring_privacy_onboarding/test_output.json`"
+      ]
+    },
+    {
+      "title": "Communications Control Suite",
+      "id": "KONKRED-ARB-COMMS-CONTROL-CANON-0001-v1.0",
+      "tier": "PUBLIC_CATALOGUE_SUPERVISED",
+      "staticDesignTarget": 84,
+      "buyer": "Communications, security, legal and change-management owners",
+      "humanApprover": "Communications owner plus legal/privacy/security reviewer as applicable",
+      "commercialEntryRaw": "$2,000–$6,000 Crisis and Policy Communications Sprint",
+      "expansionRaw": "$1,000–$5,000/month managed communications workflow",
+      "jobToBeDone": "Prepare source-grounded crisis, policy and change communications that remain drafts until approved and measurable.",
+      "definition": "A controlled communications drafting and measurement suite. It prepares drafts and channel plans; it never sends or publishes without approval.",
+      "includedUseCases": [
+        "Crisis/incident message draft",
+        "Policy translation/accessibility",
+        "Frontline communications",
+        "Change/trust rebuilding",
+        "Information-overload filtering",
+        "Impact measurement plan"
+      ],
+      "modules": [
+        "crisis and incident message draft",
+        "policy translation and accessibility",
+        "frontline/non-desk communication plan",
+        "change and trust rebuilding brief",
+        "information-overload filter",
+        "message measurement plan"
+      ],
+      "exclusions": [
+        "Autonomous decisioning or execution",
+        "Unsupported outcome, accuracy, ROI or certification claims",
+        "Any action outside the supplied policy, source set or named validator",
+        "Silent assumption of jurisdiction, accounting basis, clinical authority, employment rule or market data"
+      ],
+      "inputContract": [
+        "Approved fact pack",
+        "Source events",
+        "Audience/channel/locale",
+        "Accessibility and glossary policy",
+        "Legal/security review state",
+        "Delivery/engagement data"
+      ],
+      "outputContract": [
+        "Approved fact ledger",
+        "Message draft",
+        "Channel/accessibility plan",
+        "Reviewer queue",
+        "Measurement plan",
+        "Unknowns and next-update owner"
+      ],
+      "validators": [
+        "Fact/source validator",
+        "Translation/glossary checker",
+        "Accessibility checker",
+        "Distribution approval system"
+      ],
+      "controlRequirements": [
+        "No send/publish",
+        "No speculation or blame",
+        "No translation of unredacted sensitive data",
+        "No unsupported impact/ROI claim",
+        "Consent/unsubscribe respected"
+      ],
+      "pilotDesign": "One incident/change communication process, one audience and one approver. Measure source fidelity, review cycles and delivery-readiness time.",
+      "acceptanceMeasures": [
+        "Schema-valid output rate",
+        "Source-reference fidelity",
+        "Critical missing-input stop rate",
+        "Unsupported-claim rate",
+        "Human acceptance and correction time",
+        "Product-specific error or exception rate",
+        "Audit-log completeness"
+      ],
+      "failureModes": [
+        "Fact pack absent",
+        "Unknown stated as fact",
+        "Accessibility missing",
+        "Legal review not recorded",
+        "Draft sent as final"
+      ],
+      "buyerQuestions": [
+        "Who owns the fact pack?",
+        "Which channels are permitted?",
+        "What review is mandatory?",
+        "What locales/accessibility rules apply?",
+        "How is impact measured?"
+      ],
+      "publicValidation": {
+        "testFocus": "Public incident postmortem used to test source-linked fact extraction, pre-approval and no automatic external distribution.",
+        "result": "PASS",
+        "measuredEvidence": "The public incident source supplied 15 source events. Without an approved fact pack and review chain, the result remained draft-only and no external distribution occurred.",
+        "sources": [
+          "https://blog.cloudflare.com/cloudflare-incident-march-21-2025/"
+        ],
+        "limitations": [
+          "A public postmortem is a proxy for an incident fact pack.",
+          "No message was sent or published."
+        ]
+      },
+      "technicalRefs": [
+        "Prompt: `arb_merged_validation/products/communications_control/prompt.txt`",
+        "Product dossier: `arb_merged_validation/products/communications_control/PRODUCT.md`",
+        "Test output: `arb_merged_validation/products/communications_control/test_output.json`"
+      ]
+    },
+    {
+      "title": "Marketing & Sales Evidence Module Library",
+      "id": "KONKRED-ARB-MKT-SALES-CANON-0001-v1.0",
+      "tier": "PUBLIC_CATALOGUE_SUPERVISED",
+      "staticDesignTarget": 82,
+      "buyer": "Marketing, sales, proposal, research and content teams",
+      "humanApprover": "Marketing/sales owner plus legal/compliance and claims owner as applicable",
+      "commercialEntryRaw": "$97–$297 Workflow Kit or $1,500–$5,000 RFP/Claims Sprint",
+      "expansionRaw": "$599–$3,000/month research and proposal workspace",
+      "jobToBeDone": "Create evidence-backed RFP, research, SEO, sales and content assets without fabricating claims, forecasts, consent or customer proof.",
+      "definition": "A grounded marketing and sales module library. It drafts and researches from approved evidence; it does not fabricate proof, forecast traffic without exports or send outreach.",
+      "includedUseCases": [
+        "RFP/security questionnaire first pass",
+        "VoC/JTBD/competitive synthesis",
+        "SEO/content planning",
+        "Sales discovery/QBR drafts",
+        "Approved-claim ad/copy variants",
+        "Consent-aware outreach drafts"
+      ],
+      "modules": [
+        "RFP/security questionnaire first pass",
+        "research/VoC/JTBD/competitive synthesis",
+        "SEO/content planning",
+        "sales discovery and QBR drafts",
+        "ad/copy variants from approved claims",
+        "outreach drafts with consent and platform policy"
+      ],
+      "exclusions": [
+        "Autonomous decisioning or execution",
+        "Unsupported outcome, accuracy, ROI or certification claims",
+        "Any action outside the supplied policy, source set or named validator",
+        "Silent assumption of jurisdiction, accounting basis, clinical authority, employment rule or market data"
+      ],
+      "inputContract": [
+        "RFP requirements",
+        "Claims/certification registry",
+        "Public/customer research records",
+        "Timestamped keyword/SERP exports",
+        "Consent/suppression and platform policy",
+        "Legal/commercial approval"
+      ],
+      "outputContract": [
+        "Requirement/claim map",
+        "Evidence gaps",
+        "Research opportunity register",
+        "Draft assets",
+        "Approval/consent queue",
+        "Submission readiness state"
+      ],
+      "validators": [
+        "Claims registry",
+        "RFP parser",
+        "SEO/SERP export validator",
+        "Consent/platform-policy checker",
+        "Word-count checker"
+      ],
+      "controlRequirements": [
+        "No unsupported customer proof",
+        "No traffic/conversion guarantee",
+        "No outreach send",
+        "No ad publication",
+        "Missing evidence returns NOT_READY"
+      ],
+      "pilotDesign": "One RFP or research workflow, one claims registry and one commercial owner. Measure requirement coverage, unsupported claims and reviewer correction.",
+      "acceptanceMeasures": [
+        "Schema-valid output rate",
+        "Source-reference fidelity",
+        "Critical missing-input stop rate",
+        "Unsupported-claim rate",
+        "Human acceptance and correction time",
+        "Product-specific error or exception rate",
+        "Audit-log completeness"
+      ],
+      "failureModes": [
+        "Claims registry absent",
+        "Keyword export stale",
+        "Consent missing",
+        "Commitment invented",
+        "Word/page limit missed"
+      ],
+      "buyerQuestions": [
+        "Which claims are approved?",
+        "What data can be used?",
+        "What are the submission constraints?",
+        "What consent/platform rules apply?",
+        "Who approves external language?"
+      ],
+      "publicValidation": {
+        "testFocus": "Public RFP, SEO-factor and advertising-guidance sources used to test claims-registry, tool-data and consent hard stops; no autonomous outreach or ad publication.",
+        "result": "PASS",
+        "measuredEvidence": "Public RFP, SEO-factor and FTC sources were processed. Missing claims registry, timestamped SERP exports and consent/platform policy correctly prevented unsupported claims, outreach or publication.",
+        "sources": [
+          "https://esentire-dot-com-assets.s3.ca-central-1.amazonaws.com/assets/resourcefiles/MDR-RFP-RFI-Questionnaire.pdf",
+          "https://github.com/Zafar-Saeed/SEO_Dataset",
+          "https://www.ftc.gov/business-guidance/advertising-marketing"
+        ],
+        "limitations": [
+          "The public sources do not contain a company claims registry or consent record.",
+          "No outreach or advertising was generated for publication."
+        ]
+      },
+      "technicalRefs": [
+        "Prompt: `arb_merged_validation/products/marketing_sales_modules/prompt.txt`",
+        "Product dossier: `arb_merged_validation/products/marketing_sales_modules/PRODUCT.md`",
+        "Test output: `arb_merged_validation/products/marketing_sales_modules/test_output.json`"
+      ]
+    },
+    {
+      "title": "Operations & Procurement Intelligence Suite",
+      "id": "KONKRED-ARB-OPS-PROCUREMENT-CANON-0001-v1.0",
+      "tier": "PUBLIC_CATALOGUE_SUPERVISED",
+      "staticDesignTarget": 84,
+      "buyer": "Procurement, supply-chain, S&OP and operations leaders",
+      "humanApprover": "Procurement owner, supply-chain owner and commercial/legal owner as applicable",
+      "commercialEntryRaw": "$3,000–$10,000 Procurement Evidence Sprint",
+      "expansionRaw": "$2,000–$8,000/month procurement workspace",
+      "jobToBeDone": "Make procurement and operations requirements, supplier evidence and scenarios explicit without awarding suppliers or executing operational actions.",
+      "definition": "A procurement and operations planning suite that makes requirements, dependencies and scenarios explicit. It does not predict with unsupported certainty or award suppliers.",
+      "includedUseCases": [
+        "Requirement extraction",
+        "Supplier evidence scorecard",
+        "Supply-chain dependency map",
+        "Resilience scenarios",
+        "Inventory/logistics exceptions",
+        "S&OP consensus brief",
+        "Sustainability evidence"
+      ],
+      "modules": [
+        "procurement requirement extraction",
+        "supplier evidence and scorecard",
+        "supply-chain dependency map",
+        "scenario and resilience planning",
+        "inventory/logistics exception review",
+        "S&OP consensus brief",
+        "sustainability evidence register"
+      ],
+      "exclusions": [
+        "Autonomous decisioning or execution",
+        "Unsupported outcome, accuracy, ROI or certification claims",
+        "Any action outside the supplied policy, source set or named validator",
+        "Silent assumption of jurisdiction, accounting basis, clinical authority, employment rule or market data"
+      ],
+      "inputContract": [
+        "RFP and amendments",
+        "Attachments and coordinates",
+        "Supplier records and rubric",
+        "ERP/inventory/logistics data",
+        "Time series and scenario assumptions",
+        "Procurement approval policy"
+      ],
+      "outputContract": [
+        "Requirement register",
+        "Supplier evidence scorecard",
+        "Dependency map",
+        "Scenario table",
+        "Procurement owner queue",
+        "Uncertainty and source register"
+      ],
+      "validators": [
+        "PDF/OCR coordinate parser",
+        "Supplier/ERP connector",
+        "Forecast/scenario engine",
+        "Amendment resolver",
+        "Procurement review"
+      ],
+      "controlRequirements": [
+        "No supplier award",
+        "No purchase order",
+        "No unsupported supplier prediction",
+        "Cue words are not complete recall",
+        "Forecast requires uncertainty range"
+      ],
+      "pilotDesign": "One procurement requirement or supplier-review process and one named owner. Measure requirement coverage, source-coordinate quality and review time.",
+      "acceptanceMeasures": [
+        "Schema-valid output rate",
+        "Source-reference fidelity",
+        "Critical missing-input stop rate",
+        "Unsupported-claim rate",
+        "Human acceptance and correction time",
+        "Product-specific error or exception rate",
+        "Audit-log completeness"
+      ],
+      "failureModes": [
+        "Attachment missing",
+        "Amendment conflict",
+        "Supplier rubric undefined",
+        "Time series absent",
+        "Scenario treated as forecast"
+      ],
+      "buyerQuestions": [
+        "What source set is complete?",
+        "Which rubric is approved?",
+        "What feeds are available?",
+        "What uncertainty is required?",
+        "Who awards the supplier?"
+      ],
+      "publicValidation": {
+        "testFocus": "Public RFP and public incident material used to test source-preserving requirement extraction, uncertainty labeling and no supplier award/order execution.",
+        "result": "PASS",
+        "measuredEvidence": "The public RFP produced 144 requirement-cue lines. Missing supplier feeds and time series correctly limited the result to source-preserving extraction and scenarios; no award, purchase order or logistics action occurred.",
+        "sources": [
+          "https://www.pgcc.edu/media/wwwpgccedu/content-assets/community/doing-business-with-pgcc/procurement/request-for-bids/rfq-20-05/RFP-No-025-004.pdf",
+          "https://blog.cloudflare.com/cloudflare-incident-march-21-2025/"
+        ],
+        "limitations": [
+          "Cue-line extraction is not a complete procurement requirement recall benchmark.",
+          "No supplier award, order or logistics action was executed."
+        ]
+      },
+      "technicalRefs": [
+        "Prompt: `arb_merged_validation/products/operations_procurement/prompt.txt`",
+        "Product dossier: `arb_merged_validation/products/operations_procurement/PRODUCT.md`",
+        "Test output: `arb_merged_validation/products/operations_procurement/test_output.json`"
+      ]
+    },
+    {
+      "title": "Mixed Quick-Win Control Workflows",
+      "id": "KONKRED-ARB-MSC-CONTROL-CANON-0001-v1.0",
+      "tier": "INTERNAL_CONTROLLED_PILOT",
+      "staticDesignTarget": 83,
+      "buyer": "Named IT, security, finance or operations owners",
+      "humanApprover": "Named security, IT, finance or operations owner for the selected module",
+      "commercialEntryRaw": "$2,000–$6,000 One-Module Control Preflight",
+      "expansionRaw": "Module-specific controlled pilot",
+      "jobToBeDone": "Offer bounded internal control workflows for cloud cost, breach/outage, refunds, chargebacks and shadow AI without combining policies or executing actions.",
+      "definition": "A bounded internal pilot bundle for operational control workflows. Each module produces evidence and a proposal; none applies changes or closes a case.",
+      "includedUseCases": [
+        "Cloud waste/commitment review",
+        "Breach rapid-triage plan",
+        "Outage/runbook synthesis",
+        "Returns/refund evidence",
+        "Chargeback evidence builder",
+        "Shadow-AI access review"
+      ],
+      "modules": [
+        "cloud waste/commitment review",
+        "breach rapid-triage plan",
+        "outage/runbook synthesis",
+        "returns/refund evidence",
+        "chargeback evidence builder",
+        "shadow-AI access review"
+      ],
+      "exclusions": [
+        "Autonomous decisioning or execution",
+        "Unsupported outcome, accuracy, ROI or certification claims",
+        "Any action outside the supplied policy, source set or named validator",
+        "Silent assumption of jurisdiction, accounting basis, clinical authority, employment rule or market data"
+      ],
+      "inputContract": [
+        "Explicit selected module",
+        "Module-specific source records",
+        "Applicable policy and owner",
+        "Scanner/plan/ledger/incident validator output",
+        "Action policy and audit log"
+      ],
+      "outputContract": [
+        "Selected module",
+        "Module evidence",
+        "Module findings",
+        "Safe verification/draft",
+        "Owner approval queue",
+        "Shared audit record"
+      ],
+      "validators": [
+        "Module-specific parser/validator",
+        "Read-only connectors",
+        "Action-policy engine",
+        "Immutable audit log"
+      ],
+      "controlRequirements": [
+        "No silent cross-module policy mixing",
+        "No infrastructure change",
+        "No case closure",
+        "No journal posting",
+        "No external send"
+      ],
+      "pilotDesign": "Choose one module only. Define its owner, source authority, validator and prohibited actions before running any customer data.",
+      "acceptanceMeasures": [
+        "Schema-valid output rate",
+        "Source-reference fidelity",
+        "Critical missing-input stop rate",
+        "Unsupported-claim rate",
+        "Human acceptance and correction time",
+        "Product-specific error or exception rate",
+        "Audit-log completeness"
+      ],
+      "failureModes": [
+        "Module not explicit",
+        "Wrong authority used",
+        "Cross-module policy leakage",
+        "Action boundary unclear",
+        "Validator absent"
+      ],
+      "buyerQuestions": [
+        "Which module is selected?",
+        "What is its authority?",
+        "What connector is read-only?",
+        "Who approves the result?",
+        "What action is prohibited?"
+      ],
+      "publicValidation": {
+        "testFocus": "Public IaC, incident and reconciliation sources used to test shared read-only action boundaries and module-specific human approval.",
+        "result": "PASS",
+        "measuredEvidence": "The shared preflight covered 4 IaC findings, 15 incident timestamps, 1 ambiguous reconciliation candidate and 8 unmatched rows while keeping infrastructure change, case closure, journal posting and external sending at zero.",
+        "sources": [
+          "https://dev.to/suhteevah/your-terraform-is-probably-insecure-here-are-90-patterns-to-check-1bci",
+          "https://blog.cloudflare.com/cloudflare-incident-march-21-2025/",
+          "https://github.com/pavitsu/pavit-bank-reconciliation"
+        ],
+        "limitations": [
+          "This is a module preflight, not a complete product integration test.",
+          "Each module needs its own connector, owner and domain holdout set."
+        ]
+      },
+      "technicalRefs": [
+        "Prompt: `arb_merged_validation/products/mixed_quick_win_workflows/prompt.txt`",
+        "Product dossier: `arb_merged_validation/products/mixed_quick_win_workflows/PRODUCT.md`",
+        "Test output: `arb_merged_validation/products/mixed_quick_win_workflows/test_output.json`"
+      ]
+    }
+  ],
+  "workflows": [
+    {
+      "title": "Contract Review Copilot",
+      "id": "KONKRED-LEG-CON-CANON-0001-v2.0",
+      "parentSuite": "Legal Contract & Transaction Review Suite",
+      "staticDesignTarget": 84,
+      "buyer": "Commercial counsel and legal operations",
+      "commercialEntryRaw": "$497 Workflow Kit / $2,500 Validation Sprint",
+      "validationLine": "PASS narrow public-data preflight",
+      "problemSolved": "Commercial counsel needs a fast first-pass review but cannot rely on invented legal conclusions or missing terms being treated as safe.",
+      "definition": "This workflow is a narrower, productized entry point into the parent suite. It is suitable for a public-data demo, Workflow Kit, Validation Sprint or supervised pilot.",
+      "referenceInputs": [
+        "Contract text with page/span markers",
+        "Party role and jurisdiction policy",
+        "Versioned playbook and approved clause library",
+        "Transaction context"
+      ],
+      "referenceOutputs": [
+        "Term extract",
+        "Rule-by-rule risk register",
+        "Exact source quotes",
+        "Draft-for-counsel redlines",
+        "Escalation questions"
+      ],
+      "runbook": [
+        "Ingest and identify the contract",
+        "Check source completeness and page markers",
+        "Extract material terms",
+        "Compare against the playbook",
+        "Flag missing/ambiguous terms",
+        "Route proposed redlines to counsel"
+      ],
+      "failureModes": [
+        "Missing playbook",
+        "No jurisdiction",
+        "Lost source spans",
+        "Market norm assumed",
+        "Signature approval implied"
+      ],
+      "buyerValue": "Shortens first-pass review while preserving counsel control.",
+      "validation": {
+        "testFocus": "Public MSA source-span evidence and missing-playbook hard stop",
+        "result": "PASS",
+        "measuredResult": "9 of 10 lexical material-topic checks found public evidence; the missing governing-law term stayed missing rather than being downgraded.",
+        "publicSource": "https://community.trustcloud.ai/kbuPFACeFReXReB/uploads/2022/09/Form-of-Master-Services-Agreement.pdf"
+      },
+      "productBoundary": "The workflow may extract, classify, calculate through an external validator or interpret verified output. It does not make the final decision or execute external actions.",
+      "technicalRefs": [
+        "Prompt: `konkred_validation/products/contract_review/prompt.txt`",
+        "Product dossier: `konkred_validation/products/contract_review/PRODUCT.md`",
+        "Test output: `konkred_validation/products/contract_review/test_output.json`"
+      ]
+    },
+    {
+      "title": "IaC Security Copilot",
+      "id": "KONKRED-SEC-IAC-CANON-0001-v2.0",
+      "parentSuite": "Security Risk, Access & Data-Integrity Suite",
+      "staticDesignTarget": 83,
+      "buyer": "Cloud security and DevSecOps",
+      "commercialEntryRaw": "$497 Workflow Kit / $3,500 Security Sprint",
+      "validationLine": "PASS narrow public-data preflight",
+      "problemSolved": "Security teams need repeatable IaC evidence review without allowing an LLM to apply infrastructure changes.",
+      "definition": "This workflow is a narrower, productized entry point into the parent suite. It is suitable for a public-data demo, Workflow Kit, Validation Sprint or supervised pilot.",
+      "referenceInputs": [
+        "Repository commit and files",
+        "Provider/module versions",
+        "Plan/resource inventory",
+        "Scanner findings",
+        "Versioned control library"
+      ],
+      "referenceOutputs": [
+        "Finding register",
+        "Attack preconditions",
+        "Control mapping",
+        "Proposed diff",
+        "Read-only verification commands"
+      ],
+      "runbook": [
+        "Parse files/AST",
+        "Validate module/provider context",
+        "Correlate scanner and plan evidence",
+        "Classify finding type",
+        "Propose safe verification",
+        "Route to security owner"
+      ],
+      "failureModes": [
+        "Text-only inference",
+        "Unresolved modules",
+        "Unversioned controls",
+        "Destructive command",
+        "Secret echo"
+      ],
+      "buyerValue": "Creates a reviewable security queue without unsafe CI/CD automation.",
+      "validation": {
+        "testFocus": "Known IaC finding recall and destructive-command guard",
+        "result": "PASS",
+        "measuredResult": "4/4 known findings detected and no destructive commands present.",
+        "publicSource": "https://dev.to/suhteevah/your-terraform-is-probably-insecure-here-are-90-patterns-to-check-1bci"
+      },
+      "productBoundary": "The workflow may extract, classify, calculate through an external validator or interpret verified output. It does not make the final decision or execute external actions.",
+      "technicalRefs": [
+        "Prompt: `konkred_validation/products/iac_security/prompt.txt`",
+        "Product dossier: `konkred_validation/products/iac_security/PRODUCT.md`",
+        "Test output: `konkred_validation/products/iac_security/test_output.json`"
+      ]
+    },
+    {
+      "title": "M&A Due-Diligence Workbench",
+      "id": "KONKRED-FIN-DD-CANON-0001-v2.0",
+      "parentSuite": "Investment & M&A Analytics Workbench",
+      "staticDesignTarget": 82,
+      "buyer": "Deal teams and transaction services",
+      "commercialEntryRaw": "$997 Diligence Kit / $3,500 Diligence Sprint",
+      "validationLine": "PASS narrow public-data preflight",
+      "problemSolved": "Deal teams need a traceable diligence summary rather than an optimistic narrative assembled from incomplete documents.",
+      "definition": "This workflow is a narrower, productized entry point into the parent suite. It is suitable for a public-data demo, Workflow Kit, Validation Sprint or supervised pilot.",
+      "referenceInputs": [
+        "Deal context",
+        "Document inventory",
+        "Evidence extracts",
+        "Structured financials",
+        "Management representations",
+        "Materiality policy"
+      ],
+      "referenceOutputs": [
+        "Thesis assessment",
+        "Workstream finding ledger",
+        "Calculation register",
+        "Missing-document queue",
+        "Specialist questions"
+      ],
+      "runbook": [
+        "Inventory source set",
+        "Check evidence availability",
+        "Normalize workstreams",
+        "Calculate only cited values",
+        "Assess thesis elements",
+        "Route specialist review"
+      ],
+      "failureModes": [
+        "Summary treated as data room",
+        "Unreproducible valuation",
+        "Management statement treated as fact",
+        "Buy/no-buy output"
+      ],
+      "buyerValue": "Turns diligence review into an auditable question and evidence queue.",
+      "validation": {
+        "testFocus": "Public investor evidence, calculation lineage and conditional risk",
+        "result": "PASS",
+        "measuredResult": "Nine public metrics maintained source coverage and a reproducible Q4-to-FY calculation; no valuation decision was issued.",
+        "publicSource": "https://investors.palantir.com/files/Palantir%20-%20Q4%202025%20Investor%20Presentation.pdf"
+      },
+      "productBoundary": "The workflow may extract, classify, calculate through an external validator or interpret verified output. It does not make the final decision or execute external actions.",
+      "technicalRefs": [
+        "Prompt: `konkred_validation/products/ma_diligence/prompt.txt`",
+        "Product dossier: `konkred_validation/products/ma_diligence/PRODUCT.md`",
+        "Test output: `konkred_validation/products/ma_diligence/test_output.json`"
+      ]
+    },
+    {
+      "title": "Incident Learning and Post-Mortem",
+      "id": "KONKRED-OPS-SRE-CANON-0001-v2.0",
+      "parentSuite": "Mixed Quick-Win Control Workflows",
+      "staticDesignTarget": 84,
+      "buyer": "SRE and engineering leadership",
+      "commercialEntryRaw": "$297 Incident Kit / $1,500 Sprint",
+      "validationLine": "PASS narrow public-data preflight",
+      "problemSolved": "SRE teams need a blameless incident record with a source-backed timeline and honest uncertainty.",
+      "definition": "This workflow is a narrower, productized entry point into the parent suite. It is suitable for a public-data demo, Workflow Kit, Validation Sprint or supervised pilot.",
+      "referenceInputs": [
+        "Incident context",
+        "Logs/chats/tickets/status events",
+        "Known actions",
+        "Owner directory"
+      ],
+      "referenceOutputs": [
+        "Timeline",
+        "Impact window",
+        "Causal analysis",
+        "Action register",
+        "Data-quality conflicts"
+      ],
+      "runbook": [
+        "Normalize timestamps",
+        "Separate phases",
+        "Calculate duration",
+        "Distinguish confirmed cause from hypothesis",
+        "Create measurable actions",
+        "Route for incident-owner approval"
+      ],
+      "failureModes": [
+        "Blame assignment",
+        "Root-cause invention",
+        "Timestamp conflict hidden",
+        "Mitigation confused with permanent fix"
+      ],
+      "buyerValue": "Produces consistent postmortems and converts incidents into tracked learning.",
+      "validation": {
+        "testFocus": "Public postmortem timeline reconstruction",
+        "result": "PASS",
+        "measuredResult": "15/15 public timestamps were found, producing a 67-minute incident window and a draft-review gate.",
+        "publicSource": "https://blog.cloudflare.com/cloudflare-incident-march-21-2025/"
+      },
+      "productBoundary": "The workflow may extract, classify, calculate through an external validator or interpret verified output. It does not make the final decision or execute external actions.",
+      "technicalRefs": [
+        "Prompt: `konkred_validation/products/incident_postmortem/prompt.txt`",
+        "Product dossier: `konkred_validation/products/incident_postmortem/PRODUCT.md`",
+        "Test output: `konkred_validation/products/incident_postmortem/test_output.json`"
+      ]
+    },
+    {
+      "title": "GRC Evidence Request Triage",
+      "id": "KONKRED-SEC-GRC-CANON-0001-v2.0",
+      "parentSuite": "Legal Regulatory, Privacy & AI-Governance Suite",
+      "staticDesignTarget": 84,
+      "buyer": "GRC managers and vCISO teams",
+      "commercialEntryRaw": "$497 GRC Kit / $1,500 Sprint",
+      "validationLine": "PASS narrow public-data preflight",
+      "problemSolved": "GRC teams need an evidence request queue that maps to exact controls without declaring compliance.",
+      "definition": "This workflow is a narrower, productized entry point into the parent suite. It is suitable for a public-data demo, Workflow Kit, Validation Sprint or supervised pilot.",
+      "referenceInputs": [
+        "Framework/version",
+        "Audit period",
+        "Auditor requests",
+        "Control library",
+        "Systems and owner directory"
+      ],
+      "referenceOutputs": [
+        "Evidence items",
+        "Exact/unmapped mappings",
+        "Collection steps",
+        "Owners and periods",
+        "Package specification"
+      ],
+      "runbook": [
+        "Normalize requests",
+        "Map exact controls",
+        "Define evidence attributes",
+        "Deduplicate requests",
+        "Assign owners",
+        "Create exceptions"
+      ],
+      "failureModes": [
+        "Generic control guess",
+        "Control pass claimed",
+        "Owner invented",
+        "Period omitted",
+        "Sensitive evidence exposed"
+      ],
+      "buyerValue": "Reduces evidence-chasing friction and improves audit preparation.",
+      "validation": {
+        "testFocus": "Exact control mapping and evidence-register normalization",
+        "result": "PASS",
+        "measuredResult": "Eight exact mapping checks passed; absence of a versioned control library correctly returns NEEDS_INPUT.",
+        "publicSource": "https://soc2auditors.org/insights/soc-2-controls-list/"
+      },
+      "productBoundary": "The workflow may extract, classify, calculate through an external validator or interpret verified output. It does not make the final decision or execute external actions.",
+      "technicalRefs": [
+        "Prompt: `konkred_validation/products/grc_evidence/prompt.txt`",
+        "Product dossier: `konkred_validation/products/grc_evidence/PRODUCT.md`",
+        "Test output: `konkred_validation/products/grc_evidence/test_output.json`"
+      ]
+    },
+    {
+      "title": "Cash/Bank/PSP Reconciliation Copilot",
+      "id": "KONKRED-FIN-REC-CANON-0001-v2.0",
+      "parentSuite": "Finance Close, Reconciliation & Reporting Suite",
+      "staticDesignTarget": 82,
+      "buyer": "Controllers and accounting operations",
+      "commercialEntryRaw": "$497 Finance Kit / $2,500 Sprint",
+      "validationLine": "PASS narrow public-data preflight",
+      "problemSolved": "Controllers need matching and exception handling without false matches or automatic journal posting.",
+      "definition": "This workflow is a narrower, productized entry point into the parent suite. It is suitable for a public-data demo, Workflow Kit, Validation Sprint or supervised pilot.",
+      "referenceInputs": [
+        "ERP/bank/PSP rows",
+        "Entity/period/currency policy",
+        "Matching policy version",
+        "Engine results",
+        "Chart of accounts"
+      ],
+      "referenceOutputs": [
+        "Matching policy",
+        "Verified matches",
+        "Exception queue",
+        "JE proposals",
+        "Balance checks"
+      ],
+      "runbook": [
+        "Validate row IDs and period",
+        "Review engine results",
+        "Separate exact/ambiguous/unmatched",
+        "Calculate supported adjustments",
+        "Route owner/SLA",
+        "Controller approval"
+      ],
+      "failureModes": [
+        "Duplicate match",
+        "Timing item misclassified",
+        "Balance not verified",
+        "JE posted automatically"
+      ],
+      "buyerValue": "Creates a disciplined exception queue around deterministic reconciliation.",
+      "validation": {
+        "testFocus": "Exact candidates, ambiguity detection and no automatic journal entry",
+        "result": "PASS",
+        "measuredResult": "19 exact candidates, 1 ambiguous candidate and 8 unmatched bank rows; no journal entries were posted.",
+        "publicSource": "https://github.com/pavitsu/pavit-bank-reconciliation"
+      },
+      "productBoundary": "The workflow may extract, classify, calculate through an external validator or interpret verified output. It does not make the final decision or execute external actions.",
+      "technicalRefs": [
+        "Prompt: `konkred_validation/products/reconciliation/prompt.txt`",
+        "Product dossier: `konkred_validation/products/reconciliation/PRODUCT.md`",
+        "Test output: `konkred_validation/products/reconciliation/test_output.json`"
+      ]
+    },
+    {
+      "title": "Enterprise RFP Response Copilot",
+      "id": "KONKRED-SAL-RFP-CANON-0001-v2.0",
+      "parentSuite": "Marketing & Sales Evidence Module Library",
+      "staticDesignTarget": 82,
+      "buyer": "Proposal managers and sales engineers",
+      "commercialEntryRaw": "$497 RFP Kit / $2,000 Sprint",
+      "validationLine": "PASS narrow public-data preflight",
+      "problemSolved": "Proposal teams need complete, grounded RFP answers without inventing capabilities, certifications or commitments.",
+      "definition": "This workflow is a narrower, productized entry point into the parent suite. It is suitable for a public-data demo, Workflow Kit, Validation Sprint or supervised pilot.",
+      "referenceInputs": [
+        "RFP requirements",
+        "Approved claims registry",
+        "Product evidence",
+        "Customer context",
+        "Commercial/security policy"
+      ],
+      "referenceOutputs": [
+        "Requirement responses",
+        "Claim/evidence refs",
+        "Missing-evidence list",
+        "Commitment register",
+        "Submission readiness"
+      ],
+      "runbook": [
+        "Normalize requirements",
+        "Answer directly",
+        "Attach claim IDs",
+        "Check word limits",
+        "Escalate commitments",
+        "Mark readiness"
+      ],
+      "failureModes": [
+        "Claims missing",
+        "Certification invented",
+        "Competitor claim unsupported",
+        "Word limit missed",
+        "Ready-to-paste overclaim"
+      ],
+      "buyerValue": "Improves proposal first-pass speed while protecting claims and commitments.",
+      "validation": {
+        "testFocus": "Missing claims-registry negative grounding test",
+        "result": "PASS",
+        "measuredResult": "95 public requirements were found; an empty claims registry correctly blocked all unsupported responses.",
+        "publicSource": "https://esentire-dot-com-assets.s3.ca-central-1.amazonaws.com/assets/resourcefiles/MDR-RFP-RFI-Questionnaire.pdf"
+      },
+      "productBoundary": "The workflow may extract, classify, calculate through an external validator or interpret verified output. It does not make the final decision or execute external actions.",
+      "technicalRefs": [
+        "Prompt: `konkred_validation/products/rfp_response/prompt.txt`",
+        "Product dossier: `konkred_validation/products/rfp_response/PRODUCT.md`",
+        "Test output: `konkred_validation/products/rfp_response/test_output.json`"
+      ]
+    },
+    {
+      "title": "GovCon RFP Compliance Workbench",
+      "id": "KONKRED-GOV-RFP-CANON-0001-v2.0",
+      "parentSuite": "Operations & Procurement Intelligence Suite",
+      "staticDesignTarget": 85,
+      "buyer": "Capture and proposal managers",
+      "commercialEntryRaw": "$997 GovCon Kit / $2,000 Sprint",
+      "validationLine": "PASS narrow public-data preflight",
+      "problemSolved": "GovCon proposal teams need source-preserving requirement extraction across sections, amendments and attachments.",
+      "definition": "This workflow is a narrower, productized entry point into the parent suite. It is suitable for a public-data demo, Workflow Kit, Validation Sprint or supervised pilot.",
+      "referenceInputs": [
+        "Solicitation and version",
+        "Sections/pages/tables",
+        "Amendments",
+        "Attachments",
+        "Proposal outline/context"
+      ],
+      "referenceOutputs": [
+        "Requirement register",
+        "Evaluation matrix",
+        "Deliverables",
+        "Format rules",
+        "Ambiguity questions"
+      ],
+      "runbook": [
+        "Normalize solicitation",
+        "Reconcile amendments",
+        "Extract binding items",
+        "Classify context",
+        "Map only supplied locations",
+        "Draft questions"
+      ],
+      "failureModes": [
+        "Keyword-only recall",
+        "Attachment omitted",
+        "Amendment superseded text missed",
+        "Coordinates lost",
+        "100% claim"
+      ],
+      "buyerValue": "Creates a defensible compliance matrix and pre-proposal question queue.",
+      "validation": {
+        "testFocus": "Requirement-cue extraction and source-quality handling",
+        "result": "PASS",
+        "measuredResult": "191 cue lines were found, with 104 offeror-context lines, 39 government-context lines and 48 ambiguous lines; missing coordinates were exposed.",
+        "publicSource": "https://www.pgcc.edu/media/wwwpgccedu/content-assets/community/doing-business-with-pgcc/procurement/request-for-bids/rfq-20-05/RFP-No-025-004.pdf"
+      },
+      "productBoundary": "The workflow may extract, classify, calculate through an external validator or interpret verified output. It does not make the final decision or execute external actions.",
+      "technicalRefs": [
+        "Prompt: `konkred_validation/products/govcon_rfp/prompt.txt`",
+        "Product dossier: `konkred_validation/products/govcon_rfp/PRODUCT.md`",
+        "Test output: `konkred_validation/products/govcon_rfp/test_output.json`"
+      ]
+    },
+    {
+      "title": "FP&A Monthly Variance Analysis",
+      "id": "KONKRED-FIN-FPA-CANON-0001-v2.0",
+      "parentSuite": "Finance Planning, Treasury & Liquidity Suite",
+      "staticDesignTarget": 82,
+      "buyer": "FP&A managers and finance leaders",
+      "commercialEntryRaw": "$297 FP&A Kit / $1,500 Sprint",
+      "validationLine": "PASS narrow public-data preflight",
+      "problemSolved": "FP&A teams need arithmetic-correct variance narratives that do not invent causes.",
+      "definition": "This workflow is a narrower, productized entry point into the parent suite. It is suitable for a public-data demo, Workflow Kit, Validation Sprint or supervised pilot.",
+      "referenceInputs": [
+        "Normalized budget/actual rows",
+        "Period/currency/version",
+        "Materiality policy",
+        "Operational context",
+        "Owner confirmations"
+      ],
+      "referenceOutputs": [
+        "Variance table",
+        "Materiality/direction",
+        "Driver evidence",
+        "Forward scenarios",
+        "Validation checks"
+      ],
+      "runbook": [
+        "Validate rows",
+        "Calculate variance externally",
+        "Apply materiality",
+        "Link confirmed explanations",
+        "Label unknowns",
+        "Draft manager review"
+      ],
+      "failureModes": [
+        "Wrong variance semantics",
+        "Zero denominator",
+        "Cause invented",
+        "Favorable direction reversed"
+      ],
+      "buyerValue": "Provides fast, auditable monthly variance review.",
+      "validation": {
+        "testFocus": "Budget/actual normalization and policy-mismatch safety",
+        "result": "PASS",
+        "measuredResult": "3,871 public rows were processed; 274 zero-budget rows and unknown causes remained explicit.",
+        "publicSource": "https://data.dumfriesva.gov/api/views/x4av-ttes/rows.csv?accessType=DOWNLOAD"
+      },
+      "productBoundary": "The workflow may extract, classify, calculate through an external validator or interpret verified output. It does not make the final decision or execute external actions.",
+      "technicalRefs": [
+        "Prompt: `konkred_validation/products/fpa_variance/prompt.txt`",
+        "Product dossier: `konkred_validation/products/fpa_variance/PRODUCT.md`",
+        "Test output: `konkred_validation/products/fpa_variance/test_output.json`"
+      ]
+    },
+    {
+      "title": "Executive Flash Brief",
+      "id": "KONKRED-EXC-BRF-CANON-0001-v2.0",
+      "parentSuite": "Finance Close, Reconciliation & Reporting Suite",
+      "staticDesignTarget": 81,
+      "buyer": "Chiefs of staff and executive offices",
+      "commercialEntryRaw": "$197 Executive Kit / $1,500 Sprint",
+      "validationLine": "PASS narrow public-data preflight",
+      "problemSolved": "Executives need concise status without unsupported green/yellow/red signals or automatic distribution.",
+      "definition": "This workflow is a narrower, productized entry point into the parent suite. It is suitable for a public-data demo, Workflow Kit, Validation Sprint or supervised pilot.",
+      "referenceInputs": [
+        "Goals/KPIs/thresholds",
+        "Department updates",
+        "Source refs",
+        "Decision rights"
+      ],
+      "referenceOutputs": [
+        "Goal status",
+        "Department signals",
+        "Conflicts",
+        "Asks",
+        "Draft brief"
+      ],
+      "runbook": [
+        "Extract facts",
+        "Map to goals",
+        "Apply thresholds",
+        "Preserve conflicts",
+        "Draft under word limit",
+        "Keep as draft"
+      ],
+      "failureModes": [
+        "Threshold missing",
+        "Positive narrative chosen over conflict",
+        "Board ask invented",
+        "Distribution gate bypassed"
+      ],
+      "buyerValue": "Turns source-linked updates into a reviewable executive brief.",
+      "validation": {
+        "testFocus": "KPI-threshold status, source coverage and distribution gate",
+        "result": "PASS",
+        "measuredResult": "Source coverage was 100%; two goals were threshold-supported while an unthresholded goal remained UNASSESSED.",
+        "publicSource": "https://investors.palantir.com/files/Palantir%20-%20Q4%202025%20Investor%20Presentation.pdf"
+      },
+      "productBoundary": "The workflow may extract, classify, calculate through an external validator or interpret verified output. It does not make the final decision or execute external actions.",
+      "technicalRefs": [
+        "Prompt: `konkred_validation/products/executive_flash/prompt.txt`",
+        "Product dossier: `konkred_validation/products/executive_flash/PRODUCT.md`",
+        "Test output: `konkred_validation/products/executive_flash/test_output.json`"
+      ]
+    },
+    {
+      "title": "Commercial Lease Abstraction",
+      "id": "KONKRED-LEG-CRE-CANON-0001-v2.0",
+      "parentSuite": "Legal Contract & Transaction Review Suite",
+      "staticDesignTarget": 82,
+      "buyer": "Real-estate legal and lease administration",
+      "commercialEntryRaw": "$497 Lease Kit / $2,500 Sprint",
+      "validationLine": "PASS narrow public-data preflight",
+      "problemSolved": "Lease teams need reliable term extraction and calculations without unsupported “market” conclusions.",
+      "definition": "This workflow is a narrower, productized entry point into the parent suite. It is suitable for a public-data demo, Workflow Kit, Validation Sprint or supervised pilot.",
+      "referenceInputs": [
+        "Lease text/page markers",
+        "Tenant/landlord role",
+        "Risk policy",
+        "Market benchmark if used"
+      ],
+      "referenceOutputs": [
+        "Abstracted terms",
+        "Calculations",
+        "Flags",
+        "Required-points status",
+        "Counsel queue"
+      ],
+      "runbook": [
+        "Validate document",
+        "Extract terms and quotes",
+        "Calculate explicit values",
+        "Compare only supplied benchmark",
+        "Flag missing/ambiguous terms",
+        "Route review"
+      ],
+      "failureModes": [
+        "Above-market claim without benchmark",
+        "Missing term marked low risk",
+        "Cross-reference ignored",
+        "Quote not traceable"
+      ],
+      "buyerValue": "Makes lease administration faster and more consistent.",
+      "validation": {
+        "testFocus": "Required-term extraction and exact holdover quote",
+        "result": "PASS",
+        "measuredResult": "The 150% holdover term was traceable to a public quote; missing terms were not treated as low risk.",
+        "publicSource": "https://esign.com/wp-content/uploads/Texas-Association-of-Realtors-Commercial-Lease-Agreement.pdf"
+      },
+      "productBoundary": "The workflow may extract, classify, calculate through an external validator or interpret verified output. It does not make the final decision or execute external actions.",
+      "technicalRefs": [
+        "Prompt: `konkred_validation/products/lease_abstraction/prompt.txt`",
+        "Product dossier: `konkred_validation/products/lease_abstraction/PRODUCT.md`",
+        "Test output: `konkred_validation/products/lease_abstraction/test_output.json`"
+      ]
+    },
+    {
+      "title": "SEO Content Opportunity Planner",
+      "id": "KONKRED-MKT-SEO-CANON-0001-v2.0",
+      "parentSuite": "Marketing & Sales Evidence Module Library",
+      "staticDesignTarget": 81,
+      "buyer": "SEO leads and content strategists",
+      "commercialEntryRaw": "$197 SEO Kit / $1,500 Sprint",
+      "validationLine": "PASS narrow public-data preflight",
+      "problemSolved": "SEO teams need evidence-based opportunity planning without fabricated search volume, rankings or traffic forecasts.",
+      "definition": "This workflow is a narrower, productized entry point into the parent suite. It is suitable for a public-data demo, Workflow Kit, Validation Sprint or supervised pilot.",
+      "referenceInputs": [
+        "Timestamped keyword export",
+        "SERP/competitor evidence",
+        "Content inventory",
+        "Technical constraints",
+        "Business goals"
+      ],
+      "referenceOutputs": [
+        "Topic clusters",
+        "Opportunity priorities",
+        "Range forecasts where supported",
+        "Calendar",
+        "Content briefs"
+      ],
+      "runbook": [
+        "Validate exports",
+        "Cluster by intent",
+        "Check business fit",
+        "Identify evidence-backed gaps",
+        "Build calendar",
+        "Return research-required state when data is absent"
+      ],
+      "failureModes": [
+        "Forecast without tool data",
+        "Domain authority invented",
+        "Stale SERP",
+        "Internal URL invented"
+      ],
+      "buyerValue": "Converts SEO research into a reproducible planning queue.",
+      "validation": {
+        "testFocus": "Tool-data sufficiency and no-fabricated-forecast guard",
+        "result": "PASS",
+        "measuredResult": "2,960 public SEO rows lacked the required keyword/SERP fields, so the correct result was RESEARCH_REQUIRED with no forecast.",
+        "publicSource": "https://github.com/Zafar-Saeed/SEO_Dataset"
+      },
+      "productBoundary": "The workflow may extract, classify, calculate through an external validator or interpret verified output. It does not make the final decision or execute external actions.",
+      "technicalRefs": [
+        "Prompt: `konkred_validation/products/seo_planner/prompt.txt`",
+        "Product dossier: `konkred_validation/products/seo_planner/PRODUCT.md`",
+        "Test output: `konkred_validation/products/seo_planner/test_output.json`"
+      ]
+    },
+    {
+      "title": "Evidence-Backed PRD Generator",
+      "id": "KONKRED-PRD-CANON-0001-v2.0",
+      "parentSuite": "Marketing & Sales Evidence Module Library",
+      "staticDesignTarget": 84,
+      "buyer": "Product managers and product operations",
+      "commercialEntryRaw": "$497 PRD Kit / $2,000 Sprint",
+      "validationLine": "CONDITIONAL narrow public-data preflight",
+      "problemSolved": "Product teams need research synthesis without turning public requests into approved requirements or invented technical design.",
+      "definition": "This workflow is a narrower, productized entry point into the parent suite. It is suitable for a public-data demo, Workflow Kit, Validation Sprint or supervised pilot.",
+      "referenceInputs": [
+        "Research records",
+        "Approved business requirements",
+        "Technical constraints",
+        "Design constraints",
+        "Prioritization policy"
+      ],
+      "referenceOutputs": [
+        "Evidence synthesis",
+        "Themes",
+        "Requirements",
+        "Acceptance criteria",
+        "Technical review queue",
+        "Open decisions"
+      ],
+      "runbook": [
+        "Normalize research",
+        "Separate evidence and hypothesis",
+        "Assess contradictions",
+        "Apply prioritization only when inputs exist",
+        "Draft requirements",
+        "Route engineering/design review"
+      ],
+      "failureModes": [
+        "Quote invented",
+        "Sample size implied",
+        "Technical design invented",
+        "RICE inputs missing",
+        "Conditional result hidden"
+      ],
+      "buyerValue": "Improves product discovery handoff while preserving engineering ownership.",
+      "validation": {
+        "testFocus": "Public research synthesis and engineering-review separation",
+        "result": "CONDITIONAL",
+        "measuredResult": "66 public GitHub enhancement records had complete source references; the result remained CONDITIONAL because approved requirements, analytics and engineering constraints were absent.",
+        "publicSource": "https://api.github.com/repos/pandas-dev/pandas/issues?state=all&labels=Enhancement&per_page=100&page=1"
+      },
+      "productBoundary": "The workflow may extract, classify, calculate through an external validator or interpret verified output. It does not make the final decision or execute external actions.",
+      "technicalRefs": [
+        "Prompt: `konkred_validation/products/prd_generator/prompt.txt`",
+        "Product dossier: `konkred_validation/products/prd_generator/PRODUCT.md`",
+        "Test output: `konkred_validation/products/prd_generator/test_output.json`"
+      ]
+    },
+    {
+      "title": "Customer Health and Churn Copilot",
+      "id": "KONKRED-CSM-CHR-CANON-0001-v2.0",
+      "parentSuite": "Customer Support Control Suite",
+      "staticDesignTarget": 82,
+      "buyer": "Customer-success operations",
+      "commercialEntryRaw": "$497 Health Kit / $2,000 Sprint",
+      "validationLine": "PASS narrow public-data preflight",
+      "problemSolved": "CS teams need explainable account-health review and must not confuse a heuristic or benchmark model with a calibrated enterprise probability.",
+      "definition": "This workflow is a narrower, productized entry point into the parent suite. It is suitable for a public-data demo, Workflow Kit, Validation Sprint or supervised pilot.",
+      "referenceInputs": [
+        "Account features",
+        "Freshness/baselines",
+        "Qualitative feedback",
+        "Registered model output",
+        "Intervention library",
+        "Team capacity"
+      ],
+      "referenceOutputs": [
+        "Risk mode",
+        "Signals",
+        "Model metadata check",
+        "Interventions",
+        "Systemic patterns",
+        "Resource plan"
+      ],
+      "runbook": [
+        "Validate features",
+        "Check model calibration",
+        "Explain observed change",
+        "Select approved interventions",
+        "Assign owner",
+        "Require account approval"
+      ],
+      "failureModes": [
+        "Probability without model",
+        "Correlation called cause",
+        "ARR-only prioritization",
+        "Concession auto-approved"
+      ],
+      "buyerValue": "Prioritizes review and interventions without automatic customer action.",
+      "validation": {
+        "testFocus": "Calibrated reference model and explainable risk mode",
+        "result": "PASS",
+        "measuredResult": "7,032 cleaned rows produced a calibrated reference ROC-AUC of 0.8403 and Brier score of 0.1381; this is not a production churn model.",
+        "publicSource": "https://raw.githubusercontent.com/Giskard-AI/examples/main/datasets/WA_Fn-UseC_-Telco-Customer-Churn.csv"
+      },
+      "productBoundary": "The workflow may extract, classify, calculate through an external validator or interpret verified output. It does not make the final decision or execute external actions.",
+      "technicalRefs": [
+        "Prompt: `konkred_validation/products/churn_copilot/prompt.txt`",
+        "Product dossier: `konkred_validation/products/churn_copilot/PRODUCT.md`",
+        "Test output: `konkred_validation/products/churn_copilot/test_output.json`"
+      ]
+    },
+    {
+      "title": "A/B Experiment Interpretation Assistant",
+      "id": "KONKRED-DAT-ABT-CANON-0001-v2.0",
+      "parentSuite": "Pricing & Monetization Science Suite",
+      "staticDesignTarget": 85,
+      "buyer": "Product analytics and data science",
+      "commercialEntryRaw": "$297 Experiment Kit / $1,500 Sprint",
+      "validationLine": "PASS narrow public-data preflight",
+      "problemSolved": "Product teams need statistical interpretation tied to an experiment plan without using an LLM as the statistics engine.",
+      "definition": "This workflow is a narrower, productized entry point into the parent suite. It is suitable for a public-data demo, Workflow Kit, Validation Sprint or supervised pilot.",
+      "referenceInputs": [
+        "Experiment metadata",
+        "Verified analysis output",
+        "Guardrail results",
+        "Power/precision",
+        "Business context",
+        "Decision policy"
+      ],
+      "referenceOutputs": [
+        "Validity checks",
+        "Primary result",
+        "Guardrails",
+        "Business-impact range",
+        "Recommendation",
+        "Limitations"
+      ],
+      "runbook": [
+        "Validate estimand and plan",
+        "Read verified statistics",
+        "Check SRM and guardrails",
+        "Separate statistical/practical significance",
+        "Apply decision policy",
+        "Route rollout approval"
+      ],
+      "failureModes": [
+        "P-value from prose",
+        "Post-hoc power misuse",
+        "Segment fishing",
+        "Guardrail omitted",
+        "Rollout executed"
+      ],
+      "buyerValue": "Creates a credible bridge from statistical output to product decision.",
+      "validation": {
+        "testFocus": "External statistical reference agreement and stats-engine guard",
+        "result": "PASS",
+        "measuredResult": "290,583 cleaned observations produced a one-sided p-value of 0.90494 and SRM p-value of 0.94823; rollout was not executed.",
+        "publicSource": "https://github.com/tnangrani/Analyze_AB_Test_Results"
+      },
+      "productBoundary": "The workflow may extract, classify, calculate through an external validator or interpret verified output. It does not make the final decision or execute external actions.",
+      "technicalRefs": [
+        "Prompt: `konkred_validation/products/ab_interpretation/prompt.txt`",
+        "Product dossier: `konkred_validation/products/ab_interpretation/PRODUCT.md`",
+        "Test output: `konkred_validation/products/ab_interpretation/test_output.json`"
+      ]
+    }
+  ]
+}

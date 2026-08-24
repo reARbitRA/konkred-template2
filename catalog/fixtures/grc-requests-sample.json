@@ -1,0 +1,9 @@
+{
+  "sampleLabel": "SYNTHETIC PUBLIC GRC EVIDENCE REQUESTS",
+  "requests": [
+    { "id": "REQ-001", "text": "Provide evidence of annual penetration testing of the production environment for SOC 2 Type II." },
+    { "id": "REQ-002", "text": "Provide your data retention and deletion policy, and evidence that customer data is deleted within 30 days of contract termination." },
+    { "id": "REQ-003", "text": "Provide a list of subprocessors and evidence of signed DPAs for each." },
+    { "id": "REQ-004", "text": "Provide evidence of employee security awareness training completion in the last 12 months." }
+  ]
+}

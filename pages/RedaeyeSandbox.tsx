@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'motion/react';
 import { PageView } from '../types.ts';
 import { 
@@ -65,8 +65,34 @@ export const RedaeyeSandbox: React.FC<RedaeyeSandboxProps> = ({ onNavigate }) =>
     }
   ];
 
+  const [tvOn, setTvOn] = useState(false);
+  const noiseRef = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    const cv = noiseRef.current; if (!cv) return;
+    const ctx = cv.getContext('2d'); if (!ctx) return;
+    let alive = true;
+    const draw = () => {
+      if (!alive) return;
+      if (cv.style.opacity !== '0') {
+        const w = cv.width = Math.max(1, Math.floor(cv.clientWidth / 2)), h = cv.height = Math.max(1, Math.floor(cv.clientHeight / 2));
+        const img = ctx.createImageData(w, h), d = img.data;
+        for (let i = 0; i < d.length; i += 4) { const v = Math.random() * 255 | 0; d[i] = d[i+1] = d[i+2] = v; d[i+3] = 255; }
+        ctx.putImageData(img, 0, 0);
+      }
+      requestAnimationFrame(draw);
+    };
+    draw();
+    const t = setTimeout(() => { alive = true; if (cv) cv.style.opacity = '0'; setTvOn(true); }, 450);
+    return () => clearTimeout(t);
+  }, []);
+
   return (
-    <div className="min-h-screen bg-[#0B0F14] text-[#E6E9ED] font-sans selection:bg-[#FF003C] selection:text-white">
+    <div className="min-h-screen bg-[#07080B] px-2 sm:px-6 py-5">
+    <div className="k-tv p-2 sm:p-5">
+    <canvas ref={noiseRef} className="k-noise" style={{ opacity: tvOn ? 0 : 1 }} aria-hidden="true" />
+    <div className="k-osd px-2 py-1.5 border-b-2" style={{ borderColor: 'rgba(255,255,255,.08)' }}>CH 36 · REDAEYE TELEVISION · 367 TECHNIQUES ON AIR</div>
+    <div className="k-screen !rounded-none !border-0 mt-1">
+    <div className="relative z-10 min-h-screen bg-[#0B0F14] text-[#E6E9ED] font-sans selection:bg-[#FF003C] selection:text-white">
       {/* Grid Background Overlay */}
       <div className="fixed inset-0 pointer-events-none opacity-20" 
            style={{ backgroundImage: 'linear-gradient(rgba(255,0,60,.1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,0,60,.1) 1px,transparent 1px)', backgroundSize: '60px 60px' }} />
@@ -301,7 +327,7 @@ export const RedaeyeSandbox: React.FC<RedaeyeSandboxProps> = ({ onNavigate }) =>
                     </div>
                     <h3 className="font-mono text-xl text-white mb-2 uppercase">Awaiting Synthesis</h3>
                     <p className="text-[#555] text-sm max-w-md font-mono">
-                      Generate a new component in the Logic Forge to display it here. The sandbox provides a real-time preview environment with brutalist UI constraints.
+                      Generate a new component with fullKONK_with fullKONK_&gt; to display it heregt; to display it here. The sandbox provides a real-time preview environment with brutalist UI constraints.
                     </p>
                     
                     <div className="mt-10 grid grid-cols-2 gap-4 w-full max-w-lg">
@@ -362,6 +388,9 @@ export const RedaeyeSandbox: React.FC<RedaeyeSandboxProps> = ({ onNavigate }) =>
           </div>
         </div>
       </footer>
+    </div>
+    </div>
+    </div>
     </div>
   );
 };

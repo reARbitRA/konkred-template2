@@ -1,0 +1,9 @@
+{
+  "sampleLabel": "SYNTHETIC PUBLIC TERRAFORM SAMPLE",
+  "manifests": [
+    {
+      "path": "main.tf",
+      "content": "provider \"aws\" { region = \"us-east-1\" }\n\nresource \"aws_s3_bucket\" \"data\" {\n  bucket = \"example-public-data-bucket\"\n  acl    = \"public-read\"\n}\n\nresource \"aws_db_instance\" \"app\" {\n  allocated_storage = 20\n  engine            = \"postgres\"\n  instance_class    = \"db.t3.micro\"\n  username          = \"admin\"\n  password          = \"Sup3rSecret!2026\"\n  skip_final_snapshot = true\n  storage_encrypted = false\n}\n\nresource \"aws_iam_role_policy\" \"admin\" {\n  name = \"example-admin-policy\"\n  role = \"example-role\"\n  policy = jsonencode({\n    Version = \"2012-10-17\"\n    Statement = [{ Effect = \"Allow\", Action = \"*\", Resource = \"*\" }]\n  })\n}\n"
+    }
+  ]
+}

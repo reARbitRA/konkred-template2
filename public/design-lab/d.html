@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAMPLE D — Panel System · konkred.xyz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0e14; --panel:#0d1219; --line:#1e2836; --line2:#2a3a52;
+  --blue:#5da9ff; --amber:#ffb224; --txt:#dbe5f1; --mut:#5f7290; --mono:'IBM Plex Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--txt);font-family:'Inter',system-ui,sans-serif;overflow-x:hidden}
+::selection{background:var(--blue);color:var(--bg)}
+/* blueprint grid */
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background-image:linear-gradient(rgba(93,169,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(93,169,255,.05) 1px,transparent 1px);
+  background-size:28px 28px}
+body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background-image:linear-gradient(rgba(93,169,255,.09) 1px,transparent 1px),linear-gradient(90deg,rgba(93,169,255,.09) 1px,transparent 1px);
+  background-size:140px 140px}
+
+/* crosshair follower */
+.xh{position:fixed;z-index:35;pointer-events:none;opacity:0;transition:opacity .3s}
+.xh .h{position:absolute;top:50%;left:-100vw;right:-100vw;height:1px;background:rgba(93,169,255,.18)}
+.xh .v{position:absolute;left:50%;top:-100vh;bottom:-100vh;width:1px;background:rgba(93,169,255,.18)}
+body:hover .xh{opacity:1}
+.coords{position:fixed;top:50%;right:14px;transform:translateY(-50%);z-index:36;pointer-events:none;
+  font-family:var(--mono);font-size:9px;color:var(--mut);letter-spacing:.15em;writing-mode:vertical-rl;opacity:0;transition:opacity .3s}
+body:hover .coords{opacity:1}
+
+/* ruler top */
+.ruler{position:sticky;top:0;z-index:40;height:34px;background:rgba(10,14,20,.92);backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;
+  padding:0 clamp(14px,4vw,48px);font-family:var(--mono);font-size:9.5px;letter-spacing:.25em;color:var(--mut)}
+.ruler b{color:var(--txt);letter-spacing:.35em;font-weight:600}
+.ruler .sq{width:12px;height:12px;border:1.5px solid var(--amber);display:inline-block;margin-right:10px;vertical-align:-2px}
+
+/* hero */
+.hero{padding:clamp(48px,8vw,110px) clamp(14px,4vw,48px) 34px;position:relative;max-width:1280px}
+.sec-no{font-family:var(--mono);font-size:11px;letter-spacing:.3em;color:var(--blue);margin-bottom:20px;display:flex;align-items:center;gap:14px}
+.sec-no::after{content:"";flex:1;max-width:180px;height:1px;background:var(--line2)}
+h1{font-weight:900;font-size:clamp(36px,6.5vw,86px);line-height:1.0;letter-spacing:-.025em;text-transform:uppercase}
+h1 svg{display:block;width:min(560px,80%);height:auto;margin-top:14px}
+h1 svg path{stroke:var(--amber);stroke-width:2.5;fill:none;stroke-dasharray:600;stroke-dashoffset:600;animation:draw 1.6s .4s cubic-bezier(.6,0,.2,1) forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.sub{margin-top:24px;max-width:540px;font-size:14.5px;line-height:1.8;color:var(--mut)}
+
+/* module grid */
+.wrap{padding:clamp(26px,4vw,54px) clamp(14px,4vw,48px) 120px;max-width:1280px}
+.row-label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:9.5px;letter-spacing:.3em;color:var(--mut);
+  border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:22px}
+.mods{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);position:relative}
+/* corner crosshairs on the whole board */
+.mods::before,.mods::after,.mods .cx::before,.mods .cx::after{content:"+";position:absolute;font-family:var(--mono);color:var(--blue);font-size:13px;line-height:1;z-index:2}
+.mods::before{top:-8px;left:-7px}.mods::after{top:-8px;right:-7px}
+.mods .cx::before{bottom:-8px;left:-7px}.mods .cx::after{bottom:-8px;right:-7px}
+.mod{background:var(--panel);padding:24px;cursor:pointer;position:relative;min-height:250px;
+  display:flex;flex-direction:column;transition:background .25s}
+.mod:hover{background:#111827}
+.mod .ref{font-family:var(--mono);font-size:9px;letter-spacing:.2em;color:var(--mut);display:flex;justify-content:space-between;margin-bottom:18px}
+.mod .ref b{color:var(--blue);font-weight:500}
+.mod .tag{align-self:flex-start;font-family:var(--mono);font-size:8.5px;letter-spacing:.28em;padding:4px 9px;margin-bottom:16px;
+  border:1px solid var(--line2);color:var(--mut)}
+.mod.suite .tag{border-color:rgba(255,178,36,.4);color:var(--amber)}
+.mod h3{font-size:18px;font-weight:800;letter-spacing:-.01em;margin-bottom:10px}
+.mod p{font-size:12.5px;line-height:1.7;color:var(--mut);flex:1}
+.mod .dims{font-family:var(--mono);font-size:9px;color:var(--mut);letter-spacing:.15em;margin-top:16px;
+  padding-top:14px;border-top:1px dashed var(--line);display:flex;justify-content:space-between}
+.mod .dims .pr{color:var(--amber)}
+/* animated dashed border on hover */
+.mod::after{content:"";position:absolute;inset:6px;border:1px dashed rgba(93,169,255,0);pointer-events:none;transition:border-color .25s}
+.mod:hover::after{border-color:rgba(93,169,255,.45);animation:march 1s linear infinite}
+@keyframes march{to{transform:translateX(6px)}}
+.mod .arrow{position:absolute;right:18px;bottom:16px;font-family:var(--mono);color:var(--blue);opacity:0;transform:translateX(-8px);transition:all .25s}
+.mod:hover .arrow{opacity:1;transform:none}
+
+/* modal — technical sheet */
+.modal{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;padding:18px}
+.modal.on{display:flex}
+.modal .bg{position:absolute;inset:0;background:rgba(6,9,14,.8);backdrop-filter:blur(5px)}
+.sheet{position:relative;width:min(680px,100%);background:var(--panel);border:1px solid var(--line2);
+  animation:sheetIn .35s cubic-bezier(.2,.9,.2,1) both}
+@keyframes sheetIn{0%{transform:translateY(26px);opacity:0}100%{transform:none;opacity:1}}
+.sheet .title{display:flex;justify-content:space-between;align-items:center;padding:16px 22px;border-bottom:1px solid var(--line);
+  font-family:var(--mono);font-size:10px;letter-spacing:.25em;color:var(--mut)}
+.sheet .title b{color:var(--txt)}
+.sheet .body{padding:26px}
+.sheet h2{font-size:24px;font-weight:900;letter-spacing:-.01em;margin:4px 0 14px}
+.spec{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);margin:18px 0}
+.spec div{background:var(--panel);padding:14px 16px}
+.spec span{display:block;font-family:var(--mono);font-size:8.5px;letter-spacing:.25em;color:var(--mut);margin-bottom:6px}
+.spec b{font-size:13px;font-weight:600}
+.spec .ok{color:#4ade80}.spec .am{color:var(--amber)}
+.sheet .x{position:absolute;top:12px;right:14px;background:none;border:1px solid var(--line);color:var(--mut);
+  font-family:var(--mono);font-size:10px;letter-spacing:.2em;padding:6px 12px;cursor:pointer}
+.sheet .x:hover{border-color:var(--blue);color:var(--blue)}
+.order{display:inline-block;background:var(--blue);color:var(--bg);font-weight:800;font-size:12.5px;letter-spacing:.18em;
+  padding:15px 32px;border:none;cursor:pointer;font-family:var(--mono);transition:all .15s}
+.order:hover{background:var(--amber)}
+.order:active{transform:translateY(2px)}
+
+/* walkthrough */
+.walk{position:fixed;left:0;right:0;bottom:0;z-index:45;background:rgba(10,14,20,.95);border-top:1px solid var(--line);backdrop-filter:blur(10px);
+  display:flex;flex-wrap:wrap}
+.walk .st{flex:1;min-width:200px;padding:15px clamp(12px,3vw,30px);border-right:1px solid var(--line);display:flex;gap:13px;align-items:center}
+.walk .st:last-child{border-right:0}
+.walk .num{font-family:var(--mono);font-size:10px;color:var(--amber);border:1px solid rgba(255,178,36,.4);padding:5px 8px}
+.walk b{display:block;font-size:11.5px;font-weight:700;letter-spacing:.06em}
+.walk span{font-size:10.5px;color:var(--mut)}
+.note{position:fixed;bottom:84px;left:14px;z-index:44;font-family:var(--mono);font-size:8.5px;letter-spacing:.25em;color:var(--mut)}
+
+@media(max-width:960px){.mods{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:620px){
+  .mods{grid-template-columns:1fr}
+  .mod{min-height:0}
+  .walk .st{min-width:46%}
+  .coords{display:none}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="xh"><div class="h"></div><div class="v"></div></div>
+<div class="coords" id="coords">X 0000 · Y 0000</div>
+
+<header class="ruler">
+  <div><span class="sq"></span><b>KONKRED</b> — PANEL SYSTEM</div>
+  <div>SAMPLE D · REV 2026.08</div>
+</header>
+
+<section class="hero">
+  <p class="sec-no">SEC 01 — CATALOGUE</p>
+  <h1>Blueprints for<br>real work.
+    <svg viewBox="0 0 560 26" fill="none"><path d="M2 14 H180 L196 4 H372 L386 22 H558"/></svg>
+  </h1>
+  <p class="sub">An architectural drawing that runs. Exposed grid, dimensioned panels, crosshair precision — every module a numbered plate in the master plan.</p>
+</section>
+
+<main class="wrap">
+  <div class="row-label"><span>MODULE INDEX — 36 UNITS</span><span>SCALE 1:1</span></div>
+  <div class="mods" id="grid"><i class="cx"></i></div>
+</main>
+
+<div class="modal" id="modal">
+  <div class="bg" onclick="closeModal()"></div>
+  <div class="sheet">
+    <div class="title"><span>TECHNICAL SHEET — <b id="mRef"></b></span><button class="x" onclick="closeModal()">ESC</button></div>
+    <div class="body">
+      <h2 id="mT"></h2>
+      <p style="font-size:13px;color:var(--mut);line-height:1.7" id="mD"></p>
+      <div class="spec">
+        <div><span>STATUS</span><b class="ok" id="mS"></b></div>
+        <div><span>PRICE</span><b class="am" id="mP"></b></div>
+        <div><span>AUTONOMOUS ACTIONS</span><b class="ok">NONE — BY DESIGN</b></div>
+        <div><span>APPROVAL</span><b>NAMED HUMAN OWNER</b></div>
+      </div>
+      <button class="order">ORDER MODULE ▸</button>
+    </div>
+  </div>
+</div>
+
+<footer class="walk">
+  <div class="st"><span class="num">01</span><div><b>Read the plan</b><span>Crosshair follows your cursor; coordinates on the ruler edge</span></div></div>
+  <div class="st"><span class="num">02</span><div><b>Open a plate</b><span>Click any module — a technical sheet with the full spec</span></div></div>
+  <div class="st"><span class="num">03</span><div><b>Order the module</b><span>Kit order in test mode — honest states, nothing faked</span></div></div>
+</footer>
+<div class="note">SAMPLE ONLY — NOT THE LIVE APP</div>
+
+<script>
+const P=[
+ {t:"Contract Review Copilot",ref:"PL-101",tp:"WORKFLOW",d:"First-pass review with playbook risk flags and exact source quotes.",p:"FROM $497",s:"PUBLIC DEMO"},
+ {t:"IaC Security Copilot",ref:"PL-102",tp:"WORKFLOW",d:"Finding matrix on real Terraform — read-only, never applies.",p:"FROM $497",s:"SUPERVISED"},
+ {t:"Reconciliation Copilot",ref:"PL-103",tp:"WORKFLOW",d:"Deterministic matching: exact, ambiguous, unmatched lanes.",p:"FROM $497",s:"KIT"},
+ {t:"Incident Post-Mortem",ref:"PL-104",tp:"WORKFLOW",d:"Scrubable timeline with blameless causal lanes.",p:"FROM $297",s:"PUBLIC DEMO"},
+ {t:"Customer Support Control",ref:"PL-201",tp:"SUITE",d:"Ticket queue, policy diff, SLA clock, account health.",p:"SPRINT $2.5K+",s:"SUPERVISED",suite:true},
+ {t:"Finance Close & Reporting",ref:"PL-202",tp:"SUITE",d:"Close checklist, exceptions table, controller drawer.",p:"SPRINT $3.5K+",s:"SUPERVISED",suite:true},
+];
+const g=document.getElementById("grid");
+P.forEach(x=>{
+  const c=document.createElement("div");
+  c.className="mod"+(x.suite?" suite":"");
+  c.innerHTML=`<div class="ref"><b>${x.ref}</b><span>${x.tp}</span></div><span class="tag">${x.s}</span>
+   <h3>${x.t}</h3><p>${x.d}</p><div class="dims"><span class="pr">${x.p}</span><span>GRID 28×28</span></div>
+   <span class="arrow">[ OPEN ]</span>`;
+  c.onclick=()=>{
+    document.getElementById("mT").textContent=x.t;
+    document.getElementById("mD").textContent=x.d;
+    document.getElementById("mRef").textContent=x.ref;
+    document.getElementById("mS").textContent=x.s;
+    document.getElementById("mP").textContent=x.p;
+    document.getElementById("modal").classList.add("on");
+  };
+  g.appendChild(c);
+});
+function closeModal(){document.getElementById("modal").classList.remove("on")}
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal()});
+/* crosshair + coords */
+const co=document.getElementById("coords");
+document.addEventListener("mousemove",e=>{
+  document.querySelector(".xh").style.transform=`translate(${e.clientX}px,${e.clientY}px)`;
+  co.textContent=`X ${String(Math.round(e.clientX)).padStart(4,"0")} · Y ${String(Math.round(e.clientY)).padStart(4,"0")}`;
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAMPLE G — BROADCAST · konkred.xyz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--amber:#ffb200;--ph:#3dff9a;--red:#ff4d4d}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden}
+body{background:#07080b;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-family:'IBM Plex Mono',monospace;color:#c9e8d5;gap:14px;padding:12px}
+/* TV set */
+.tv{position:relative;width:min(96vw,1000px);aspect-ratio:16/9.6;background:#15161c;border-radius:26px;
+  border:3px solid #000;box-shadow:0 24px 80px rgba(0,0,0,.7),inset 0 2px 0 rgba(255,255,255,.06);
+  padding:clamp(14px,2.6vw,30px);display:flex;gap:clamp(10px,1.8vw,22px)}
+.screen{position:relative;flex:1;background:#020503;border-radius:14px;overflow:hidden;border:2px solid #000;
+  box-shadow:inset 0 0 60px rgba(0,0,0,.8)}
+/* CRT overlays */
+.screen::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:20;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.28) 0 1px,transparent 1px 3px),
+  radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.55))}
+.screen::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:21;
+  background:linear-gradient(180deg,rgba(255,255,255,.05),transparent 12%)}
+#noise{position:absolute;inset:0;width:100%;height:100%;z-index:10;opacity:1;transition:opacity .12s}
+/* channel content */
+.ch{position:absolute;inset:0;z-index:5;display:none;padding:clamp(16px,3.5vw,44px);flex-direction:column}
+.ch.on{display:flex}
+.ch .osd{font-size:clamp(9px,1.4vw,12px);letter-spacing:.3em;color:var(--ph);opacity:.85;margin-bottom:8px}
+.ch h2{font-family:'Archivo Black',sans-serif;color:#eafff3;font-size:clamp(20px,4.6vw,54px);line-height:1;
+  text-transform:uppercase;text-shadow:0 0 24px rgba(61,255,154,.35)}
+.ch .tw{margin-top:12px;font-size:clamp(10px,1.5vw,13.5px);line-height:1.8;color:#8fd8b4;max-width:560px;min-height:4.2em}
+.ch .tw::after{content:"▌";color:var(--ph);animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.ch .row{margin-top:auto;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.ch .badge{font-size:clamp(8px,1.2vw,10px);letter-spacing:.22em;border:1px solid rgba(61,255,154,.4);color:var(--ph);padding:6px 12px}
+.ch .badge.am{border-color:rgba(255,178,0,.5);color:var(--amber)}
+.ch .cta{background:var(--ph);color:#001b0d;font-weight:700;font-size:clamp(9px,1.3vw,12px);letter-spacing:.2em;
+  padding:12px 24px;border:none;cursor:pointer;font-family:inherit;box-shadow:5px 5px 0 rgba(61,255,154,.2)}
+.ch .cta:active{transform:translate(3px,3px);box-shadow:none}
+/* oscilloscope deco per channel */
+.wave{position:absolute;right:3%;bottom:8%;width:34%;height:30%;opacity:.5;pointer-events:none}
+/* side panel */
+.side{width:clamp(64px,10vw,120px);display:flex;flex-direction:column;justify-content:space-between;align-items:center;padding:8px 0}
+.brand{writing-mode:vertical-rl;font-family:'Archivo Black',sans-serif;letter-spacing:.4em;font-size:clamp(10px,1.4vw,14px);color:#e9e6df}
+.brand span{color:var(--amber)}
+/* dial */
+.dial{position:relative;width:clamp(54px,8vw,84px);height:clamp(54px,8vw,84px);border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#2c2d36,#101117 70%);border:3px solid #000;
+  box-shadow:0 6px 18px rgba(0,0,0,.6),inset 0 2px 3px rgba(255,255,255,.08);cursor:grab;touch-action:none}
+.dial:active{cursor:grabbing}
+.dial .notch{position:absolute;left:50%;top:6%;width:6px;height:26%;background:var(--amber);border-radius:3px;
+  transform-origin:50% 190%;transform:translateX(-50%) rotate(0deg)}
+.dial .tick{position:absolute;inset:-8px;border-radius:50%;pointer-events:none}
+.chnums{display:flex;flex-direction:column;gap:5px}
+.chnums button{width:30px;height:22px;background:#1a1b22;border:2px solid #000;color:#6f7686;font-family:inherit;
+  font-size:9px;cursor:pointer}
+.chnums button.on{background:var(--amber);color:#000;font-weight:700}
+.led{width:10px;height:10px;border-radius:50%;background:var(--red);box-shadow:0 0 12px var(--red);animation:blink 1.6s steps(1) infinite}
+/* hint + walkthrough */
+.hint{font-size:9px;letter-spacing:.3em;color:#5d6472}
+.walk{position:fixed;left:0;right:0;bottom:0;z-index:50;background:#0c0d11;border-top:2px solid #1e2028;
+  display:flex;flex-wrap:wrap;justify-content:center}
+.walk .st{padding:10px 22px;font-size:9.5px;letter-spacing:.18em;color:#5d6472;display:flex;gap:8px;align-items:center}
+.walk .st b{color:var(--amber)}
+@media(max-width:640px){.side{width:56px}.brand{display:none}.hint{display:none}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+<div class="tv">
+  <div class="screen" id="screen">
+    <canvas id="noise"></canvas>
+    <div id="chs"></div>
+  </div>
+  <div class="side">
+    <div class="brand">KONKRED <span>BROADCAST</span></div>
+    <div class="chnums" id="chnums"></div>
+    <div class="dial" id="dial" title="Drag to zap"><div class="tick"></div><div class="notch" id="notch"></div></div>
+    <div class="led"></div>
+  </div>
+</div>
+<div class="hint">← → ZAP · DRAG THE DIAL · CH 00 IS THE INDEX</div>
+
+<footer class="walk">
+  <div class="st"><b>01 —</b> ZAP BETWEEN CHANNELS (ARROWS OR THE DIAL)</div>
+  <div class="st"><b>02 —</b> STATIC PASSES, THE CHANNEL TUNES IN, THE SPEC TYPES ITSELF</div>
+  <div class="st"><b>03 —</b> EACH CHANNEL IS A PRODUCT — 36 IN THE FULL BUILD</div>
+  <div class="st"><b>SAMPLE ONLY — NOT THE LIVE APP</b></div>
+</footer>
+
+<script>
+const CH=[
+ {n:"00",t:"THE INDEX",d:"36 controlled workflow products broadcast around the clock. Every channel is a product; every claim on air is sourced. Zap through the schedule.",b:["36 PRODUCTS","21 SUITES","15 TOOLS"],p:null},
+ {n:"01",t:"CONTRACT REVIEW COPILOT",d:"First-pass review with playbook risk flags and exact source quotes. Missing terms stay missing — never invented.",b:["PUBLIC DEMO","FROM $497"],p:"RUN THE DEMO ▸"},
+ {n:"02",t:"IAC SECURITY COPILOT",d:"Finding matrix on real Terraform — read-only verification. It proves the risk; it never touches live infrastructure.",b:["SUPERVISED","FROM $497"],p:"REQUEST PILOT ▸"},
+ {n:"03",t:"RECONCILIATION COPILOT",d:"Deterministic bank and ledger matching: exact, ambiguous, unmatched lanes. No auto-posting — the controller decides.",b:["WORKFLOW KIT","FROM $497"],p:"GET THE KIT ▸"},
+ {n:"04",t:"SUPPORT CONTROL SUITE",d:"The command center: ticket queue, policy comparison, SLA clock, account health. Nine modules under human approval.",b:["SUITE","SPRINT $2.5K+"],p:"BOOK SPRINT ▸"},
+ {n:"05",t:"FINANCE CLOSE SUITE",d:"Close-control center: period checklist, reconciliation exceptions, balance status, controller approval drawer.",b:["SUITE","SPRINT $3.5K+"],p:"BOOK SPRINT ▸"},
+];
+/* build channels */
+const chsEl=document.getElementById("chs"),nums=document.getElementById("chnums");
+CH.forEach((c,i)=>{
+  const d=document.createElement("div");d.className="ch";d.id="ch"+i;
+  d.innerHTML=`<div class="osd">CH ${c.n} · KONKRED BROADCAST · SIGNAL LOCKED</div><h2>${c.t}</h2>
+   <p class="tw" data-d="${c.d.replace(/"/g,'&quot;')}"></p>
+   <svg class="wave" viewBox="0 0 200 60"><polyline points="0,30 20,30 28,6 36,54 44,30 80,30 88,14 96,46 104,30 150,30 158,10 166,50 174,30 200,30" fill="none" stroke="#3dff9a" stroke-width="2"/></svg>
+   <div class="row">${c.b.map((b,j)=>`<span class="badge ${j%2?'am':''}">${b}</span>`).join("")}
+   ${c.p?`<button class="cta">${c.p}</button>`:""}</div>`;
+  chsEl.appendChild(d);
+  const b=document.createElement("button");b.textContent=c.n;
+  b.onclick=()=>zap(i);nums.appendChild(b);
+});
+/* static noise */
+const cv=document.getElementById("noise"),ctx=cv.getContext("2d");
+function drawNoise(){
+  const w=cv.width=Math.floor(cv.clientWidth/2),h=cv.height=Math.floor(cv.clientHeight/2);
+  const img=ctx.createImageData(w,h),d=img.data;
+  for(let i=0;i<d.length;i+=4){const v=Math.random()*255|0;d[i]=d[i+1]=d[i+2]=v;d[i+3]=255}
+  ctx.putImageData(img,0,0);
+}
+let noiseOn=true;
+(function loop(){if(noiseOn)drawNoise();requestAnimationFrame(loop)})();
+/* zap */
+let cur=-1,twTimer=null;
+function show(i){
+  document.querySelectorAll(".ch").forEach(c=>c.classList.remove("on"));
+  document.getElementById("ch"+i).classList.add("on");
+  document.querySelectorAll(".chnums button").forEach((b,j)=>b.classList.toggle("on",j===i));
+  const tw=document.querySelector("#ch"+i+" .tw");clearTimeout(twTimer);
+  const s=tw.dataset.d;let k=0;tw.textContent="";
+  (function w(){if(k<s.length){tw.textContent=s.slice(0,++k);twTimer=setTimeout(w,14)}})();
+  const ang=-120+i*(240/(CH.length-1));
+  document.getElementById("notch").style.transform=`translateX(-50%) rotate(${ang}deg)`;
+}
+function zap(i){
+  if(i===cur)return;cur=i;
+  noiseOn=true;document.getElementById("noise").style.opacity="1";
+  setTimeout(()=>{noiseOn=false;document.getElementById("noise").style.opacity="0";show(i)},260);
+}
+/* dial drag */
+const dial=document.getElementById("dial");let dialA=0,dragging=false;
+dial.addEventListener("pointerdown",e=>{dragging=true;dial.setPointerCapture(e.pointerId);e.preventDefault()});
+dial.addEventListener("pointermove",e=>{
+  if(!dragging)return;
+  const r=dial.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;
+  const a=Math.atan2(e.clientY-cy,e.clientX-cx)*180/Math.PI+90;
+  const delta=((a-dialA)%360+540)%360-180;
+  if(Math.abs(delta)>14){dialA=a;
+    const next=(cur+(delta>0?1:-1)+CH.length)%CH.length;zap(next);
+  }
+});
+dial.addEventListener("pointerup",()=>dragging=false);
+/* keys */
+document.addEventListener("keydown",e=>{
+  if(e.key==="ArrowRight")zap((cur+1)%CH.length);
+  if(e.key==="ArrowLeft")zap((cur-1+CH.length)%CH.length);
+});
+zap(0);
+</script>
+</body>
+</html>

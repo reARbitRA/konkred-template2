@@ -1,0 +1,9 @@
+{
+  "sampleLabel": "SYNTHETIC PUBLIC EXECUTIVE BRIEF SAMPLE",
+  "items": [
+    { "id": "ITEM-01", "category": "Revenue", "metric": "MRR", "value": "$412,000 (+3.1% WoW)", "note": "Expansion revenue from enterprise renewals." },
+    { "id": "ITEM-02", "category": "Product", "metric": "Activation Rate", "value": "38%", "note": "New signup activation improved after onboarding v2." },
+    { "id": "ITEM-03", "category": "Support", "metric": "P95 Response Time", "value": "3h 12m", "note": "Slightly above target of 3h; ticket volume up 8%." },
+    { "id": "ITEM-04", "category": "Risk", "metric": "SOC 2 Evidence Deadline", "value": "2026-07-15", "note": "Evidence collection 60% complete." }
+  ]
+}

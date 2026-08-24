@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAMPLE A — Industrial Terminal · konkred.xyz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Archivo+Black&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#04070a; --panel:#0a1210; --line:#123024;
+  --ph:#3dff9a; --ph-dim:#1d7a4c; --amber:#ffb200; --red:#ff4d4d;
+  --txt:#c9e8d5; --mut:#4d7a63;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--txt);font-family:'IBM Plex Mono',ui-monospace,monospace;overflow-x:hidden}
+/* CRT scanlines + vignette */
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:50;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.22) 0 1px,transparent 1px 3px);}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:51;
+  background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.5));}
+::selection{background:var(--ph);color:#000}
+
+/* ── chrome ── */
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  border-bottom:1px solid var(--line);padding:14px clamp(16px,4vw,48px);position:sticky;top:0;background:rgba(4,7,10,.92);backdrop-filter:blur(6px);z-index:40}
+.brand{display:flex;align-items:center;gap:12px}
+.kmark{width:34px;height:34px;border:2px solid var(--ph);display:grid;place-items:center;
+  font-family:'Archivo Black',sans-serif;color:var(--ph);font-size:15px;
+  box-shadow:4px 4px 0 rgba(61,255,154,.15);animation:kmarkIn .5s steps(3) both}
+@keyframes kmarkIn{0%{transform:scale(1.6) rotate(-8deg);opacity:0}100%{transform:none;opacity:1}}
+.brand b{letter-spacing:.35em;font-size:13px;color:#eafff3}
+.brand small{display:block;color:var(--mut);font-size:9px;letter-spacing:.2em}
+.tag{font-size:10px;color:var(--amber);border:1px solid rgba(255,178,0,.4);padding:4px 10px;letter-spacing:.25em}
+
+/* ── hero ── */
+.hero{padding:clamp(40px,7vw,90px) clamp(16px,4vw,48px) 30px;position:relative}
+.sysline{color:var(--mut);font-size:11px;letter-spacing:.15em;margin-bottom:18px}
+.sysline .ok{color:var(--ph)}
+h1{font-family:'Archivo Black',sans-serif;color:#eafff3;line-height:.95;
+  font-size:clamp(34px,6.5vw,84px);text-transform:uppercase;letter-spacing:-.01em}
+h1 .hl{color:var(--ph)}
+.cursor{display:inline-block;width:.55em;height:.9em;background:var(--ph);vertical-align:-.08em;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.sub{margin-top:18px;max-width:560px;font-size:13px;line-height:1.8;color:var(--mut)}
+.blink-live{color:var(--red);animation:blink 1.4s steps(1) infinite}
+
+/* ── cards ── */
+.grid{display:grid;gap:18px;padding:30px clamp(16px,4vw,48px) 80px;
+  grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+.card{position:relative;background:var(--panel);border:1px solid var(--line);
+  clip-path:polygon(0 0,calc(100% - 20px) 0,100% 20px,100% 100%,0 100%);
+  padding:20px 20px 18px 26px;cursor:pointer;
+  opacity:0;transform:translateX(-24px);animation:slideIn .45s cubic-bezier(.2,.9,.2,1) forwards;
+  transition:background .15s steps(3)}
+.card:nth-child(1){animation-delay:.05s}.card:nth-child(2){animation-delay:.12s}
+.card:nth-child(3){animation-delay:.19s}.card:nth-child(4){animation-delay:.26s}
+.card:nth-child(5){animation-delay:.33s}.card:nth-child(6){animation-delay:.4s}
+@keyframes slideIn{to{opacity:1;transform:none}}
+.card:hover{background:#0d1a14}
+.card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--ph-dim);transition:background .15s}
+.card:hover::before,.card.sel::before{background:var(--ph)}
+.card.suite::before{background:#7c5cff33}.card.suite:hover::before{background:#7c5cff}
+.card .idx{position:absolute;top:12px;right:26px;font-size:10px;color:var(--mut)}
+.card .type{display:inline-block;font-size:9px;letter-spacing:.25em;padding:3px 8px;margin-bottom:12px;
+  border:1px solid var(--ph-dim);color:var(--ph)}
+.card.suite .type{border-color:#7c5cff66;color:#a89bff}
+.card h3{color:#eafff3;font-size:16px;font-weight:600;letter-spacing:.02em;margin-bottom:8px}
+.card p{font-size:11.5px;line-height:1.7;color:var(--mut);min-height:56px}
+.card .foot{display:flex;justify-content:space-between;align-items:center;margin-top:16px;
+  padding-top:12px;border-top:1px dashed var(--line);font-size:10px}
+.card .price{color:var(--amber)}
+.card .open{color:var(--ph);letter-spacing:.2em}
+.card .open::after{content:"█";margin-left:6px;animation:blink 1s steps(1) infinite}
+/* corner bracket on hover */
+.card .br{position:absolute;width:14px;height:14px;border:2px solid var(--amber);opacity:0;transition:opacity .15s}
+.card .br.tl{top:6px;left:8px;border-right:0;border-bottom:0}
+.card .br.br2{bottom:6px;right:8px;border-left:0;border-top:0}
+.card:hover .br{opacity:1}
+
+/* ── modal ── */
+.modal{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;padding:20px}
+.modal.on{display:flex}
+.modal .bg{position:absolute;inset:0;background:rgba(2,5,4,.85)}
+.modal .box{position:relative;width:min(680px,100%);background:var(--panel);border:1px solid var(--ph-dim);
+  clip-path:polygon(0 0,calc(100% - 26px) 0,100% 26px,100% 100%,0 100%);
+  animation:modalIn .3s steps(5) both;padding:26px}
+@keyframes modalIn{0%{transform:scaleY(.6);opacity:0}100%{transform:none;opacity:1}}
+.modal .head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;border-bottom:1px solid var(--line);padding-bottom:14px;margin-bottom:16px}
+.modal h2{font-size:19px;color:#eafff3}
+.modal .x{background:none;border:1px solid var(--line);color:var(--mut);font-family:inherit;padding:6px 12px;cursor:pointer;letter-spacing:.2em}
+.modal .x:hover{border-color:var(--red);color:var(--red)}
+.term{background:#020403;border:1px solid var(--line);padding:16px;font-size:11.5px;line-height:1.9;color:var(--ph);margin-bottom:16px}
+.term .dim{color:var(--mut)}
+.term .bar{display:inline-block;width:8px;height:14px;background:var(--ph);vertical-align:-2px;animation:blink 1s steps(1) infinite}
+.runbtn{display:inline-block;background:var(--ph);color:#001b0d;font-weight:700;font-size:12px;
+  letter-spacing:.25em;padding:14px 28px;border:none;cursor:pointer;font-family:inherit;
+  box-shadow:6px 6px 0 rgba(61,255,154,.2);transition:transform .06s steps(2)}
+.runbtn:active{transform:translate(3px,3px);box-shadow:none}
+
+/* ── walkthrough strip ── */
+.walk{position:fixed;left:0;right:0;bottom:0;z-index:45;background:rgba(3,6,5,.95);
+  border-top:1px solid var(--line);backdrop-filter:blur(8px);
+  display:flex;align-items:center;gap:0;padding:0 clamp(10px,3vw,32px);flex-wrap:wrap}
+.walk .step{flex:1;min-width:180px;display:flex;gap:12px;align-items:center;padding:14px 10px}
+.walk .n{font-family:'Archivo Black',sans-serif;font-size:22px;color:var(--ph);opacity:.9}
+.walk .step b{display:block;font-size:11px;color:#eafff3;letter-spacing:.12em}
+.walk .step span{font-size:10px;color:var(--mut)}
+.note{position:fixed;bottom:74px;right:14px;z-index:44;font-size:9px;color:var(--mut);letter-spacing:.15em}
+
+@media(max-width:640px){
+  .card p{min-height:0}
+  .walk .step{min-width:150px;padding:10px 6px}
+  .walk .n{font-size:16px}
+  .tag{display:none}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <div class="kmark">K</div>
+    <div><b>KONKRED</b><small>DESIGN SAMPLE A</small></div>
+  </div>
+  <div class="tag">INDUSTRIAL TERMINAL</div>
+</header>
+
+<section class="hero">
+  <div class="sysline"><span class="ok">[OK]</span> CATALOGUE LINK ESTABLISHED · 36 PRODUCTS INDEXED · <span class="blink-live">● LIVE</span></div>
+  <h1 id="type" style="min-height:2.1em"></h1>
+  <p class="sub">Phosphor-green ops-console brutalism. Notched modules, status spines, CRT texture. Every element reads like an operations terminal from 1983 — running 2026 workflows.</p>
+</section>
+
+<main class="grid" id="grid"></main>
+
+<div class="modal" id="modal">
+  <div class="bg" onclick="closeModal()"></div>
+  <div class="box">
+    <div class="head">
+      <div><h2 id="mTitle"></h2><div class="sysline" id="mMeta"></div></div>
+      <button class="x" onclick="closeModal()">ESC</button>
+    </div>
+    <div class="term" id="mTerm"></div>
+    <button class="runbtn">RUN MODULE ▸</button>
+  </div>
+</div>
+
+<footer class="walk">
+  <div class="step"><span class="n">01</span><div><b>SCAN THE GRID</b><span>Notched modules with status spines — green = tool, violet = suite</span></div></div>
+  <div class="step"><span class="n">02</span><div><b>OPEN A MODULE</b><span>Click any card — terminal panel slams open with the run contract</span></div></div>
+  <div class="step"><span class="n">03</span><div><b>RUN OR REQUEST</b><span>One command runs the demo; kits route to the test-mode form</span></div></div>
+</footer>
+<div class="note">SAMPLE ONLY — NOT THE LIVE APP</div>
+
+<script>
+const P=[
+ {t:"Contract Review Copilot",type:"TOOL",d:"First-pass contract review. Playbook risk flags with exact source quotes.",p:"FROM $497",suite:false},
+ {t:"IaC Security Copilot",type:"TOOL",d:"Terraform finding matrix on real code — read-only, never applies.",p:"FROM $497",suite:false},
+ {t:"Reconciliation Copilot",type:"TOOL",d:"Deterministic bank/ledger matching in exact, ambiguous, unmatched lanes.",p:"FROM $497",suite:false},
+ {t:"Incident Post-Mortem",type:"TOOL",d:"Scrubable incident timeline with blameless causal lanes.",p:"FROM $297",suite:false},
+ {t:"Customer Support Control",type:"SUITE",d:"Command center: ticket queue, policy diff, SLA clock, health panel.",p:"SPRINT $2,500+",suite:true},
+ {t:"Finance Close & Reporting",type:"SUITE",d:"Close cockpit: checklist, exceptions table, controller drawer.",p:"SPRINT $3,500+",suite:true},
+];
+const g=document.getElementById("grid");
+P.forEach((x,i)=>{
+  const c=document.createElement("div");
+  c.className="card"+(x.suite?" suite":"");
+  c.innerHTML=`<span class="br tl"></span><span class="br br2"></span><span class="idx">${String(i+1).padStart(2,"0")}</span>
+   <span class="type">${x.type}</span><h3>${x.t}</h3><p>${x.d}</p>
+   <div class="foot"><span class="price">${x.p}</span><span class="open">OPEN</span></div>`;
+  c.onclick=()=>openM(x);
+  g.appendChild(c);
+});
+function openM(x){
+  document.getElementById("mTitle").textContent=x.t;
+  document.getElementById("mMeta").innerHTML=`[OK] MODULE LOADED · STATUS: <span class="ok">VALIDATED</span>`;
+  const t=document.getElementById("mTerm");
+  t.innerHTML=`<span class="dim">$ konkred run ${x.t.toLowerCase().replace(/[^a-z]+/g,"-")}</span><br>
+   &gt; input contract loaded <span class="dim">[sample]</span><br>&gt; extracting terms <span class="dim">████████</span> done<br>
+   &gt; 3 risks flagged · 2 missing terms preserved<br>&gt; awaiting human review <span class="bar"></span>`;
+  document.getElementById("modal").classList.add("on");
+}
+function closeModal(){document.getElementById("modal").classList.remove("on")}
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal()});
+/* typewriter */
+const T="36 CONTROLLED WORKFLOWS.<br>ZERO <span class='hl'>FAKE</span> CLAIMS.";
+const h=document.getElementById("type");let i=0,plain=T.replace(/<[^>]+>/g,"").length;
+(function tw(){
+  // reveal by characters of the plain text, keep markup simple: type into two phases
+  if(i<=10){h.innerHTML=T.slice(0,i)+"<span class='cursor'></span>";i++;setTimeout(tw,45)}
+  else if(i<=plain+2){h.innerHTML="36 CONTROLLED WORKFLOWS.<br>ZERO <span class='hl'>"+ "FAKE".slice(0,Math.max(0,i-15)) +"</span> CLAIMS.<span class='cursor'></span>";i++;setTimeout(tw,55)}
+  else h.innerHTML=T+"<span class='cursor'></span>";
+})();
+</script>
+</body>
+</html>

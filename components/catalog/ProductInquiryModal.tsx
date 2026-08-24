@@ -1,0 +1,240 @@
+import React, { useState } from 'react';
+import { X, Loader2, CheckCircle2, AlertTriangle, CreditCard, Info } from 'lucide-react';
+import { databaseService } from '../../services/database.ts';
+import { validateInquiryForm } from '../../catalog/validate.ts';
+
+export type InquiryIntent =
+  | 'workflow_kit'
+  | 'validation_sprint'
+  | 'enterprise_pilot'
+  | 'all_catalog_workspace';
+
+interface ProductInquiryModalProps {
+  intent: InquiryIntent;
+  productName?: string;
+  onClose: () => void;
+}
+
+const INTENT_TITLES: Record<InquiryIntent, string> = {
+  workflow_kit: 'Buy Workflow Kit',
+  validation_sprint: 'Book Validation Sprint',
+  enterprise_pilot: 'Request Enterprise Pilot',
+  all_catalog_workspace: 'All-Catalog Workspace',
+};
+
+const INTENT_BODIES: Record<InquiryIntent, string> = {
+  workflow_kit:
+    'The workflow kit includes the canonical prompt, input/output schemas, runbook and fixture set. Execution is performed by your engineering team; KONKRED provides the kit and support.',
+  validation_sprint:
+    'A structured validation sprint produces the validation report for the product: benchmark results, limitation analysis and a production-readiness recommendation.',
+  enterprise_pilot:
+    'A supervised pilot with KONKRED validation engineers, scoped to your data and security requirements. Requires scoping call and approval.',
+  all_catalog_workspace:
+    'Access to all 15 workflow products across the catalogue under one workspace license, with validation sprints scheduled by priority.',
+};
+
+/**
+ * Test-mode monetization form. Payment/CRM credentials are not configured, so
+ * this form collects an inquiry lead only — NO payment is processed. The UI
+ * states this explicitly and reports honest success/failure.
+ */
+export const ProductInquiryModal: React.FC<ProductInquiryModalProps> = ({ intent, productName, onClose }) => {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [company, setCompany] = useState('');
+  const [message, setMessage] = useState('');
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const validationErrors = validateInquiryForm({ name, email, company, message, acceptedTerms });
+    if (validationErrors.length > 0) {
+      setError(validationErrors[0]);
+      return;
+    }
+    setIsSubmitting(true);
+    setError(null);
+    try {
+      await databaseService.submitProductLead({
+        productSlug: productName ? undefined : null,
+        intent,
+        name: name.trim(),
+        email: email.trim(),
+        company: company.trim() || undefined,
+        message: message.trim() || undefined,
+        acceptedTerms,
+      });
+      setSubmitted(true);
+    } catch (err) {
+      console.error('Lead submission failed:', err);
+      setError(
+        'Your inquiry could not be stored right now (lead storage is not configured in this environment). ' +
+        'Please email ari@konkred.xyz directly with your intent.'
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-[90] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label={INTENT_TITLES[intent]}>
+      <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose} />
+
+      <div className="relative w-full max-w-lg border-4 max-h-[90vh] overflow-y-auto" style={{ background: 'var(--k-panel)', borderColor: 'var(--k-edge)', boxShadow: '12px 12px 0 var(--k-hard)' }} data-testid="inquiry-modal">
+        <div className="flex items-center justify-between px-6 py-4 border-b-2 sticky top-0 z-10" style={{ borderColor: 'var(--k-line)', background: 'var(--k-panel)' }}>
+          <div>
+            <h3 className="k-mono font-black uppercase tracking-widest text-sm" style={{ color: 'var(--k-ink)' }}>
+              {INTENT_TITLES[intent]}
+            </h3>
+            {productName && (
+              <p className="text-[10px] k-mono uppercase tracking-widest mt-0.5" style={{ color: 'var(--k-amber)' }}>
+                {productName}
+              </p>
+            )}
+          </div>
+          <button
+            onClick={onClose}
+            aria-label="Close"
+            className="p-2 border-2 cursor-pointer" style={{ borderColor: 'var(--k-line)', color: 'var(--k-mut)' }}
+          >
+            <X size={16} />
+          </button>
+        </div>
+
+        <div className="p-6 space-y-4">
+          {/* TEST MODE notice — payment is NOT processed */}
+          <div className="flex items-start gap-3 border-2 px-4 py-3" style={{ borderColor: 'var(--k-amber)', background: 'var(--k-amber)', color: 'var(--k-on-acc)' }}>
+            <CreditCard size={16} className="shrink-0 mt-0.5" />
+            <div>
+              <p className="k-mono font-black uppercase tracking-widest text-[10px]">
+                TEST MODE // NO PAYMENT PROCESSED
+              </p>
+              <p className="text-[11px] leading-relaxed mt-1">
+                Payment and CRM credentials are not configured in this environment. This form
+                records your inquiry as a lead only — nothing is charged. A KONKRED contact will
+                follow up to arrange payment, booking or scoping.
+              </p>
+            </div>
+          </div>
+
+          <p className="text-xs leading-relaxed" style={{ color: 'var(--k-mut)' }}>{INTENT_BODIES[intent]}</p>
+
+          {submitted ? (
+            <div className="space-y-4 py-4">
+              <div className="flex items-start gap-3 border-2 px-4 py-4" style={{ borderColor: 'var(--k-line)', background: 'var(--k-bg)' }}>
+                <CheckCircle2 size={18} className="shrink-0 mt-0.5" style={{ color: 'var(--k-ph)' }} />
+                <div>
+                  <p className="k-mono font-black uppercase tracking-widest text-[11px]" style={{ color: 'var(--k-ph)' }}>
+                    INQUIRY RECEIVED
+                  </p>
+                  <p className="text-xs leading-relaxed mt-1" style={{ color: 'var(--k-ink)' }}>
+                    Your {INTENT_TITLES[intent].toLowerCase()} inquiry was stored. A KONKRED contact
+                    will follow up at {email}. No payment was processed.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={onClose}
+                className="k-btn k-btn-ghost w-full"
+              >
+                Close
+              </button>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="inq-name" className="block text-[10px] font-mono uppercase tracking-wider text-zinc-500 mb-1.5">
+                    Full Name *
+                  </label>
+                  <input
+                    id="inq-name"
+                    type="text"
+                    required
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-amber-500"
+                    placeholder="Jane Doe"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="inq-email" className="block text-[10px] font-mono uppercase tracking-wider text-zinc-500 mb-1.5">
+                    Work Email *
+                  </label>
+                  <input
+                    id="inq-email"
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-amber-500"
+                    placeholder="jane@company.com"
+                  />
+                </div>
+              </div>
+              <div>
+                <label htmlFor="inq-company" className="block text-[10px] font-mono uppercase tracking-wider text-zinc-500 mb-1.5">
+                  Company
+                </label>
+                <input
+                  id="inq-company"
+                  type="text"
+                  value={company}
+                  onChange={(e) => setCompany(e.target.value)}
+                  className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-amber-500"
+                  placeholder="Acme Corp"
+                />
+              </div>
+              <div>
+                <label htmlFor="inq-message" className="block text-[10px] font-mono uppercase tracking-wider text-zinc-500 mb-1.5">
+                  Message / Scope Notes
+                </label>
+                <textarea
+                  id="inq-message"
+                  rows={3}
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-amber-500 resize-none"
+                  placeholder="Timeline, data sensitivity, integration context…"
+                />
+              </div>
+
+              <label className="flex items-start gap-2.5 text-[11px] text-zinc-400 leading-relaxed cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={acceptedTerms}
+                  onChange={(e) => setAcceptedTerms(e.target.checked)}
+                  className="mt-0.5 accent-amber-500"
+                />
+                <span>
+                  I agree to the KONKRED <span className="text-amber-500">terms</span> and{' '}
+                  <span className="text-amber-500">privacy policy</span> and consent to being
+                  contacted about this inquiry. No payment is authorized by this form.
+                </span>
+              </label>
+
+              {error && (
+                <div className="flex items-start gap-2.5 bg-red-500/10 border border-red-500/40 rounded-xl px-4 py-3" role="alert">
+                  <AlertTriangle size={15} className="text-red-400 shrink-0 mt-0.5" />
+                  <p className="text-xs text-red-300 font-mono leading-relaxed">{error}</p>
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full py-3.5 bg-amber-500 hover:bg-amber-400 disabled:bg-zinc-800 text-black disabled:text-zinc-500 font-mono font-black text-xs uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer"
+              >
+                {isSubmitting ? <Loader2 size={14} className="animate-spin" /> : <Info size={14} />}
+                {isSubmitting ? 'Submitting…' : `Submit ${INTENT_TITLES[intent]}`}
+              </button>
+            </form>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
