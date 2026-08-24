@@ -17,6 +17,12 @@ import { AttachedCodeFile, BuildMode, FKMessage, FKProject, GeneratedFile, Pipel
 const MODES: { id: BuildMode; label: string }[] = [
   { id: 'fullstack', label: 'FULL-STACK' }, { id: 'frontend', label: 'FRONTEND' }, { id: 'backend', label: 'BACKEND' }, { id: 'review', label: 'REVIEW' },
 ];
+const PROVIDER_SIGNUP: Record<string, string> = {
+  groq: 'https://console.groq.com/keys', cerebras: 'https://cloud.cerebras.ai/', google: 'https://aistudio.google.com/apikey',
+  sambanova: 'https://cloud.sambanova.ai/apis', deepseek: 'https://platform.deepseek.com/api_keys', openrouter: 'https://openrouter.ai/settings/keys',
+  huggingface: 'https://huggingface.co/settings/tokens', mistral: 'https://console.mistral.ai/api-keys/', nvidia: 'https://build.nvidia.com/',
+  fireworks: 'https://fireworks.ai/account/api-keys', cloudflare: 'https://dash.cloudflare.com/',
+};
 const EXTENSIONS: Record<string, string> = { ts: 'typescript', tsx: 'tsx', js: 'javascript', jsx: 'jsx', html: 'html', css: 'css', json: 'json', prisma: 'prisma', sql: 'sql', yaml: 'yaml', yml: 'yaml', sh: 'bash', bash: 'bash' };
 interface ProviderOption { id: string; name: string; hasKey: boolean; models: { id: string; label: string }[] }
 
@@ -174,10 +180,17 @@ export default function FullKonkPage() {
       .then(data => {
         setAllProviders(data.providers || []);
         setProvidersLoaded(true);
-        const available = (data.providers || []).filter(option => option.hasKey || byokKeys[option.id]);
+        const all = data.providers || [];
+        const available = all.filter(option => option.hasKey || byokKeys[option.id]);
         if (available.length && !available.some(option => option.id === provider)) {
           setProvider(available[0].id);
           setModel(available[0].models[0]?.id || '');
+        }
+        // Nothing keyed anywhere? Preselect the fastest free signup so the
+        // BYOK field in ⚙ SETTINGS targets a real provider immediately.
+        if (!available.length && all.length && !byokKeys[provider]) {
+          setProvider('groq');
+          setModel(all.find(option => option.id === 'groq')?.models[0]?.id || '');
         }
       })
       // A failed probe says nothing about server configuration; never claim
@@ -379,7 +392,7 @@ export default function FullKonkPage() {
       <div style={{ display: 'flex', gap: 4 }}>{MODES.map(item => <button key={item.id} disabled={streaming} onClick={() => setMode(item.id)} className={`fk-btn${mode === item.id ? ' fk-btn-acc' : ''}`}>{item.label}</button>)}</div>
       <button onClick={() => setShowSettings(value => !value)} className="fk-btn">⚙ SETTINGS</button>
       <button onClick={() => setLiveEnv(value => !value)} className={`fk-btn${liveEnv ? ' fk-btn-acc' : ''}`}>▶ LIVE ENV</button>
-      <select className="fk-select" value={provider} disabled={streaming} onChange={event => { const next = providerOptions.find(option => option.id === event.target.value); setProvider(event.target.value); if (next?.models[0]) setModel(next.models[0].id); }}>{providerOptions.length ? providerOptions.map(option => <option key={option.id} value={option.id}>{option.name.toUpperCase()}</option>) : <option value={provider}>{providersLoaded ? 'NO PROVIDERS' : 'LOADING…'}</option>}</select>
+      <select className="fk-select" value={provider} disabled={streaming} onChange={event => { const next = providerOptions.find(option => option.id === event.target.value); setProvider(event.target.value); if (next?.models[0]) setModel(next.models[0].id); }}>{providerOptions.length ? providerOptions.map(option => <option key={option.id} value={option.id}>{option.name.toUpperCase()}</option>) : <option value={provider}>{providersLoaded ? 'NO KEY — PICK ONE, ADD KEY IN ⚙' : 'LOADING…'}</option>}</select>
       <select value={model} disabled={streaming} onChange={event => setModel(event.target.value)} className="fk-select">{(providerOptions.find(option => option.id === provider)?.models || [{ id: model, label: model }]).map(option => <option key={option.id} value={option.id}>{option.label}</option>)}</select>
     </header>
     {showSettings && <div className="fk-settings" style={{ display: 'grid', gridTemplateColumns: '120px 160px 170px minmax(240px, 1fr)', gap: 10, alignItems: 'center', padding: '8px 16px' }}>
@@ -392,7 +405,10 @@ export default function FullKonkPage() {
       <input value={systemPrompt} onChange={event => setSystemPrompt(event.target.value)} placeholder="Optional system prompt override (or load a playbook)" className="fk-select" style={{ width: '100%', boxSizing: 'border-box' }} />
       <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
         <span style={{ color: byokKeys[provider] ? '#ffb400' : '#666' }}>🔑 {(allProviders.find(o => o.id === provider)?.name || provider).toUpperCase()} KEY</span>
-        <input type="password" value={byokDraft} onChange={event => saveByok(event.target.value)} placeholder={byokKeys[provider] ? '●●●● saved in this browser' : 'bring your own key (free tier ok)'} className="fk-select" style={{ width: 190, marginLeft: 5 }} autoComplete="off" />
+        <input type="password" value={byokDraft} onChange={event => saveByok(event.target.value)} placeholder={byokKeys[provider] ? '●●●● saved in this browser' : 'paste a free-tier key'} className="fk-select" style={{ width: 190, marginLeft: 5 }} autoComplete="off" />
+        {!byokKeys[provider] && PROVIDER_SIGNUP[provider] && (
+          <a href={PROVIDER_SIGNUP[provider]} target="_blank" rel="noreferrer noopener" className="fk-btn fk-btn-acc" style={{ textDecoration: 'none' }}>GET FREE KEY ↗</a>
+        )}
       </label>
       <span style={{ color: '#555' }}>BYOK stays in this browser; sent only with your own requests, never stored server-side.</span>
     </div>}

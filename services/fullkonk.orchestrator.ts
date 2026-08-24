@@ -26,6 +26,9 @@ const google = { providerId: 'google', providerName: 'Google AI Studio', baseUrl
 const deepseek = { providerId: 'deepseek', providerName: 'DeepSeek', baseUrl: 'https://api.deepseek.com/v1', envKey: 'DEEPSEEK_API_KEY' };
 const openrouter = { providerId: 'openrouter', providerName: 'OpenRouter', baseUrl: 'https://openrouter.ai/api/v1', envKey: 'OPENROUTER_API_KEY' };
 const groq = { providerId: 'groq', providerName: 'Groq', baseUrl: 'https://api.groq.com/openai/v1', envKey: 'GROQ_API_KEY' };
+const mistral = { providerId: 'mistral', providerName: 'Mistral AI', baseUrl: 'https://api.mistral.ai/v1', envKey: 'MISTRAL_API_KEY' };
+const cloudflare = { providerId: 'cloudflare', providerName: 'Cloudflare Workers AI', baseUrl: 'https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/v1', envKey: 'CLOUDFLARE_API_TOKEN' };
+const fireworks = { providerId: 'fireworks', providerName: 'Fireworks AI', baseUrl: 'https://api.fireworks.ai/inference/v1', envKey: 'FIREWORKS_API_KEY' };
 const sambanova = { providerId: 'sambanova', providerName: 'SambaNova', baseUrl: 'https://api.sambanova.ai/v1', envKey: 'SAMBANOVA_API_KEY' };
 const cerebras = { providerId: 'cerebras', providerName: 'Cerebras', baseUrl: 'https://api.cerebras.ai/v1', envKey: 'CEREBRAS_API_KEY' };
 
@@ -46,6 +49,12 @@ export const MODEL_REGISTRY: ModelProfile[] = [
   { ...openrouter, modelId: 'meta-llama/llama-3.3-70b-instruct:free', modelLabel: 'Llama 3.3 70B (OpenRouter)', contextWindow: 128_000, maxOutput: 16_384, thinkingScore: 5, capabilityScore: 6, speedScore: 6, supportsThinking: false, free: true, rpm: 20, tpm: 40_000, tpd: -1, specialty: ['general', 'frontend'] },
   { providerId: 'nvidia', providerName: 'NVIDIA NIM', baseUrl: 'https://integrate.api.nvidia.com/v1', envKey: 'NVIDIA_API_KEY', modelId: 'deepseek-ai/deepseek-r1', modelLabel: 'DeepSeek R1 (NVIDIA)', contextWindow: 128_000, maxOutput: 32_768, thinkingScore: 10, capabilityScore: 9, speedScore: 7, supportsThinking: true, free: true, rpm: 40, tpm: 100_000, tpd: -1, specialty: ['reasoning', 'backend', 'verify', 'test'] },
   { providerId: 'huggingface', providerName: 'HuggingFace', baseUrl: 'https://api-inference.huggingface.co/v1', envKey: 'HUGGINGFACE_API_KEY', modelId: 'Qwen/Qwen3-235B-A22B', modelLabel: 'Qwen3 235B (HF)', contextWindow: 40_960, maxOutput: 8_192, thinkingScore: 9, capabilityScore: 8, speedScore: 4, supportsThinking: true, free: true, rpm: 10, tpm: 20_000, tpd: -1, specialty: ['reasoning', 'general'] },
+  { ...mistral, modelId: 'mistral-large-latest', modelLabel: 'Mistral Large 2', contextWindow: 128_000, maxOutput: 16_384, thinkingScore: 6, capabilityScore: 8, speedScore: 8, supportsThinking: false, free: true, rpm: 30, tpm: 250_000, tpd: -1, specialty: ['general', 'frontend', 'backend'] },
+  { ...mistral, modelId: 'mistral-small-latest', modelLabel: 'Mistral Small', contextWindow: 128_000, maxOutput: 16_384, thinkingScore: 5, capabilityScore: 7, speedScore: 9, supportsThinking: false, free: true, rpm: 60, tpm: 250_000, tpd: -1, specialty: ['general'] },
+  { ...cloudflare, modelId: '@cf/meta/llama-3.3-70b-instruct-fp8-fast', modelLabel: 'Llama 3.3 70B (CF)', contextWindow: 128_000, maxOutput: 16_384, thinkingScore: 6, capabilityScore: 7, speedScore: 9, supportsThinking: false, free: true, rpm: 45, tpm: 60_000, tpd: -1, specialty: ['general', 'frontend'] },
+  { ...cloudflare, modelId: '@cf/openai/gpt-oss-120b', modelLabel: 'GPT-OSS 120B (CF)', contextWindow: 128_000, maxOutput: 16_384, thinkingScore: 7, capabilityScore: 7, speedScore: 8, supportsThinking: false, free: true, rpm: 45, tpm: 60_000, tpd: -1, specialty: ['general', 'backend'] },
+  { ...fireworks, modelId: 'accounts/fireworks/models/llama4-maverick-instruct-basic', modelLabel: 'Llama 4 Maverick (FW)', contextWindow: 131_072, maxOutput: 16_384, thinkingScore: 7, capabilityScore: 8, speedScore: 9, supportsThinking: false, free: true, rpm: 30, tpm: 60_000, tpd: -1, specialty: ['frontend', 'general'] },
+  { ...fireworks, modelId: 'accounts/fireworks/models/deepseek-v3', modelLabel: 'DeepSeek V3 (FW)', contextWindow: 128_000, maxOutput: 16_384, thinkingScore: 7, capabilityScore: 9, speedScore: 8, supportsThinking: false, free: true, rpm: 30, tpm: 60_000, tpd: -1, specialty: ['backend', 'architect'] },
 ];
 
 // Existing KONKRED deployments predate the canonical *_API_KEY names.
@@ -59,7 +68,9 @@ const ENV_KEY_ALIASES: Record<string, string[]> = {
   CEREBRAS_API_KEY: ['CEREBRAS'],
   NVIDIA_API_KEY: ['NVIDIA'],
   DEEPSEEK_API_KEY: ['DEEPSEEK'],
-  GITHUB_TOKEN: ['GITHUB_MODELS_TOKEN'],
+  MISTRAL_API_KEY: ['MISTRAL'],
+  FIREWORKS_API_KEY: ['FIREWORKS'],
+  CLOUDFLARE_API_TOKEN: ['CLOUDFLARE_API_KEY', 'CF_API_TOKEN'],
 };
 
 export function resolveProviderApiKey(profile: Pick<ModelProfile, 'envKey'>): string | undefined {
@@ -241,7 +252,8 @@ async function streamModel(profile: ModelProfile, request: OrchestratorRequest, 
     ? request.byok.key
     : resolveProviderApiKey(profile);
   if (!apiKey) throw new Error(`Missing environment variable ${profile.envKey} or its supported alias.`);
-  const response = await fetchWithTimeout(`${profile.baseUrl}/chat/completions`, {
+  const baseUrl = profile.baseUrl.replace(/\$\{([A-Z0-9_]+)\}/g, (_, name) => process.env[name] || '');
+  const response = await fetchWithTimeout(`${baseUrl}/chat/completions`, {
     method: 'POST', headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json', 'HTTP-Referer': 'https://konkred.xyz', 'X-Title': 'fullKONK_> Orchestrator' },
     body: JSON.stringify({ model: profile.modelId, messages: request.messages, temperature: request.temperature ?? .3, max_tokens: Math.min(request.maxTokens || 8192, profile.maxOutput), stream: true }),
   }, signal);
