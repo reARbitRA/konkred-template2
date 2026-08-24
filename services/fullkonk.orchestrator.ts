@@ -44,7 +44,6 @@ export const MODEL_REGISTRY: ModelProfile[] = [
   { ...cerebras, modelId: 'llama-4-scout-17b', modelLabel: 'Llama 4 Scout (Cerebras)', contextWindow: 131_072, maxOutput: 16_384, thinkingScore: 6, capabilityScore: 7, speedScore: 10, supportsThinking: false, free: true, rpm: 30, tpm: 60_000, tpd: 1_000_000, specialty: ['general', 'frontend'] },
   { ...cerebras, modelId: 'gpt-oss-120b', modelLabel: 'GPT-OSS 120B', contextWindow: 128_000, maxOutput: 32_768, thinkingScore: 7, capabilityScore: 7, speedScore: 9, supportsThinking: false, free: true, rpm: 30, tpm: 60_000, tpd: 1_000_000, specialty: ['general', 'backend', 'longcontext'] },
   { ...openrouter, modelId: 'meta-llama/llama-3.3-70b-instruct:free', modelLabel: 'Llama 3.3 70B (OpenRouter)', contextWindow: 128_000, maxOutput: 16_384, thinkingScore: 5, capabilityScore: 6, speedScore: 6, supportsThinking: false, free: true, rpm: 20, tpm: 40_000, tpd: -1, specialty: ['general', 'frontend'] },
-  { providerId: 'github', providerName: 'GitHub Models', baseUrl: 'https://models.inference.ai.azure.com', envKey: 'GITHUB_TOKEN', modelId: 'gpt-4o', modelLabel: 'GPT-4o (GitHub)', contextWindow: 128_000, maxOutput: 16_384, thinkingScore: 7, capabilityScore: 8, speedScore: 7, supportsThinking: false, free: true, rpm: 10, tpm: 30_000, tpd: -1, specialty: ['general', 'frontend', 'verify'] },
   { providerId: 'nvidia', providerName: 'NVIDIA NIM', baseUrl: 'https://integrate.api.nvidia.com/v1', envKey: 'NVIDIA_API_KEY', modelId: 'deepseek-ai/deepseek-r1', modelLabel: 'DeepSeek R1 (NVIDIA)', contextWindow: 128_000, maxOutput: 32_768, thinkingScore: 10, capabilityScore: 9, speedScore: 7, supportsThinking: true, free: true, rpm: 40, tpm: 100_000, tpd: -1, specialty: ['reasoning', 'backend', 'verify', 'test'] },
   { providerId: 'huggingface', providerName: 'HuggingFace', baseUrl: 'https://api-inference.huggingface.co/v1', envKey: 'HUGGINGFACE_API_KEY', modelId: 'Qwen/Qwen3-235B-A22B', modelLabel: 'Qwen3 235B (HF)', contextWindow: 40_960, maxOutput: 8_192, thinkingScore: 9, capabilityScore: 8, speedScore: 4, supportsThinking: true, free: true, rpm: 10, tpm: 20_000, tpd: -1, specialty: ['reasoning', 'general'] },
 ];
@@ -160,6 +159,8 @@ export interface OrchestratorRequest {
   minContextWindow?: number;
   preferProviders?: string[];
   preferModel?: string;
+  /** Bring-your-own-key: used only for the matching provider, never stored or logged. */
+  byok?: { providerId: string; key: string };
 }
 export interface OrchestratorResult { content: string; provider: string; model: string; tokensUsed: number; durationMs: number; attempts: number }
 export interface StreamCallbacks {
@@ -170,13 +171,17 @@ export interface StreamCallbacks {
   onReset: (characters: number) => void;
 }
 
-/** Every model whose provider credential (canonical name or alias) is present. */
-export function getKeyedModels(): ModelProfile[] {
+/** Every model whose provider credential (canonical name or alias) is present.
+ * A caller-supplied BYOK key makes that provider's models usable for the request. */
+export function getKeyedModels(byok?: { providerId: string; key: string }): ModelProfile[] {
+  if (byok?.key && byok.providerId) {
+    return MODEL_REGISTRY.filter(profile => hasProviderApiKey(profile) || profile.providerId === byok.providerId);
+  }
   return MODEL_REGISTRY.filter(profile => hasProviderApiKey(profile));
 }
 
 export function getCandidates(request: OrchestratorRequest): ModelProfile[] {
-  const keyed = getKeyedModels();
+  const keyed = getKeyedModels(request.byok);
   const fitsRequest = (profile: ModelProfile): boolean =>
     !request.minContextWindow || profile.contextWindow >= request.minContextWindow;
 
@@ -232,7 +237,9 @@ async function readWithTimeout(reader: ReadableStreamDefaultReader<Uint8Array>, 
 }
 
 async function streamModel(profile: ModelProfile, request: OrchestratorRequest, callbacks: StreamCallbacks, signal?: AbortSignal): Promise<string> {
-  const apiKey = resolveProviderApiKey(profile);
+  const apiKey = request.byok?.providerId === profile.providerId && request.byok.key
+    ? request.byok.key
+    : resolveProviderApiKey(profile);
   if (!apiKey) throw new Error(`Missing environment variable ${profile.envKey} or its supported alias.`);
   const response = await fetchWithTimeout(`${profile.baseUrl}/chat/completions`, {
     method: 'POST', headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json', 'HTTP-Referer': 'https://konkred.xyz', 'X-Title': 'fullKONK_> Orchestrator' },
@@ -294,7 +301,7 @@ async function streamModel(profile: ModelProfile, request: OrchestratorRequest, 
 export async function orchestrate(request: OrchestratorRequest, callbacks: StreamCallbacks, signal?: AbortSignal): Promise<OrchestratorResult> {
   // A deployment without any credential is a configuration problem; anything
   // else is a transient provider problem that must be failed over, not surfaced.
-  if (!getKeyedModels().length) throw new NoProvidersConfiguredError();
+  if (!getKeyedModels(request.byok).length) throw new NoProvidersConfiguredError();
 
   const candidates = getCandidates(request);
   if (!candidates.length) throw new NoProvidersConfiguredError();

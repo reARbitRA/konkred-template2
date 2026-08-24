@@ -116,7 +116,14 @@ export default function FullKonkPage() {
   const [streaming, setStreaming] = useState(false);
   const [provider, setProvider] = useState('google');
   const [model, setModel] = useState('gemini-2.5-flash');
-  const [providerOptions, setProviderOptions] = useState<ProviderOption[]>([]);
+  const [allProviders, setAllProviders] = useState<ProviderOption[]>([]);
+  const [byokKeys, setByokKeys] = useState<Record<string, string>>(() => {
+    try { return JSON.parse(localStorage.getItem('fk-byok') || '{}'); } catch { return {}; }
+  });
+  const [byokDraft, setByokDraft] = useState('');
+  const [narrow, setNarrow] = useState(() => typeof window !== 'undefined' && window.matchMedia('(max-width: 1100px)').matches);
+  const [panel, setPanel] = useState<'chat' | 'code' | 'live'>('chat');
+  const providerOptions = allProviders.filter(option => option.hasKey || Boolean(byokKeys[option.id]));
   const [temperature, setTemperature] = useState(0.4);
   const [maxTokens, setMaxTokens] = useState(8192);
   const [systemPrompt, setSystemPrompt] = useState('');
@@ -146,13 +153,28 @@ export default function FullKonkPage() {
     return auth.onAuthStateChanged(user => { setUserId(user?.uid || null); if (user) setShowSidebar(true); });
   }, []);
   useEffect(() => {
+    const mq = window.matchMedia('(max-width: 1100px)');
+    const onChange = () => setNarrow(mq.matches);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
+
+  const saveByok = (value: string) => {
+    setByokDraft(value);
+    const next = { ...byokKeys };
+    if (value.trim()) next[provider] = value.trim(); else delete next[provider];
+    setByokKeys(next);
+    try { localStorage.setItem('fk-byok', JSON.stringify(next)); } catch { /* private mode */ }
+  };
+
+  useEffect(() => {
     const controller = new AbortController();
     fetch('/api/fullkonk/providers', { signal: controller.signal })
       .then(response => response.json() as Promise<{ providers?: ProviderOption[] }>)
       .then(data => {
-        const available = (data.providers || []).filter(option => option.hasKey);
-        setProviderOptions(available);
+        setAllProviders(data.providers || []);
         setProvidersLoaded(true);
+        const available = (data.providers || []).filter(option => option.hasKey || byokKeys[option.id]);
         if (available.length && !available.some(option => option.id === provider)) {
           setProvider(available[0].id);
           setModel(available[0].models[0]?.id || '');
@@ -214,9 +236,10 @@ export default function FullKonkPage() {
     let activeStage: PipelineStage = mode === 'review' ? 'review' : 'architect';
     try {
       const headers = await authHeaders();
+      const byok = byokKeys[provider] ? { 'x-provider-key': byokKeys[provider] } : {};
       const response = await fetch('/api/fullkonk/generate', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...headers },
+        headers: { 'Content-Type': 'application/json', ...byok, ...headers },
         body: JSON.stringify({ prompt, mode, provider, model, temperature, maxTokens, systemPrompt: systemPrompt || undefined, projectId: activeProject?.id, attachedFiles: attachments }),
         signal: controller.signal,
       });
@@ -367,8 +390,34 @@ export default function FullKonkPage() {
         {getPlaybooks().map(pb => <option key={pb.id} value={pb.id}>{pb.name} ({pb.count})</option>)}
       </select>
       <input value={systemPrompt} onChange={event => setSystemPrompt(event.target.value)} placeholder="Optional system prompt override (or load a playbook)" className="fk-select" style={{ width: '100%', boxSizing: 'border-box' }} />
+      <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <span style={{ color: byokKeys[provider] ? '#ffb400' : '#666' }}>🔑 {(allProviders.find(o => o.id === provider)?.name || provider).toUpperCase()} KEY</span>
+        <input type="password" value={byokDraft} onChange={event => saveByok(event.target.value)} placeholder={byokKeys[provider] ? '●●●● saved in this browser' : 'bring your own key (free tier ok)'} className="fk-select" style={{ width: 190, marginLeft: 5 }} autoComplete="off" />
+      </label>
+      <span style={{ color: '#555' }}>BYOK stays in this browser; sent only with your own requests, never stored server-side.</span>
     </div>}
     <PipelineStatus stage={stage} text={stageText} streaming={streaming} metrics={metrics} onStop={() => abortRef.current?.abort()} canRetry={retryable && Boolean(latestPromptRef.current)} onRetry={handleRetry} />
+    {/* Tablet / narrow layout: one panel at a time with a touch tab bar */}
+    {narrow ? (
+      <main style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ flex: 1, minHeight: 0, display: 'flex' }}>
+          {panel === 'chat' && <div style={{ flex: 1, minWidth: 0 }}><ChatPanel messages={messages} streaming={streaming} attachments={attachments} onAttachmentsChange={setAttachments} onSend={prompt => { void handleSend(prompt); }} onClear={clearWorkspace} /></div>}
+          {panel === 'code' && <div style={{ flex: 1, minWidth: 0 }}><CodeOutput files={files} previousFiles={previousFiles} activeFile={activeFile} onSelectFile={setActiveFile} streaming={streaming} /></div>}
+          {panel === 'live' && <div style={{ flex: 1, minWidth: 0 }}><LiveEnvironment files={files} streaming={streaming} /></div>}
+        </div>
+        <nav aria-label="Console panels" style={{ display: 'flex', flexShrink: 0, borderTop: '4px solid #000', background: '#0e0f14' }}>
+          {([
+            ['chat', '▤ CHAT'],
+            ['code', '◈ CODE'],
+            ['live', '▶ LIVE'],
+          ] as const).map(([id, label]) => (
+            <button key={id} onClick={() => setPanel(id)} className={`fk-btn${panel === id ? ' fk-btn-acc' : ''}`} style={{ flex: 1, padding: '14px 0', fontSize: 10, border: 'none', borderBottom: panel === id ? '4px solid #ffb400' : '4px solid transparent' }}>
+              {label}{id === 'live' && !liveEnv ? ' (off)' : ''}
+            </button>
+          ))}
+        </nav>
+      </main>
+    ) : (
     <main style={{ flex: 1, minHeight: 0, display: 'grid', gridTemplateColumns:
         showSidebar && userId && liveEnv ? '200px minmax(250px, 330px) minmax(0, 1fr) minmax(300px, 420px)'
       : showSidebar && userId ? '220px minmax(300px, 380px) minmax(0, 1fr)'
@@ -379,6 +428,7 @@ export default function FullKonkPage() {
       <div style={{ minWidth: 0, borderRight: liveEnv ? '3px solid #000' : undefined }}><CodeOutput files={files} previousFiles={previousFiles} activeFile={activeFile} onSelectFile={setActiveFile} streaming={streaming} /></div>
       {liveEnv && <div style={{ minWidth: 0 }}><LiveEnvironment files={files} streaming={streaming} /></div>}
     </main>
+    )}
     <AnimatePresence>{showAnalytics && userId && <AnalyticsDashboard userId={userId} onClose={() => setShowAnalytics(false)} />}{showGitHub && <GitHubExportModal files={files} onClose={() => setShowGitHub(false)} />}</AnimatePresence>
   </div>;
 }

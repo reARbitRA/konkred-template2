@@ -242,3 +242,10 @@ html.theme-light ::selection{background:var(--k-ink);color:var(--k-bg)}
 .fk-settings{background:#0e0f14;border-bottom:2px solid #26262e;
   font-family:'IBM Plex Mono',monospace;font-size:8px;color:#8a8a99}
 .fk-led{width:9px;height:9px;background:#ff4d4d;box-shadow:none;animation:k-blink 1.4s steps(1) infinite}
+
+/* touch devices (tablets/phones): bigger hit targets for the console */
+@media (pointer: coarse) {
+  .fk-btn{font-size:10px;padding:10px 16px;letter-spacing:.14em}
+  .fk-select{font-size:10px;padding:10px 12px}
+  .fk-head{height:64px}
+}

@@ -435,6 +435,11 @@ export async function createApp(): Promise<express.Express> {
     const temperature = typeof req.body?.temperature === 'number' ? Math.min(1, Math.max(0, req.body.temperature)) : 0.4;
     const maxTokens = typeof req.body?.maxTokens === 'number' ? Math.min(16_384, Math.max(1024, req.body.maxTokens)) : 8192;
     const customSystemPrompt = typeof req.body?.systemPrompt === 'string' ? req.body.systemPrompt.slice(0, 12_000) : undefined;
+    // BYOK: the caller's own provider key, sent per request. Used transiently
+    // for the matching provider only — never stored, never logged, redacted
+    // from any error surface downstream.
+    const byokKey = typeof req.header('x-provider-key') === 'string' ? req.header('x-provider-key').trim().slice(0, 400) : '';
+    const byok = byokKey && preferredProvider ? { providerId: preferredProvider, key: byokKey } : undefined;
     const projectId = typeof req.body?.projectId === 'string' ? req.body.projectId : undefined;
     if (!prompt) return res.status(400).json({ error: 'prompt required' });
 
@@ -494,6 +499,7 @@ export async function createApp(): Promise<express.Express> {
         maxTokens,
         preferProviders: preferredProvider ? [preferredProvider] : undefined,
         preferModel: requestedModel,
+        byok,
         requireThinking: ['architect', 'backend', 'verify', 'review'].includes(task),
         minContextWindow: task === 'architect' ? 32_000 : undefined,
       }, {
