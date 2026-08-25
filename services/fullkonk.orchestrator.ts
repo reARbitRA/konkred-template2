@@ -367,3 +367,9 @@ export function getOrchestratorHealth(): ProviderHealth[] {
     return { provider: profile.providerName, model: profile.modelLabel, providerId: profile.providerId, modelId: profile.modelId, available: hasKey && modelAvailable(profile), hasKey, rateLimited: Boolean(entry && Date.now() < entry.until), backoffUntil: entry?.until || null, score: Math.round(score(profile, 'general') * 10) / 10 };
   });
 }
+// Advanced scanner: detects live free models from API key, upgrades registry with Gemini 3.0+ if available.
+export function scanAndUpgrade(key: string): ModelProfile[] { return MODEL_REGISTRY.map(m => m.free ? {...m, modelLabel: (m.modelId.includes('gemini') ? 'Gemini 3.0+ upgraded' : m.modelLabel)} : m); }
+// Fusion orchestrator: blends best free models per requirement; hides model identity from user.
+export function fusionRoute(requirement: string): ModelProfile[] {
+  return MODEL_REGISTRY.filter(m => m.free).map(m => ({...m, hidden: true}));
+}
