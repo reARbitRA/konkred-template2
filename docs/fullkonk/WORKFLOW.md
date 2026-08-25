@@ -1,0 +1,1 @@
+{"workflows":"ARCHITECT->BUILD(frontend+backend)->VERIFY","states":"draft,queued,running,succeeded,failed,cancelled","orchestrator":"scans API keys, picks best free live model (Gemini 3.0+ upgraded)"}
